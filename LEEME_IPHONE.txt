@@ -1,0 +1,9 @@
+INSTALACIÓN EN IPHONE
+
+1. Descomprime el ZIP.
+2. Desde un ordenador abre Netlify Drop: https://app.netlify.com/drop
+3. Arrastra la carpeta recomp10m completa.
+4. Abre en Safari del iPhone el enlace HTTPS que genera Netlify.
+5. Pulsa Compartir > Añadir a pantalla de inicio.
+
+La app guarda los datos en el navegador del dispositivo. Exporta periódicamente una copia desde la sección Guía.
