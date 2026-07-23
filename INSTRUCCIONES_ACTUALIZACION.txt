@@ -1,0 +1,25 @@
+ACTUALIZAR RECOMP 10M EN GITHUB
+
+1. Descomprime este ZIP.
+2. Entra en tu repositorio Recomp-10.
+3. Pulsa Add file > Upload files.
+4. Sube estos seis archivos:
+   index.html
+   data.js
+   manifest.json
+   sw.js
+   icon-192.png
+   icon-512.png
+5. GitHub avisará de que algunos archivos ya existen. Es correcto: deben sustituirse.
+6. Pulsa Commit changes.
+7. Espera 1–3 minutos y abre de nuevo tu dirección de GitHub Pages.
+8. Si ves la versión anterior, cierra la app, abre Safari, recarga la página y vuelve a añadirla a inicio.
+9. Antes de actualizar futuras versiones, usa Más > Exportar datos.
+
+NOVEDADES
+- 60 recetas completas.
+- Buscador y favoritos.
+- Temporizador de descansos.
+- Últimos pesos visibles.
+- Notas por ejercicio.
+- Comparador visual de fotografías.
