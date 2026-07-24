@@ -1,5 +1,5 @@
 {
-  "name": "Recomp 10M v2.2 Personal Focus Engine",
+  "name": "Recomp 10M v2.3 Session Choice & Instructor Studio",
   "short_name": "Recomp 10M",
   "start_url": "./index.html?v=22",
   "display": "standalone",
@@ -17,5 +17,5 @@
       "type": "image/png"
     }
   ],
-  "description": "Plataforma multideporte con perfiles, prioridades musculares y adaptación completa por usuario."
+  "description": "Plataforma multideporte con selector de sesiones y constructor para instructores."
 }
