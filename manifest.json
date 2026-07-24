@@ -1,10 +1,10 @@
 {
-  "name": "Recomp 10M v1.3 Performance Core",
+  "name": "Recomp 10M v1.6 Intelligence OS",
   "short_name": "Recomp 10M",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#07100c",
-  "theme_color": "#07100c",
+  "background_color": "#070b18",
+  "theme_color": "#070b18",
   "icons": [
     {
       "src": "icon-192.png",
@@ -16,5 +16,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "description": "Entrenamiento y nutrición adaptativos con Recomp Intelligence Score y piloto automático."
 }

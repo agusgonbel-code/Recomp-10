@@ -1,16 +1,14 @@
-# Recomp 10M v1.3 — Performance Core
+# Recomp 10M v1.6 — Intelligence OS
 
-## Novedades reales
-- AI Daily Briefing personalizado con recuperación, adherencia, macros y última sesión.
-- Muscle Analytics: volumen semanal por grupo muscular.
-- Detección de estancamientos basada en e1RM de los últimos registros.
-- Acciones de progresión recomendadas.
-- Lista de compra inteligente generada desde el menú semanal.
-- Biblioteca ampliada a 500 recetas estructuradas.
-- Conserva entrenamientos, Restaurant AI, progreso, fotos y copias de seguridad.
+Nueva versión funcional con:
 
-## Instalación
-Sube todos los archivos a GitHub Pages, Netlify o cualquier hosting HTTPS. En iPhone abre la URL en Safari, pulsa Compartir y Añadir a pantalla de inicio.
+- Recomp Intelligence Score (RIS) de 0 a 100.
+- Seis dimensiones: entrenamiento, nutrición, recuperación, adherencia, progreso y actividad.
+- Motor de decisiones con motivo, acción y nivel de confianza.
+- Modo Piloto Automático.
+- Perfil de aprendizaje local basado en el historial.
+- Simulador de decisiones para días de entrenamiento, calorías, proteína, sueño y sesiones cortas.
+- Conserva entrenamiento, 500 recetas, Restaurant AI, progreso, temas y copias de seguridad.
 
-## Límites actuales
-La IA de esta versión funciona localmente mediante reglas y análisis del historial. OCR universal, visión avanzada y sincronización en la nube necesitan un backend seguro y servicios externos.
+## Uso
+Abre `index.html` o publica la carpeta en un hosting estático compatible con HTTPS para instalarla como PWA en iPhone.
