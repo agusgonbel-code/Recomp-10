@@ -1,12 +1,5 @@
-# Recomp 10M v2.0 — Sport Engine Alpha
+# Recomp 10M v2.1 — Sport Worlds
 
-Primera versión multideporte funcional.
+Cada modalidad abre ahora una experiencia propia: sesión o WOD del día, pestañas, métricas, biblioteca, alternativas y nutrición específica. Incluye Hipertrofia, Crosstraining, OCR, Hyrox, Running, Trail y Calistenia.
 
-## Incluye
-- Selector persistente de 7 modalidades.
-- Panel, métricas, módulos, coach y nutrición específicos por deporte.
-- Hipertrofia/Fuerza, Crosstraining, OCR, Hyrox, Running, Trail y Calistenia.
-- Conserva Motion Coach, alternativas, recetas, Restaurant AI, progreso e Intelligence OS.
-
-## Instalación en iPhone
-Publica la carpeta en un hosting estático, abre la URL en Safari y usa Compartir → Añadir a pantalla de inicio.
+Movement Studio mejora las demostraciones con ángulos simulados, cámara lenta, fases técnicas, claves, progresiones y alternativas. Funciona como PWA local y conserva los datos anteriores en el navegador.
