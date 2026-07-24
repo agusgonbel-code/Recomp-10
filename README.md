@@ -1,14 +1,12 @@
-# Recomp 10M v1.6 — Intelligence OS
+# Recomp 10M v2.0 — Sport Engine Alpha
 
-Nueva versión funcional con:
+Primera versión multideporte funcional.
 
-- Recomp Intelligence Score (RIS) de 0 a 100.
-- Seis dimensiones: entrenamiento, nutrición, recuperación, adherencia, progreso y actividad.
-- Motor de decisiones con motivo, acción y nivel de confianza.
-- Modo Piloto Automático.
-- Perfil de aprendizaje local basado en el historial.
-- Simulador de decisiones para días de entrenamiento, calorías, proteína, sueño y sesiones cortas.
-- Conserva entrenamiento, 500 recetas, Restaurant AI, progreso, temas y copias de seguridad.
+## Incluye
+- Selector persistente de 7 modalidades.
+- Panel, métricas, módulos, coach y nutrición específicos por deporte.
+- Hipertrofia/Fuerza, Crosstraining, OCR, Hyrox, Running, Trail y Calistenia.
+- Conserva Motion Coach, alternativas, recetas, Restaurant AI, progreso e Intelligence OS.
 
-## Uso
-Abre `index.html` o publica la carpeta en un hosting estático compatible con HTTPS para instalarla como PWA en iPhone.
+## Instalación en iPhone
+Publica la carpeta en un hosting estático, abre la URL en Safari y usa Compartir → Añadir a pantalla de inicio.

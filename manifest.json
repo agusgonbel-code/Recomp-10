@@ -1,7 +1,7 @@
 {
-  "name": "Recomp 10M v1.6 Intelligence OS",
-  "short_name": "Recomp 10M",
-  "start_url": "./index.html",
+  "name": "Recomp 10M v2.0 Sport Engine Alpha",
+  "short_name": "Recomp Sport",
+  "start_url": "./index.html?v=20",
   "display": "standalone",
   "background_color": "#070b18",
   "theme_color": "#070b18",
