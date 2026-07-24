@@ -1,5 +1,11 @@
-# Recomp 10M v2.1 — Sport Worlds
+# Recomp 10M v2.2 — Personal Focus Engine
 
-Cada modalidad abre ahora una experiencia propia: sesión o WOD del día, pestañas, métricas, biblioteca, alternativas y nutrición específica. Incluye Hipertrofia, Crosstraining, OCR, Hyrox, Running, Trail y Calistenia.
+Novedades principales:
+- Perfiles múltiples en el mismo dispositivo.
+- Objetivo personal y selección de hasta cuatro zonas prioritarias.
+- Sugerencias complementarias de IA según deporte y recuperación.
+- Bloques específicos adaptados a Hipertrofia, Crosstraining, OCR, Hyrox, Running, Trail y Calistenia.
+- Nutrición personalizada según objetivo, deporte y prioridades.
+- Los nuevos registros quedan asociados al perfil activo.
 
-Movement Studio mejora las demostraciones con ángulos simulados, cámara lenta, fases técnicas, claves, progresiones y alternativas. Funciona como PWA local y conserva los datos anteriores en el navegador.
+Abre `index.html` o publica la carpeta completa en un alojamiento web compatible con PWA.

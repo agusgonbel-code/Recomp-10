@@ -1,7 +1,7 @@
 {
-  "name": "Recomp 10M v2.1 Sport Worlds",
+  "name": "Recomp 10M v2.2 Personal Focus Engine",
   "short_name": "Recomp 10M",
-  "start_url": "./index.html?v=20",
+  "start_url": "./index.html?v=22",
   "display": "standalone",
   "background_color": "#070b18",
   "theme_color": "#070b18",
@@ -17,5 +17,5 @@
       "type": "image/png"
     }
   ],
-  "description": "Plataforma multideporte con experiencias, entrenamientos y nutrición específicos por modalidad."
+  "description": "Plataforma multideporte con perfiles, prioridades musculares y adaptación completa por usuario."
 }
