@@ -1,21 +1,16 @@
-# Recomp 10M v1.0 Beta
+# Recomp 10M v1.3 — Performance Core
 
-Aplicación PWA local para iPhone y navegador.
-
-## Incluye
-- Dashboard y Recovery Intelligence.
-- Programa de cuatro días con recomendaciones de carga.
-- Registro de series, RIR, volumen, récords y descanso.
-- Nutrition Pro con objetivos, plan diario, recetas y lista de compra.
-- Métricas, gráficas y fotos de progreso.
-- Biblioteca de ejercicios y alternativas.
-- Informes, historial, preferencias y copias de seguridad.
-- Migración compatible con los datos locales de versiones anteriores que usen la clave `recomp10m_state`.
+## Novedades reales
+- AI Daily Briefing personalizado con recuperación, adherencia, macros y última sesión.
+- Muscle Analytics: volumen semanal por grupo muscular.
+- Detección de estancamientos basada en e1RM de los últimos registros.
+- Acciones de progresión recomendadas.
+- Lista de compra inteligente generada desde el menú semanal.
+- Biblioteca ampliada a 500 recetas estructuradas.
+- Conserva entrenamientos, Restaurant AI, progreso, fotos y copias de seguridad.
 
 ## Instalación
-1. Sube todos los archivos a GitHub Pages, Netlify o cualquier alojamiento HTTPS.
-2. Abre la dirección desde Safari en el iPhone.
-3. Pulsa Compartir → Añadir a pantalla de inicio.
+Sube todos los archivos a GitHub Pages, Netlify o cualquier hosting HTTPS. En iPhone abre la URL en Safari, pulsa Compartir y Añadir a pantalla de inicio.
 
-## Importante
-Esta es una beta funcional con almacenamiento local. No incluye todavía cuenta de usuario, sincronización entre dispositivos, análisis real de imágenes mediante IA ni publicación nativa en App Store.
+## Límites actuales
+La IA de esta versión funciona localmente mediante reglas y análisis del historial. OCR universal, visión avanzada y sincronización en la nube necesitan un backend seguro y servicios externos.
