@@ -1,11 +1,15 @@
-# Recomp 10M v2.3 — Session Choice & Instructor Studio
+# FitCoach Phase 1
 
-Novedades principales:
-- Varias sesiones preparadas para cada deporte.
-- Cambio de WOD o entrenamiento según duración, lugar y enfoque.
-- Sesiones específicas para Crosstraining, OCR, Hyrox, Running, Trail, Calistenia e Hipertrofia.
-- Instructor Studio para crear WODs y sesiones de Crosstraining, Hyrox y OCR.
-- Plantillas personalizadas, duplicación, eliminación y activación como sesión del día.
-- Conserva perfiles, prioridades musculares, nutrición adaptada y progreso.
+Rediseño visual completo compatible con GitHub Pages.
 
-Abre `index.html` o publica la carpeta completa en un alojamiento compatible con PWA.
+## Novedades
+- Interfaz estilo Apple más limpia.
+- Dashboard renovado.
+- Tarjetas, fondos, animaciones y navegación mejoradas.
+- Se mantienen entrenamiento, recetas, macros, progreso y copias de seguridad.
+- Compatible con los datos locales de la Beta 0.7.
+
+## Actualización en GitHub
+Sustituye en la raíz del repositorio todos estos archivos y haz un commit con el mensaje:
+
+`FitCoach Phase 1 - rediseño completo`
