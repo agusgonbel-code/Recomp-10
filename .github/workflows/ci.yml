@@ -34,6 +34,7 @@ jobs:
           node --check persistence.js
           node --check training-engine.js
           node --check nutrition-engine.js
+          node --check photo-engine.js
 
       - name: Test persistence safety
         run: node --test tests/persistence.test.mjs
@@ -43,6 +44,9 @@ jobs:
 
       - name: Test nutrition engine
         run: node --test tests/nutrition-engine.test.mjs
+
+      - name: Test photo engine
+        run: node --test tests/photo-engine.test.mjs
 
       - name: Validate inline application script
         shell: bash
@@ -64,9 +68,11 @@ jobs:
           test -s persistence.js
           test -s training-engine.js
           test -s nutrition-engine.js
+          test -s photo-engine.js
           test -s icon-192.png
           test -s icon-512.png
           grep -q "navigator.serviceWorker.register('./sw.js')" index.html
           grep -q "src='persistence.js'" index.html
           grep -q "src='training-engine.js'" index.html
           grep -q "src='nutrition-engine.js'" index.html
+          grep -q "src='photo-engine.js'" index.html
