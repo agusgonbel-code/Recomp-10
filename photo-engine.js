@@ -417,6 +417,18 @@
     }
   }
 
+  async function resetDataSecure() {
+    if (!confirm('¿Borrar todos los datos, incluidas las fotos?')) return;
+    try {
+      localStorage.clear();
+      await replacePhotos([]);
+      selected.clear();
+      location.reload();
+    } catch (error) {
+      alert('No se pudieron borrar todos los datos: ' + globalThis.RecompPersistence.clip(error?.message, 120));
+    }
+  }
+
   async function init() {
     ensureUi();
     globalThis.savePhoto = savePhotoSecure;
@@ -424,6 +436,7 @@
     globalThis.delPhoto = deletePhotoSecure;
     globalThis.exportData = exportDataSecure;
     globalThis.importData = importDataSecure;
+    globalThis.resetData = resetDataSecure;
     try {
       await migrateLegacyPhotos();
       await renderPhotosSecure();
