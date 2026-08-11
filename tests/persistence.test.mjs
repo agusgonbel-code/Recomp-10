@@ -13,7 +13,7 @@ const cleaned = cleanBackup({
   targets: { kcal: 999999, protein: -1 },
   workouts: Array.from({ length: 1005 }, (_, index) => ({
     date: '2026-08-11', day: 'Lunes', notes: 'x'.repeat(800),
-    exercises: [{ name: 'Press', sets: [{ kg: 100, reps: 8, rir: 2 }] }],
+    exercises: [{ name: 'Press', sets: [{ kg: 100, reps: 8, rir: null }] }],
     volume: index
   })),
   photos: [{ data: 'javascript:alert(1)' }]
@@ -23,6 +23,7 @@ assert.equal(cleaned.targets.kcal, 10000);
 assert.equal(cleaned.targets.protein, 0);
 assert.equal(cleaned.workouts.length, 1000);
 assert.equal(cleaned.workouts[0].notes.length, 500);
+assert.equal(cleaned.workouts[0].exercises[0].sets[0].rir, null);
 assert.equal(cleaned.photos.length, 0);
 
 const values = new Map([['profile', '{"name":"Anterior"}']]);
