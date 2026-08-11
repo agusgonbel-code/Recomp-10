@@ -1,0 +1,53 @@
+name: Recomp 10 CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recomp-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-pwa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate manifest
+        run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8'))"
+
+      - name: Validate service worker
+        run: node --check sw.js
+
+      - name: Validate inline application script
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const html = require('fs').readFileSync('index.html', 'utf8');
+          const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
+          if (scripts.length !== 1) throw new Error('Expected exactly one inline application script');
+          require('fs').writeFileSync('/tmp/recomp-app.js', scripts[0][1]);
+          NODE
+          node --check /tmp/recomp-app.js
+
+      - name: Verify PWA shell
+        shell: bash
+        run: |
+          test -s index.html
+          test -s manifest.webmanifest
+          test -s sw.js
+          test -s icon-192.png
+          test -s icon-512.png
+          grep -q "navigator.serviceWorker.register('./sw.js')" index.html
