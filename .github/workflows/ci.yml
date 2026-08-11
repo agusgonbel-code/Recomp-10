@@ -28,8 +28,13 @@ jobs:
       - name: Validate manifest
         run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8'))"
 
-      - name: Validate service worker
-        run: node --check sw.js
+      - name: Validate JavaScript modules
+        run: |
+          node --check sw.js
+          node --check persistence.js
+
+      - name: Test persistence safety
+        run: node --test tests/persistence.test.mjs
 
       - name: Validate inline application script
         shell: bash
@@ -48,6 +53,8 @@ jobs:
           test -s index.html
           test -s manifest.webmanifest
           test -s sw.js
+          test -s persistence.js
           test -s icon-192.png
           test -s icon-512.png
           grep -q "navigator.serviceWorker.register('./sw.js')" index.html
+          grep -q "src='persistence.js'" index.html
