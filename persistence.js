@@ -8,6 +8,9 @@
     value = Number(value);
     return Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
   };
+  const optionalNum = (value, min, max) => (
+    value === null || value === '' || value === undefined ? null : num(value, min, max, null)
+  );
   const date = value => {
     const parsed = new Date(value);
     return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
@@ -64,7 +67,7 @@
                 ? exercise.sets.slice(0, 20).filter(plain).map(set => ({
                     kg: num(set.kg, 0, 2000),
                     reps: Math.round(num(set.reps, 0, 1000)),
-                    rir: num(set.rir, 0, 10)
+                    rir: optionalNum(set.rir, 0, 10)
                   }))
                 : []
             }))
