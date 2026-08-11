@@ -32,9 +32,13 @@ jobs:
         run: |
           node --check sw.js
           node --check persistence.js
+          node --check training-engine.js
 
       - name: Test persistence safety
         run: node --test tests/persistence.test.mjs
+
+      - name: Test training progression
+        run: node --test tests/training-engine.test.mjs
 
       - name: Validate inline application script
         shell: bash
@@ -54,7 +58,9 @@ jobs:
           test -s manifest.webmanifest
           test -s sw.js
           test -s persistence.js
+          test -s training-engine.js
           test -s icon-192.png
           test -s icon-512.png
           grep -q "navigator.serviceWorker.register('./sw.js')" index.html
           grep -q "src='persistence.js'" index.html
+          grep -q "src='training-engine.js'" index.html
