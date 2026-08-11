@@ -1,8 +1,9 @@
-const CACHE_NAME = 'recomp-10-v3';
+const CACHE_NAME = 'recomp-10-v4';
 const APP_SHELL = [
   './',
   './index.html',
   './persistence.js',
+  './training-engine.js',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png'
