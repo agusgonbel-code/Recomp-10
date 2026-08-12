@@ -41,4 +41,47 @@ assert.throws(() => storeBackup({ profile: { name: 'Nuevo' }, targets: { kcal: 2
 assert.equal(values.get('profile'), '{"name":"Anterior"}');
 assert.equal(values.has('targets'), false);
 
+
+const { createJsonStore } = globalThis.RecompPersistence;
+function memoryStorage(entries = []) {
+  const data = new Map(entries);
+  return {
+    data,
+    getItem: key => data.has(key) ? data.get(key) : null,
+    setItem: (key, value) => data.set(key, value),
+    removeItem: key => data.delete(key)
+  };
+}
+
+const corruptStorage = memoryStorage([
+  ['workouts', '{broken'],
+  ['recomp:last-good:workouts', JSON.stringify([{ date: '2026-08-11', volume: 1200 }])]
+]);
+const recoveredStore = createJsonStore({ storage: corruptStorage, prefix: 'recomp' });
+assert.deepEqual(recoveredStore.g('workouts', []), [{ date: '2026-08-11', volume: 1200 }]);
+assert.equal(recoveredStore.recoveredKeys.has('workouts'), true);
+assert.deepEqual(recoveredStore.g('targets', { kcal: 2800, protein: 170 }), { kcal: 2800, protein: 170 });
+
+const shapeStorage = memoryStorage([['targets', JSON.stringify([])]]);
+const shapeStore = createJsonStore({ storage: shapeStorage, prefix: 'recomp' });
+assert.deepEqual(shapeStore.g('targets', { kcal: 2800 }), { kcal: 2800 });
+
+const rollbackStorage = memoryStorage([['workouts', JSON.stringify([{ volume: 1000 }])]]);
+const originalSet = rollbackStorage.setItem;
+let primaryWrites = 0;
+rollbackStorage.setItem = (key, value) => {
+  if (key === 'workouts' && ++primaryWrites === 1) throw new Error('QuotaExceededError');
+  originalSet(key, value);
+};
+let reported = '';
+const rollbackStore = createJsonStore({
+  storage: rollbackStorage,
+  prefix: 'recomp',
+  onError: error => { reported = error.message; }
+});
+assert.throws(() => rollbackStore.s('workouts', [{ volume: 2000 }]), /QuotaExceeded/);
+assert.deepEqual(JSON.parse(rollbackStorage.getItem('workouts')), [{ volume: 1000 }]);
+assert.equal(rollbackStorage.getItem('recomp:last-good:workouts'), null);
+assert.equal(reported, 'QuotaExceededError');
+
 console.log('Persistence tests passed');

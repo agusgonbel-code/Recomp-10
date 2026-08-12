@@ -1,6 +1,6 @@
-# FitCoach Phase 1
+# Recomp 10M
 
-Rediseño visual completo compatible con GitHub Pages.
+Plataforma privada de recomposición corporal, entrenamiento, nutrición y progreso compatible con GitHub Pages.
 
 ## Novedades
 - Interfaz estilo Apple más limpia.
@@ -25,3 +25,10 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - Migración conservadora de las fotos antiguas guardadas en localStorage.
 - Comparación privada de dos fotografías con liberación de memoria.
 - Copias de seguridad versionadas con datos y fotografías, y restauración con rollback.
+
+
+## Persistencia principal
+- Cada colección valida su tipo antes de usarse.
+- Se conserva localmente el último estado válido cuando el tamaño lo permite.
+- Si una clave principal está dañada, la aplicación recupera su copia compatible.
+- Una escritura fallida revierte la clave y mantiene los datos anteriores.

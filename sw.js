@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v6';
+const CACHE_NAME = 'recomp-10-v7-state-safety';
 const APP_SHELL = [
   './',
   './index.html',

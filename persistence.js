@@ -125,7 +125,79 @@
     }
   }
 
+  const MAX_SHADOW_BYTES = 1.5 * 1024 * 1024;
+  const clone = value => JSON.parse(JSON.stringify(value));
+
+  function compatible(value, fallback) {
+    if (Array.isArray(fallback)) return Array.isArray(value);
+    if (plain(fallback)) return plain(value);
+    if (fallback === null) return value !== undefined;
+    return typeof value === typeof fallback;
+  }
+
+  function createJsonStore({
+    storage = globalThis.localStorage,
+    prefix = 'recomp10m',
+    onError = () => {}
+  } = {}) {
+    if (!storage) throw new Error('Almacenamiento local no disponible');
+    const recoveredKeys = new Set();
+    const backupKey = key => prefix + ':last-good:' + clip(key, 100);
+    const decode = (raw, fallback) => {
+      if (typeof raw !== 'string' || !raw) return null;
+      try {
+        const value = JSON.parse(raw);
+        if (!compatible(value, fallback)) return null;
+        return plain(fallback) ? { ...clone(fallback), ...value } : value;
+      } catch { return null; }
+    };
+    const restore = (key, value) => {
+      try {
+        if (value === null) storage.removeItem(key);
+        else storage.setItem(key, value);
+      } catch {}
+    };
+    return {
+      recoveredKeys,
+      g(key, fallback) {
+        const primary = decode(storage.getItem(key), fallback);
+        if (primary !== null) return primary;
+        const backup = decode(storage.getItem(backupKey(key)), fallback);
+        if (backup !== null) {
+          recoveredKeys.add(key);
+          return backup;
+        }
+        return clone(fallback);
+      },
+      s(key, value) {
+        let serialized;
+        try { serialized = JSON.stringify(value); }
+        catch (error) { onError(error, key); throw error; }
+        const shadow = backupKey(key);
+        const previousPrimary = storage.getItem(key);
+        const previousShadow = storage.getItem(shadow);
+        const validPrevious = decode(previousPrimary, value);
+        try {
+          if (validPrevious !== null && previousPrimary.length <= MAX_SHADOW_BYTES) {
+            storage.setItem(shadow, previousPrimary);
+          }
+          storage.setItem(key, serialized);
+          if (serialized.length > MAX_SHADOW_BYTES) {
+            try { storage.removeItem(shadow); } catch {}
+          }
+          recoveredKeys.delete(key);
+          return value;
+        } catch (error) {
+          restore(key, previousPrimary);
+          restore(shadow, previousShadow);
+          onError(error, key);
+          throw error;
+        }
+      }
+    };
+  }
+
   globalThis.RecompPersistence = {
-    MAX_BACKUP_BYTES, clip, num, esc, imageData, cleanBackup, storeBackup
+    MAX_BACKUP_BYTES, MAX_SHADOW_BYTES, clip, num, esc, imageData, cleanBackup, storeBackup, createJsonStore
   };
 })();
