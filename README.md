@@ -32,3 +32,9 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - Se conserva localmente el último estado válido cuando el tamaño lo permite.
 - Si una clave principal está dañada, la aplicación recupera su copia compatible.
 - Una escritura fallida revierte la clave y mantiene los datos anteriores.
+
+
+## Coach explicable
+- Prioriza adherencia semanal, esfuerzo mediante RIR, proteína según la hora y tendencia de peso cuando existen suficientes registros.
+- Cada recomendación muestra el dato que la origina y limita los ajustes a acciones prudentes.
+- No diagnostica, no estima composición corporal desde fotografías y no inventa recomendaciones cuando faltan datos.

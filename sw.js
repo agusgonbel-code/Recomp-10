@@ -1,10 +1,11 @@
-const CACHE_NAME = 'recomp-10-v7-state-safety';
+const CACHE_NAME = 'recomp-10-v8-explainable-coach';
 const APP_SHELL = [
   './',
   './index.html',
   './persistence.js',
   './training-engine.js',
   './nutrition-engine.js',
+  './coach-engine.js',
   './photo-engine.js',
   './manifest.webmanifest',
   './icon-192.png',
