@@ -1,6 +1,6 @@
 {
-  "name": "FitCoach Phase 1",
-  "short_name": "FitCoach",
+  "name": "Recomp 10M",
+  "short_name": "Recomp 10M",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#090E1B",
@@ -17,5 +17,5 @@
       "type": "image/png"
     }
   ],
-  "description": "Entrenamiento editable con biblioteca, progresión, nutrición y progreso."
+  "description": "Recomposición corporal con entrenamiento, nutrición, progreso y fotografías privadas."
 }
