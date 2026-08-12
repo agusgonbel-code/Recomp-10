@@ -1,0 +1,78 @@
+name: Recomp 10 CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recomp-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-pwa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate manifest
+        run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8'))"
+
+      - name: Validate JavaScript modules
+        run: |
+          node --check sw.js
+          node --check persistence.js
+          node --check training-engine.js
+          node --check nutrition-engine.js
+          node --check photo-engine.js
+
+      - name: Test persistence safety
+        run: node --test tests/persistence.test.mjs
+
+      - name: Test training progression
+        run: node --test tests/training-engine.test.mjs
+
+      - name: Test nutrition engine
+        run: node --test tests/nutrition-engine.test.mjs
+
+      - name: Test photo engine
+        run: node --test tests/photo-engine.test.mjs
+
+      - name: Validate inline application script
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const html = require('fs').readFileSync('index.html', 'utf8');
+          const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].filter(match => match[1].trim());
+          if (scripts.length !== 1) throw new Error('Expected exactly one inline application script');
+          require('fs').writeFileSync('/tmp/recomp-app.js', scripts[0][1]);
+          NODE
+          node --check /tmp/recomp-app.js
+
+      - name: Verify PWA shell
+        shell: bash
+        run: |
+          test -s index.html
+          test -s manifest.webmanifest
+          test -s sw.js
+          test -s persistence.js
+          test -s training-engine.js
+          test -s nutrition-engine.js
+          test -s photo-engine.js
+          test -s icon-192.png
+          test -s icon-512.png
+          grep -q "navigator.serviceWorker.register('./sw.js')" index.html
+          grep -q "src='persistence.js'" index.html
+          grep -q "src='training-engine.js'" index.html
+          grep -q "src='nutrition-engine.js'" index.html
+          grep -q "src='photo-engine.js'" index.html
