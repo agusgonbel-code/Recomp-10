@@ -32,7 +32,7 @@ const monthlyPlan = {
   days: Array.from({ length: 30 }, (_, day) => ({
     day: day + 1,
     items: Array.from({ length: 3 }, (_, meal) => ({
-      recipe: { n: 'Comida '+meal, m: 'Comida', k: 600, p: 40, c: 60, f: 20, i: ['100 g arroz'] },
+      recipe: { id: 'rc'+meal, n: 'Comida '+meal, m: 'Comida', k: 600, p: 40, c: 60, f: 20, i: ['100 g arroz'], s: ['Cocina y sirve.'], time: 20, difficulty: 'Fácil' },
       scale: 1, k: 600, p: 40, c: 60, f: 20, score: 0, slot: 'Comida'
     })),
     totals: { k: 1800, p: 120, c: 180, f: 60 }
@@ -41,6 +41,8 @@ const monthlyPlan = {
 const cleanPlan = cleanMealPlan30(monthlyPlan);
 assert.equal(cleanPlan.days.length, 30);
 assert.deepEqual(cleanPlan.days[0].totals, { k: 1800, p: 120, c: 180, f: 60 });
+assert.deepEqual(cleanPlan.days[0].items[0].recipe.s, ['Cocina y sirve.']);
+assert.equal(cleanPlan.days[0].items[0].recipe.id, 'rc0');
 assert.equal(cleanBackup({ [MEAL_PLAN_KEY]: monthlyPlan })[MEAL_PLAN_KEY].days.length, 30);
 assert.throws(() => cleanMealPlan30({ ...monthlyPlan, days: monthlyPlan.days.slice(0, 29) }), /Plan mensual/);
 
