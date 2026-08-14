@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v13-linked-macro-targets';
+const CACHE_NAME = 'recomp-10-v14-visible-menu-generator';
 const APP_SHELL = [
   './',
   './index.html',
