@@ -43,3 +43,7 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - Comidas, entrenamientos, métricas y fotografías conservan el día y la zona horaria local del dispositivo.
 - Las copias de seguridad usan el día local en el nombre del archivo.
 - Pruebas automáticas cubren Madrid, Los Ángeles y Kiritimati para evitar regresiones cerca de medianoche.
+
+## Copias de seguridad en iPhone
+- Las descargas usan el nombre `recomp-10m-backup-AAAA-MM-DD.json`.
+- La URL temporal de cada exportación se libera después de descargar para evitar acumular memoria en sesiones largas de Safari.
