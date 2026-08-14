@@ -4,13 +4,10 @@
   const $=id=>document.getElementById(id);
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let plan=null,visibleWeek=0;
-  const recipeSource=()=>{
-    if(typeof ALL_RECIPES!=='undefined'&&Array.isArray(ALL_RECIPES)) return ALL_RECIPES.map(recipe=>({
-      id:recipe.id,n:recipe.name,m:recipe.type==='Snack'?'Merienda':recipe.type,k:recipe.kcal,p:recipe.p,c:recipe.c,f:recipe.f,
-      i:Array.isArray(recipe.ingredients)?recipe.ingredients:[],s:Array.isArray(recipe.steps)?recipe.steps:[],time:recipe.time,difficulty:recipe.difficulty
-    }));
-    return typeof recipes!=='undefined'?recipes:(globalThis.recipes||[]);
-  };
+  const recipeSource=()=>RecompMealPlanner.normalizeRecipeCatalog(
+    typeof ALL_RECIPES!=='undefined'&&Array.isArray(ALL_RECIPES)?ALL_RECIPES:
+      (typeof recipes!=='undefined'?recipes:(globalThis.recipes||[]))
+  );
   const savedTargets=()=>{try{return JSON.parse(localStorage.getItem('targets')||'null')||{}}catch{return {}}};
   function save(){plan=RecompPersistence.cleanMealPlan30(plan);localStorage.setItem(key,JSON.stringify(plan))}
   function formValues(){
