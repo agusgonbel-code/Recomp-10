@@ -43,6 +43,18 @@
     };
   }
 
+  function normalizeRecipeCatalog(catalog){
+    return (Array.isArray(catalog)?catalog:[]).map(recipe=>({
+      id:String(recipe?.id||''),
+      n:String(recipe?.n||recipe?.name||'').trim(),
+      m:(recipe?.m||recipe?.type)==='Snack'?'Merienda':String(recipe?.m||recipe?.type||''),
+      k:number(recipe?.k??recipe?.kcal,0),p:number(recipe?.p,0),c:number(recipe?.c,0),f:number(recipe?.f,0),
+      i:Array.isArray(recipe?.i)?recipe.i:(Array.isArray(recipe?.ingredients)?recipe.ingredients:[]),
+      s:Array.isArray(recipe?.s)?recipe.s:(Array.isArray(recipe?.steps)?recipe.steps:[]),
+      time:number(recipe?.time,0),difficulty:String(recipe?.difficulty||'')
+    })).filter(recipe=>recipe.n&&recipe.m&&recipe.k>0);
+  }
+
   function allowedRecipes(recipes,prefs){
     const blocks=[...(DIET_BLOCKS[prefs.diet]||[]),...prefs.excluded].map(norm);
     return (Array.isArray(recipes)?recipes:[]).filter(r=>{
@@ -103,5 +115,5 @@
     }));
     return [...map.values()].sort((a,b)=>a.name.localeCompare(b.name,'es'));
   }
-  globalThis.RecompMealPlanner={macroTargets,validatePreferences,allowedRecipes,generate30Days,swapMeal,shoppingByWeek};
+  globalThis.RecompMealPlanner={macroTargets,validatePreferences,normalizeRecipeCatalog,allowedRecipes,generate30Days,swapMeal,shoppingByWeek};
 })();
