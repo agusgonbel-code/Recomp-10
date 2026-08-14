@@ -6,7 +6,7 @@
   let plan=null,visibleWeek=0;
   const recipeSource=()=>typeof recipes!=='undefined'?recipes:(globalThis.recipes||[]);
   const savedTargets=()=>{try{return JSON.parse(localStorage.getItem('targets')||'null')||{}}catch{return {}}};
-  function save(){localStorage.setItem(key,JSON.stringify(plan))}
+  function save(){plan=RecompPersistence.cleanMealPlan30(plan);localStorage.setItem(key,JSON.stringify(plan))}
   function formValues(){
     return {kcal:$('mpKcal').value,protein:$('mpProtein').value,meals:$('mpMeals').value,diet:$('mpDiet').value,
       excluded:$('mpExcluded').value,pantry:$('mpPantry').value,maxTime:$('mpTime').value,budget:$('mpBudget').value,variety:$('mpVariety').value};
@@ -48,7 +48,8 @@
     $('mpGenerate').onclick=generate;
     document.addEventListener('recomp:targets-updated',event=>applyMacroTargets(event.detail,true));
     window.addEventListener('pageshow',()=>applyMacroTargets());
-    try{plan=JSON.parse(localStorage.getItem(key)||'null')}catch{}
+    try{const saved=JSON.parse(localStorage.getItem(key)||'null');plan=saved?RecompPersistence.cleanMealPlan30(saved):null}
+    catch{$('mpStatus').innerHTML='<div class="notice">El plan guardado está dañado. Genera uno nuevo o restaura una copia válida.</div>';plan=null}
     render();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
