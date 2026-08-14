@@ -23,15 +23,24 @@
     catch(e){$('mpStatus').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
   }
   function swap(day,item){try{RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render()}catch(e){alert(e.message)}}
+  function showRecipe(day,item){
+    const meal=plan?.days?.[day]?.items?.[item];
+    if(!meal)return;
+    const ingredients=(meal.recipe.i||[]).map(value=>'<li>'+meal.scale.toFixed(2)+'× '+esc(value)+'</li>').join('');
+    $('mpRecipeDetail').innerHTML='<div class="card mp-recipe-detail"><button class="secondary mp-recipe-close" aria-label="Cerrar receta">Cerrar</button><span class="pill">'+esc(meal.slot||meal.recipe.m)+'</span><h2>'+esc(meal.recipe.n)+'</h2><div class="kcal">'+meal.k+' kcal</div><p class="small">Proteína '+meal.p+' g · Carbohidratos '+meal.c+' g · Grasas '+meal.f+' g · Porción '+meal.scale.toFixed(2)+'×</p><h3>Ingredientes ajustados</h3><ul>'+ingredients+'</ul></div>';
+    $('mpRecipeDetail').querySelector('.mp-recipe-close').onclick=()=>{$('mpRecipeDetail').innerHTML='';$('mpResult').scrollIntoView({behavior:'smooth',block:'start'})};
+    $('mpRecipeDetail').scrollIntoView({behavior:'smooth',block:'start'});
+  }
   function render(){
     if(!plan){$('mpResult').innerHTML='<div class="empty">Completa el formulario para crear tus 30 días.</div>';return}
     const start=visibleWeek*7,end=Math.min(start+7,30);
     const tabs=Array.from({length:5},(_,i)=>'<button class="'+(i===visibleWeek?'active':'')+'" data-week="'+i+'">S'+(i+1)+'</button>').join('');
     const days=plan.days.slice(start,end).map((d,di)=>'<details class="mp-day" '+(di===0?'open':'')+'><summary><span><b>Día '+d.day+'</b><small>'+d.totals.k+' kcal · P '+d.totals.p+' g</small></span><span>›</span></summary>'+
-      d.items.map((x,ii)=>'<div class="mp-meal"><div><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · '+x.scale.toFixed(2)+'×</span></div><button class="secondary" data-swap="'+(start+di)+','+ii+'" aria-label="Cambiar '+esc(x.slot)+'">↻</button></div>').join('')+'</details>').join('');
+      d.items.map((x,ii)=>'<div class="mp-meal"><button class="mp-recipe-link" data-recipe="'+(start+di)+','+ii+'"><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · '+x.scale.toFixed(2)+'× · Ver receta</span></button><button class="secondary" data-swap="'+(start+di)+','+ii+'" aria-label="Cambiar '+esc(x.slot)+'">↻</button></div>').join(')+'</details>').join('');
     const shop=RecompMealPlanner.shoppingByWeek(plan,visibleWeek).map(x=>'<label class="mp-check"><input type="checkbox"> <span>'+esc(x.name)+'</span><small>×'+x.count+'</small></label>').join('');
     $('mpStatus').innerHTML='<div class="good">Plan guardado en este dispositivo · '+plan.preferences.kcal+' kcal · '+plan.preferences.protein+' g proteína</div>';
     $('mpResult').innerHTML='<div class="mp-tabs">'+tabs+'</div>'+days+'<div class="card mp-shop"><h3>Compra · semana '+(visibleWeek+1)+'</h3><p class="small">Agrupada a partir de las recetas de esta semana.</p>'+shop+'</div>';
+    document.querySelectorAll('[data-recipe]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.recipe.split(',').map(Number);showRecipe(d,i)});
     document.querySelectorAll('[data-week]').forEach(b=>b.onclick=()=>{visibleWeek=+b.dataset.week;render()});
     document.querySelectorAll('[data-swap]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.swap.split(',').map(Number);swap(d,i)});
   }
@@ -44,7 +53,7 @@
     '<h3>2 · Límites y gustos</h3><label>Alergias o alimentos excluidos <small>· separados por comas</small></label><input id="mpExcluded" placeholder="Ej. cacahuete, marisco, cebolla"><div class="notice">Las exclusiones son un filtro preventivo por texto. Con alergias graves, revisa siempre ingredientes y contaminación cruzada.</div>'+
     '<label>Ingredientes que ya tienes o prefieres</label><input id="mpPantry" placeholder="Ej. arroz, huevos, pollo"><div class="row"><div><label>Tiempo máximo</label><select id="mpTime"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">60 min</option></select></div><div><label>Presupuesto</label><select id="mpBudget"><option value="bajo">Ajustado</option><option value="medio" selected>Medio</option><option value="alto">Flexible</option></select></div></div>'+
     '<label>Variedad</label><select id="mpVariety"><option value="alta" selected>Alta · menos repeticiones</option><option value="media">Media · cocinar por tandas</option><option value="baja">Baja · máxima sencillez</option></select>'+
-    '<button id="mpGenerate" style="width:100%;margin-top:14px">Generar mis 30 días</button><p class="small" style="text-align:center">Orientativo · no sustituye consejo sanitario individual.</p></div><div id="mpStatus"></div><div id="mpResult"></div>';
+    '<button id="mpGenerate" style="width:100%;margin-top:14px">Generar mis 30 días</button><p class="small" style="text-align:center">Orientativo · no sustituye consejo sanitario individual.</p></div><div id="mpRecipeDetail"></div><div id="mpStatus"></div><div id="mpResult"></div>';
     $('mpGenerate').onclick=generate;
     document.addEventListener('recomp:targets-updated',event=>applyMacroTargets(event.detail,true));
     window.addEventListener('pageshow',()=>applyMacroTargets());
