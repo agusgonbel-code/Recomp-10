@@ -4,7 +4,13 @@
   const $=id=>document.getElementById(id);
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let plan=null,visibleWeek=0;
-  const recipeSource=()=>typeof recipes!=='undefined'?recipes:(globalThis.recipes||[]);
+  const recipeSource=()=>{
+    if(typeof ALL_RECIPES!=='undefined'&&Array.isArray(ALL_RECIPES)) return ALL_RECIPES.map(recipe=>({
+      id:recipe.id,n:recipe.name,m:recipe.type==='Snack'?'Merienda':recipe.type,k:recipe.kcal,p:recipe.p,c:recipe.c,f:recipe.f,
+      i:Array.isArray(recipe.ingredients)?recipe.ingredients:[],s:Array.isArray(recipe.steps)?recipe.steps:[],time:recipe.time,difficulty:recipe.difficulty
+    }));
+    return typeof recipes!=='undefined'?recipes:(globalThis.recipes||[]);
+  };
   const savedTargets=()=>{try{return JSON.parse(localStorage.getItem('targets')||'null')||{}}catch{return {}}};
   function save(){plan=RecompPersistence.cleanMealPlan30(plan);localStorage.setItem(key,JSON.stringify(plan))}
   function formValues(){
@@ -27,7 +33,11 @@
     const meal=plan?.days?.[day]?.items?.[item];
     if(!meal)return;
     const ingredients=(meal.recipe.i||[]).map(value=>'<li>'+meal.scale.toFixed(2)+'× '+esc(value)+'</li>').join('');
-    $('mpRecipeDetail').innerHTML='<div class="card mp-recipe-detail"><button class="secondary mp-recipe-close" aria-label="Cerrar receta">Cerrar</button><span class="pill">'+esc(meal.slot||meal.recipe.m)+'</span><h2>'+esc(meal.recipe.n)+'</h2><div class="kcal">'+meal.k+' kcal</div><p class="small">Proteína '+meal.p+' g · Carbohidratos '+meal.c+' g · Grasas '+meal.f+' g · Porción '+meal.scale.toFixed(2)+'×</p><h3>Ingredientes ajustados</h3><ul>'+ingredients+'</ul></div>';
+    const matched=recipeSource().find(recipe=>recipe.id===meal.recipe.id||recipe.n===meal.recipe.n);
+    const steps=(meal.recipe.s?.length?meal.recipe.s:(matched?.s||[])).map(value=>'<li>'+esc(value)+'</li>').join('');
+    const preparation=steps?'<h3>Preparación</h3><ol>'+steps+'</ol>':'<div class="notice">Este plan antiguo no guardó los pasos. Cambia esta comida para cargar una receta completa.</div>';
+    const meta=[meal.recipe.time&&meal.recipe.time+' min',meal.recipe.difficulty].filter(Boolean).map(esc).join(' · ');
+    $('mpRecipeDetail').innerHTML='<div class="card mp-recipe-detail"><button class="secondary mp-recipe-close" aria-label="Cerrar receta">Cerrar</button><span class="pill">'+esc(meal.slot||meal.recipe.m)+'</span><h2>'+esc(meal.recipe.n)+'</h2><div class="kcal">'+meal.k+' kcal</div><p class="small">Proteína '+meal.p+' g · Carbohidratos '+meal.c+' g · Grasas '+meal.f+' g · Porción '+meal.scale.toFixed(2)+'×'+(meta?' · '+meta:'')+'</p><h3>Ingredientes ajustados</h3><ul>'+ingredients+'</ul>'+preparation+'</div>';
     $('mpRecipeDetail').querySelector('.mp-recipe-close').onclick=()=>{$('mpRecipeDetail').innerHTML='';$('mpResult').scrollIntoView({behavior:'smooth',block:'start'})};
     $('mpRecipeDetail').scrollIntoView({behavior:'smooth',block:'start'});
   }
