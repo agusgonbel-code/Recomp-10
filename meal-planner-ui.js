@@ -17,7 +17,11 @@
     if(loggedToday(source))return;
     document.dispatchEvent(new CustomEvent('recomp:log-planned-meal',{detail:{item:meal,sourceKey:source}}));
   }
-  function save(){plan=RecompPersistence.cleanMealPlan30(plan);localStorage.setItem(key,JSON.stringify(plan))}
+  function save(){
+    const cleaner=globalThis.RecompPersistence?.cleanMealPlan30;
+    plan=typeof cleaner==='function'?cleaner(plan):plan;
+    localStorage.setItem(key,JSON.stringify(plan));
+  }
   function formValues(){
     return {kcal:$('mpKcal').value,protein:$('mpProtein').value,meals:$('mpMeals').value,diet:$('mpDiet').value,
       excluded:$('mpExcluded').value,pantry:$('mpPantry').value,maxTime:$('mpTime').value,budget:$('mpBudget').value,variety:$('mpVariety').value};
@@ -30,8 +34,15 @@
     return targets;
   }
   function generate(){
-    try{plan=RecompMealPlanner.generate30Days(recipeSource(),formValues());visibleWeek=0;save();render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'})}
-    catch(e){$('mpStatus').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
+    const button=$('mpGenerate');
+    try{
+      if(button){button.disabled=true;button.textContent='Creando 30 días…'}
+      const catalog=recipeSource();
+      if(!catalog.length)throw new Error('La biblioteca de recetas todavía no está lista. Cierra y vuelve a abrir la aplicación.');
+      plan=RecompMealPlanner.generate30Days(catalog,formValues());visibleWeek=0;save();render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'});
+    }
+    catch(e){$('mpStatus').innerHTML='<div class="notice"><b>No se pudo crear el menú.</b><br>'+esc(e.message)+'</div>'}
+    finally{if(button){button.disabled=false;button.textContent='Generar mis 30 días'}}
   }
   function swap(day,item){try{RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render()}catch(e){alert(e.message)}}
   function showRecipe(day,item){
@@ -65,7 +76,7 @@
   }
   function init(){
     const root=$('mealPlanner30'); if(!root)return;
-    const targets=savedTargets();
+    const targets=RecompMealPlanner.macroTargets(savedTargets());
     root.innerHTML='<div class="mp-intro"><span class="pill">30 DÍAS</span><h2>Tu menú, decidido de una vez</h2><p>Objetivos, alergias, tiempo y presupuesto en un plan privado que puedes ajustar comida a comida.</p></div>'+
     '<div class="card mp-form"><h3>1 · Objetivo nutricional</h3><div class="good">Sincronizado con tu calculadora de macros. Puedes ajustar estos valores solo para este menú.</div><div class="row"><div><label>Calorías / día</label><input id="mpKcal" type="number" min="1200" max="5000" value="'+esc(targets.kcal)+'"></div><div><label>Proteína (g)</label><input id="mpProtein" type="number" min="40" max="300" value="'+esc(targets.protein)+'"></div></div>'+
     '<div class="row"><div><label>Comidas / día</label><select id="mpMeals"><option>3</option><option selected>4</option><option>5</option></select></div><div><label>Estilo</label><select id="mpDiet"><option value="flexible">Flexible</option><option value="vegetariana">Vegetariano</option><option value="vegana">Vegano</option><option value="pescetariana">Pescetariano</option><option value="sin-lactosa">Sin lactosa</option><option value="sin-gluten">Sin gluten</option></select></div></div>'+
@@ -78,7 +89,7 @@
     document.addEventListener('recomp:planned-meal-logged',()=>{render();$('mpRecipeDetail').innerHTML=''});
     document.addEventListener('recomp:meal-log-changed',render);
     window.addEventListener('pageshow',()=>applyMacroTargets());
-    try{const saved=JSON.parse(localStorage.getItem(key)||'null');plan=saved?RecompPersistence.cleanMealPlan30(saved):null}
+    try{const saved=JSON.parse(localStorage.getItem(key)||'null');const cleaner=globalThis.RecompPersistence?.cleanMealPlan30;plan=saved?(typeof cleaner==='function'?cleaner(saved):saved):null}
     catch{$('mpStatus').innerHTML='<div class="notice">El plan guardado está dañado. Genera uno nuevo o restaura una copia válida.</div>';plan=null}
     render();
   }

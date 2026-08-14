@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v18-nutrition-journal';
+const CACHE_NAME = 'recomp-10-v19-menu-generator-reliability';
 const APP_SHELL = [
   './',
   './index.html',
@@ -51,16 +51,30 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Scripts must match the network-first index. Serving an old cached module with
+  // new HTML can leave buttons visible but inert after an update, especially in iOS PWAs.
+  if (event.request.destination === 'script' || event.request.destination === 'style') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response.ok && response.type === 'basic') {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      const network = fetch(event.request).then(response => {
-        if (response.ok && response.type === 'basic') {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        }
-        return response;
-      });
-      return cached || network;
-    })
+    caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
+      if (response.ok && response.type === 'basic') {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      }
+      return response;
+    }))
   );
 });
