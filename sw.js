@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v10-backup-download-safety';
+const CACHE_NAME = 'recomp-10-v11-scoped-data-reset';
 const APP_SHELL = [
   './',
   './index.html',

@@ -84,4 +84,21 @@ assert.deepEqual(JSON.parse(rollbackStorage.getItem('workouts')), [{ volume: 100
 assert.equal(rollbackStorage.getItem('recomp:last-good:workouts'), null);
 assert.equal(reported, 'QuotaExceededError');
 
+
+const resetStorage = memoryStorage([
+  ['workouts', JSON.stringify([{ volume: 900 }])],
+  ['recomp:last-good:workouts', JSON.stringify([{ volume: 800 }])],
+  ['profile', JSON.stringify({ name: 'Usuario' })],
+  ['fitcoach:user-data', JSON.stringify({ sessions: 42 })]
+]);
+const resetStore = createJsonStore({ storage: resetStorage, prefix: 'recomp' });
+resetStore.recoveredKeys.add('workouts');
+resetStore.clear(['workouts', 'profile', 'workouts']);
+assert.equal(resetStorage.getItem('workouts'), null);
+assert.equal(resetStorage.getItem('recomp:last-good:workouts'), null);
+assert.equal(resetStorage.getItem('profile'), null);
+assert.equal(resetStorage.getItem('fitcoach:user-data'), JSON.stringify({ sessions: 42 }));
+assert.equal(resetStore.recoveredKeys.has('workouts'), false);
+assert.throws(() => resetStore.clear('workouts'), /lista de claves/);
+
 console.log('Persistence tests passed');

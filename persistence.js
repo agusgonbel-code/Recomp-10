@@ -159,6 +159,14 @@
     };
     return {
       recoveredKeys,
+      clear(keys) {
+        if (!Array.isArray(keys)) throw new TypeError('Se esperaba una lista de claves');
+        [...new Set(keys.map(key => clip(key, 100)).filter(Boolean))].forEach(key => {
+          storage.removeItem(key);
+          storage.removeItem(backupKey(key));
+          recoveredKeys.delete(key);
+        });
+      },
       g(key, fallback) {
         const primary = decode(storage.getItem(key), fallback);
         if (primary !== null) return primary;
