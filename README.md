@@ -38,3 +38,8 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - Prioriza adherencia semanal, esfuerzo mediante RIR, proteína según la hora y tendencia de peso cuando existen suficientes registros.
 - Cada recomendación muestra el dato que la origina y limita los ajustes a acciones prudentes.
 - No diagnostica, no estima composición corporal desde fotografías y no inventa recomendaciones cuando faltan datos.
+
+## Fechas locales en iPhone
+- Comidas, entrenamientos, métricas y fotografías conservan el día y la zona horaria local del dispositivo.
+- Las copias de seguridad usan el día local en el nombre del archivo.
+- Pruebas automáticas cubren Madrid, Los Ángeles y Kiritimati para evitar regresiones cerca de medianoche.

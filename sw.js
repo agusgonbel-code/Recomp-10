@@ -1,8 +1,9 @@
-const CACHE_NAME = 'recomp-10-v8-explainable-coach';
+const CACHE_NAME = 'recomp-10-v9-local-date-safety';
 const APP_SHELL = [
   './',
   './index.html',
   './persistence.js',
+  './date-engine.js',
   './training-engine.js',
   './nutrition-engine.js',
   './coach-engine.js',

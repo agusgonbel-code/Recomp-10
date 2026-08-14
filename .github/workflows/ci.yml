@@ -32,10 +32,14 @@ jobs:
         run: |
           node --check sw.js
           node --check persistence.js
+          node --check date-engine.js
           node --check training-engine.js
           node --check nutrition-engine.js
           node --check coach-engine.js
           node --check photo-engine.js
+
+      - name: Test local date safety
+        run: node --test tests/date-engine.test.mjs
 
       - name: Test persistence safety
         run: node --test tests/persistence.test.mjs
@@ -70,6 +74,7 @@ jobs:
           test -s manifest.webmanifest
           test -s sw.js
           test -s persistence.js
+          test -s date-engine.js
           test -s training-engine.js
           test -s nutrition-engine.js
           test -s coach-engine.js
@@ -78,6 +83,8 @@ jobs:
           test -s icon-512.png
           grep -q "navigator.serviceWorker.register('./sw.js')" index.html
           grep -q "src='persistence.js'" index.html
+          grep -q "src='date-engine.js'" index.html
+          grep -q "'./date-engine.js'" sw.js
           grep -q "src='training-engine.js'" index.html
           grep -q "src='nutrition-engine.js'" index.html
           grep -q "src='coach-engine.js'" index.html
