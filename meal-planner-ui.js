@@ -76,6 +76,7 @@
     $('mpGenerate').onclick=generate;
     document.addEventListener('recomp:targets-updated',event=>applyMacroTargets(event.detail,true));
     document.addEventListener('recomp:planned-meal-logged',()=>{render();$('mpRecipeDetail').innerHTML=''});
+    document.addEventListener('recomp:meal-log-changed',render);
     window.addEventListener('pageshow',()=>applyMacroTargets());
     try{const saved=JSON.parse(localStorage.getItem(key)||'null');plan=saved?RecompPersistence.cleanMealPlan30(saved):null}
     catch{$('mpStatus').innerHTML='<div class="notice">El plan guardado está dañado. Genera uno nuevo o restaura una copia válida.</div>';plan=null}

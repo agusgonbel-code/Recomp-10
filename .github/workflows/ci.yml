@@ -106,6 +106,9 @@ jobs:
           grep -q "data-recipe" meal-planner-ui.js
           grep -q "data-log" meal-planner-ui.js
           grep -q "recomp:log-planned-meal" index.html
+          grep -q "saveMealEntry" index.html
+          grep -q "mealJournalDate" index.html
+          grep -q "recomp:meal-log-changed" meal-planner-ui.js
           grep -q "mpRecipeDetail" meal-planner-ui.js
           grep -q "MEAL_PLAN_KEY" index.html
           grep -q ">Menús</button>" index.html

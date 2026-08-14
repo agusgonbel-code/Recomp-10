@@ -68,6 +68,49 @@
     };
   }
 
+  function saveMealEntry(meals, draft, editingId = null) {
+    if (!Array.isArray(meals)) throw new TypeError('El diario no es válido.');
+    if (!draft || typeof draft !== 'object') throw new TypeError('La comida no es válida.');
+    const date = String(draft.date ?? '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('La fecha del diario no es válida.');
+    const parts = date.split('-').map(Number);
+    const calendarDate = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+    if (calendarDate.getUTCFullYear() !== parts[0] || calendarDate.getUTCMonth() !== parts[1] - 1 || calendarDate.getUTCDate() !== parts[2]) {
+      throw new Error('La fecha del diario no es válida.');
+    }
+    const number = (value, name, max) => {
+      value = Number(value);
+      if (!Number.isFinite(value) || value < 0 || value > max) throw new Error(`${name} no es válido.`);
+      return Math.round(value);
+    };
+    const id = editingId === null
+      ? (Number.isSafeInteger(Number(draft.id)) && Number(draft.id) > 0 ? Number(draft.id) : Date.now())
+      : Number(editingId);
+    const index = editingId === null ? -1 : meals.findIndex(meal => Number(meal?.id) === id);
+    if (editingId !== null && index < 0) throw new Error('La comida ya no existe.');
+    const previous = index < 0 ? {} : meals[index];
+    const entry = {
+      id,
+      date,
+      type: String(draft.type ?? previous.type ?? 'Comida').trim().slice(0, 30) || 'Comida',
+      name: String(draft.name ?? previous.name ?? 'Comida').trim().slice(0, 120) || 'Comida',
+      kcal: number(draft.kcal, 'Las calorías', 10000),
+      p: number(draft.p, 'La proteína', 1000),
+      c: number(draft.c, 'Los carbohidratos', 2000),
+      f: number(draft.f, 'Las grasas', 1000)
+    };
+    const sourceKey = String(draft.sourceKey ?? previous.sourceKey ?? '').trim().slice(0, 160);
+    if (sourceKey) entry.sourceKey = sourceKey;
+    const next = meals.slice();
+    if (index < 0) next.push(entry); else next[index] = entry;
+    return { meals: next, entry, created: index < 0 };
+  }
+
+  function mealsForDay(meals, date) {
+    if (!Array.isArray(meals)) return [];
+    return meals.filter(meal => meal?.date === date).slice().sort((a, b) => Number(a.id || 0) - Number(b.id || 0));
+  }
+
   function scaledRecipe(recipe, scale) {
     scale = clamp(Number(scale) || 1, 0.7, 1.6);
     return {
@@ -117,6 +160,7 @@
   }
 
   globalThis.RecompNutrition = {
-    calculateTargets, mealTotals, mealEntryFromPlan, scaledRecipe, buildDayMenu, buildWeekMenu, shoppingItems
+    calculateTargets, mealTotals, mealEntryFromPlan, saveMealEntry, mealsForDay,
+    scaledRecipe, buildDayMenu, buildWeekMenu, shoppingItems
   };
 })();

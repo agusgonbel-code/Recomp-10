@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v17-planned-meal-log';
+const CACHE_NAME = 'recomp-10-v18-nutrition-journal';
 const APP_SHELL = [
   './',
   './index.html',

@@ -25,5 +25,18 @@
       '.' + String(date.getMilliseconds()).padStart(3, '0') + offset;
   }
 
-  globalThis.RecompDate = { localDayKey, localTimestamp };
+  function shiftLocalDay(day, amount) {
+    if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new TypeError('Fecha no válida');
+    const parts = day.split('-').map(Number);
+    const date = new Date(parts[0], parts[1] - 1, parts[2], 12);
+    if (date.getFullYear() !== parts[0] || date.getMonth() !== parts[1] - 1 || date.getDate() !== parts[2]) {
+      throw new TypeError('Fecha no válida');
+    }
+    amount = Number(amount);
+    if (!Number.isInteger(amount) || Math.abs(amount) > 3660) throw new TypeError('Desplazamiento no válido');
+    date.setDate(date.getDate() + amount);
+    return localDayKey(date);
+  }
+
+  globalThis.RecompDate = { localDayKey, localTimestamp, shiftLocalDay };
 })();
