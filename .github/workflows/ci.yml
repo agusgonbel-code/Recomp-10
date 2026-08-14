@@ -99,6 +99,8 @@ jobs:
           grep -q "src='nutrition-engine.js'" index.html
           grep -q "src='meal-planner.js'" index.html
           grep -q "'./meal-planner.js'" sw.js
+          grep -q "src='meal-planner-ui.js'" index.html
+          grep -q "'./meal-planner-ui.js'" sw.js
           grep -q "src='coach-engine.js'" index.html
           grep -q "'./coach-engine.js'" sw.js
           grep -q "src='photo-engine.js'" index.html
