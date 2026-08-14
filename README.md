@@ -56,6 +56,7 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - El plan mensual se valida al guardar y abrir, se incluye en las copias de seguridad y se elimina con el borrado controlado de Recomp 10M.
 - El generador usa el catálogo completo de recetas de la app en lugar del listado antiguo reducido.
 - Cada comida del plan abre su ficha táctil con ingredientes, preparación paso a paso, tiempo, dificultad, porción ajustada y macros sin perder la semana seleccionada.
+- Cada comida planificada se puede registrar una sola vez en el diario del día, desde la lista o desde su receta; el registro actualiza inmediatamente los totales y conserva su vínculo en las copias de seguridad.
 - Las exclusiones actúan como filtro preventivo; las alergias graves requieren revisión profesional y del etiquetado.
 - Pruebas automáticas cubren duración, restricciones, sustituciones y compra semanal.
 - La interfaz está optimizada para navegación táctil y el área segura de iPhone.

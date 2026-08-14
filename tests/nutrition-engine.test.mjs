@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 await import('../nutrition-engine.js');
 
 const {
-  calculateTargets, mealTotals, scaledRecipe, buildDayMenu, buildWeekMenu, shoppingItems
+  calculateTargets, mealTotals, mealEntryFromPlan, scaledRecipe, buildDayMenu, buildWeekMenu, shoppingItems
 } = globalThis.RecompNutrition;
 
 assert.deepEqual(calculateTargets({
@@ -20,6 +20,15 @@ assert.deepEqual(mealTotals([
   { date: '2026-08-11', kcal: -50, p: '20', c: null, f: 5 },
   { date: '2026-08-10', kcal: 900, p: 60, c: 90, f: 20 }
 ], '2026-08-11'), { k: 500, p: 50, c: 50, f: 15 });
+
+assert.deepEqual(mealEntryFromPlan({
+  slot: 'Cena', recipe: { n: 'Salmón con patata', m: 'Cena' }, k: 581.4, p: 42.2, c: 55.8, f: 19.7
+}, '2026-08-14', 'mealPlan30:plan:0:3', 123), {
+  id: 123, date: '2026-08-14', type: 'Cena', name: 'Salmón con patata',
+  kcal: 581, p: 42, c: 56, f: 20, sourceKey: 'mealPlan30:plan:0:3'
+});
+assert.throws(() => mealEntryFromPlan(null, '2026-08-14', 'plan:0'), /no es válida/);
+assert.throws(() => mealEntryFromPlan({ recipe: {} }, '14-08-2026', 'plan:0'), /fecha/);
 
 const recipes = [
   ['Desayuno', 'A'], ['Desayuno', 'A2'], ['Comida', 'B'], ['Comida', 'B2'],

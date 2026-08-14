@@ -9,6 +9,14 @@
       (typeof recipes!=='undefined'?recipes:(globalThis.recipes||[]))
   );
   const savedTargets=()=>{try{return JSON.parse(localStorage.getItem('targets')||'null')||{}}catch{return {}}};
+  const sourceKey=(day,item)=>'mealPlan30:'+String(plan?.createdAt||'unknown')+':'+day+':'+item;
+  const loggedToday=source=>{try{return (JSON.parse(localStorage.getItem('meals')||'[]')||[]).some(meal=>meal?.date===RecompDate.localDayKey()&&meal?.sourceKey===source)}catch{return false}};
+  function logMeal(day,item){
+    const meal=plan?.days?.[day]?.items?.[item]; if(!meal)return;
+    const source=sourceKey(day,item);
+    if(loggedToday(source))return;
+    document.dispatchEvent(new CustomEvent('recomp:log-planned-meal',{detail:{item:meal,sourceKey:source}}));
+  }
   function save(){plan=RecompPersistence.cleanMealPlan30(plan);localStorage.setItem(key,JSON.stringify(plan))}
   function formValues(){
     return {kcal:$('mpKcal').value,protein:$('mpProtein').value,meals:$('mpMeals').value,diet:$('mpDiet').value,
@@ -34,8 +42,11 @@
     const steps=(meal.recipe.s?.length?meal.recipe.s:(matched?.s||[])).map(value=>'<li>'+esc(value)+'</li>').join('');
     const preparation=steps?'<h3>Preparación</h3><ol>'+steps+'</ol>':'<div class="notice">Este plan antiguo no guardó los pasos. Cambia esta comida para cargar una receta completa.</div>';
     const meta=[meal.recipe.time&&meal.recipe.time+' min',meal.recipe.difficulty].filter(Boolean).map(esc).join(' · ');
-    $('mpRecipeDetail').innerHTML='<div class="card mp-recipe-detail"><button class="secondary mp-recipe-close" aria-label="Cerrar receta">Cerrar</button><span class="pill">'+esc(meal.slot||meal.recipe.m)+'</span><h2>'+esc(meal.recipe.n)+'</h2><div class="kcal">'+meal.k+' kcal</div><p class="small">Proteína '+meal.p+' g · Carbohidratos '+meal.c+' g · Grasas '+meal.f+' g · Porción '+meal.scale.toFixed(2)+'×'+(meta?' · '+meta:'')+'</p><h3>Ingredientes ajustados</h3><ul>'+ingredients+'</ul>'+preparation+'</div>';
+    const logged=loggedToday(sourceKey(day,item));
+    $('mpRecipeDetail').innerHTML='<div class="card mp-recipe-detail"><button class="secondary mp-recipe-close" aria-label="Cerrar receta">Cerrar</button><span class="pill">'+esc(meal.slot||meal.recipe.m)+'</span><h2>'+esc(meal.recipe.n)+'</h2><div class="kcal">'+meal.k+' kcal</div><p class="small">Proteína '+meal.p+' g · Carbohidratos '+meal.c+' g · Grasas '+meal.f+' g · Porción '+meal.scale.toFixed(2)+'×'+(meta?' · '+meta:'')+'</p><button class="mp-log-detail '+(logged?'secondary':'')+'" '+(logged?'disabled':'')+'>'+(logged?'✓ Registrada hoy':'Añadir al diario de hoy')+'</button><h3>Ingredientes ajustados</h3><ul>'+ingredients+'</ul>'+preparation+'</div>';
     $('mpRecipeDetail').querySelector('.mp-recipe-close').onclick=()=>{$('mpRecipeDetail').innerHTML='';$('mpResult').scrollIntoView({behavior:'smooth',block:'start'})};
+    const logButton=$('mpRecipeDetail').querySelector('.mp-log-detail');
+    if(!logged)logButton.onclick=()=>logMeal(day,item);
     $('mpRecipeDetail').scrollIntoView({behavior:'smooth',block:'start'});
   }
   function render(){
@@ -43,13 +54,14 @@
     const start=visibleWeek*7,end=Math.min(start+7,30);
     const tabs=Array.from({length:5},(_,i)=>'<button class="'+(i===visibleWeek?'active':'')+'" data-week="'+i+'">S'+(i+1)+'</button>').join('');
     const days=plan.days.slice(start,end).map((d,di)=>'<details class="mp-day" '+(di===0?'open':'')+'><summary><span><b>Día '+d.day+'</b><small>'+d.totals.k+' kcal · P '+d.totals.p+' g</small></span><span>›</span></summary>'+
-      d.items.map((x,ii)=>'<div class="mp-meal"><button class="mp-recipe-link" data-recipe="'+(start+di)+','+ii+'"><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · '+x.scale.toFixed(2)+'× · Ver receta</span></button><button class="secondary" data-swap="'+(start+di)+','+ii+'" aria-label="Cambiar '+esc(x.slot)+'">↻</button></div>').join('')+'</details>').join('');
+      d.items.map((x,ii)=>{const day=start+di,logged=loggedToday(sourceKey(day,ii));return '<div class="mp-meal"><button class="mp-recipe-link" data-recipe="'+day+','+ii+'"><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · '+x.scale.toFixed(2)+'× · Ver receta</span></button><button class="secondary mp-log" data-log="'+day+','+ii+'" '+(logged?'disabled':'')+' aria-label="'+(logged?'Registrada hoy':'Añadir '+esc(x.slot)+' al diario de hoy')+'">'+(logged?'✓':'+')+'</button><button class="secondary" data-swap="'+day+','+ii+'" aria-label="Cambiar '+esc(x.slot)+'">↻</button></div>'}).join('')+'</details>').join('');
     const shop=RecompMealPlanner.shoppingByWeek(plan,visibleWeek).map(x=>'<label class="mp-check"><input type="checkbox"> <span>'+esc(x.name)+'</span><small>×'+x.count+'</small></label>').join('');
     $('mpStatus').innerHTML='<div class="good">Plan guardado en este dispositivo · '+plan.preferences.kcal+' kcal · '+plan.preferences.protein+' g proteína</div>';
     $('mpResult').innerHTML='<div class="mp-tabs">'+tabs+'</div>'+days+'<div class="card mp-shop"><h3>Compra · semana '+(visibleWeek+1)+'</h3><p class="small">Agrupada a partir de las recetas de esta semana.</p>'+shop+'</div>';
     document.querySelectorAll('[data-recipe]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.recipe.split(',').map(Number);showRecipe(d,i)});
     document.querySelectorAll('[data-week]').forEach(b=>b.onclick=()=>{visibleWeek=+b.dataset.week;render()});
     document.querySelectorAll('[data-swap]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.swap.split(',').map(Number);swap(d,i)});
+    document.querySelectorAll('[data-log]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.log.split(',').map(Number);logMeal(d,i)});
   }
   function init(){
     const root=$('mealPlanner30'); if(!root)return;
@@ -63,6 +75,7 @@
     '<button id="mpGenerate" style="width:100%;margin-top:14px">Generar mis 30 días</button><p class="small" style="text-align:center">Orientativo · no sustituye consejo sanitario individual.</p></div><div id="mpRecipeDetail"></div><div id="mpStatus"></div><div id="mpResult"></div>';
     $('mpGenerate').onclick=generate;
     document.addEventListener('recomp:targets-updated',event=>applyMacroTargets(event.detail,true));
+    document.addEventListener('recomp:planned-meal-logged',()=>{render();$('mpRecipeDetail').innerHTML=''});
     window.addEventListener('pageshow',()=>applyMacroTargets());
     try{const saved=JSON.parse(localStorage.getItem(key)||'null');plan=saved?RecompPersistence.cleanMealPlan30(saved):null}
     catch{$('mpStatus').innerHTML='<div class="notice">El plan guardado está dañado. Genera uno nuevo o restaura una copia válida.</div>';plan=null}
