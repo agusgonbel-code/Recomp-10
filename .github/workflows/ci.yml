@@ -35,6 +35,8 @@ jobs:
           node --check date-engine.js
           node --check training-engine.js
           node --check nutrition-engine.js
+          node --check meal-planner.js
+          node --check meal-planner-ui.js
           node --check coach-engine.js
           node --check photo-engine.js
 
@@ -49,6 +51,9 @@ jobs:
 
       - name: Test nutrition engine
         run: node --test tests/nutrition-engine.test.mjs
+
+      - name: Test 30-day meal planner
+        run: node --test tests/meal-planner.test.mjs
 
       - name: Test explainable coach
         run: node --test tests/coach-engine.test.mjs
@@ -80,6 +85,8 @@ jobs:
           test -s date-engine.js
           test -s training-engine.js
           test -s nutrition-engine.js
+          test -s meal-planner.js
+          test -s meal-planner-ui.js
           test -s coach-engine.js
           test -s photo-engine.js
           test -s icon-192.png
@@ -90,6 +97,8 @@ jobs:
           grep -q "'./date-engine.js'" sw.js
           grep -q "src='training-engine.js'" index.html
           grep -q "src='nutrition-engine.js'" index.html
+          grep -q "src='meal-planner.js'" index.html
+          grep -q "'./meal-planner.js'" sw.js
           grep -q "src='coach-engine.js'" index.html
           grep -q "'./coach-engine.js'" sw.js
           grep -q "src='photo-engine.js'" index.html
