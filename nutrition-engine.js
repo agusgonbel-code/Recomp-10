@@ -42,6 +42,32 @@
       }), { k: 0, p: 0, c: 0, f: 0 });
   }
 
+  function mealEntryFromPlan(item, date, sourceKey, id = Date.now()) {
+    if (!item || typeof item !== 'object' || !item.recipe || typeof item.recipe !== 'object') {
+      throw new Error('La comida planificada no es válida.');
+    }
+    const day = String(date ?? '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new Error('La fecha del diario no es válida.');
+    const number = (value, max) => {
+      value = Number(value);
+      if (!Number.isFinite(value)) return 0;
+      return Math.min(max, Math.max(0, Math.round(value)));
+    };
+    const key = String(sourceKey ?? '').trim().slice(0, 160);
+    if (!key) throw new Error('Falta el identificador de la comida planificada.');
+    return {
+      id: Number.isSafeInteger(Number(id)) && Number(id) > 0 ? Number(id) : Date.now(),
+      date: day,
+      type: String(item.slot || item.recipe.m || 'Comida').trim().slice(0, 30) || 'Comida',
+      name: String(item.recipe.n || 'Comida planificada').trim().slice(0, 120) || 'Comida planificada',
+      kcal: number(item.k, 10000),
+      p: number(item.p, 1000),
+      c: number(item.c, 2000),
+      f: number(item.f, 1000),
+      sourceKey: key
+    };
+  }
+
   function scaledRecipe(recipe, scale) {
     scale = clamp(Number(scale) || 1, 0.7, 1.6);
     return {
@@ -91,6 +117,6 @@
   }
 
   globalThis.RecompNutrition = {
-    calculateTargets, mealTotals, scaledRecipe, buildDayMenu, buildWeekMenu, shoppingItems
+    calculateTargets, mealTotals, mealEntryFromPlan, scaledRecipe, buildDayMenu, buildWeekMenu, shoppingItems
   };
 })();

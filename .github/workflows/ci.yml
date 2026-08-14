@@ -104,6 +104,8 @@ jobs:
           grep -q "applyMacroTargets" meal-planner-ui.js
           grep -q "cleanMealPlan30" meal-planner-ui.js
           grep -q "data-recipe" meal-planner-ui.js
+          grep -q "data-log" meal-planner-ui.js
+          grep -q "recomp:log-planned-meal" index.html
           grep -q "mpRecipeDetail" meal-planner-ui.js
           grep -q "MEAL_PLAN_KEY" index.html
           grep -q ">Menús</button>" index.html

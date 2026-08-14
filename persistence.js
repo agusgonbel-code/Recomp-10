@@ -144,7 +144,8 @@
         kcal: num(meal.kcal, 0, 10000),
         p: num(meal.p, 0, 1000),
         c: num(meal.c, 0, 2000),
-        f: num(meal.f, 0, 1000)
+        f: num(meal.f, 0, 1000),
+        sourceKey: clip(meal.sourceKey, 160)
       }));
     }
     if ('metrics' in data) {

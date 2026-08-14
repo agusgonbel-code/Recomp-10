@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v16-full-menu-recipes';
+const CACHE_NAME = 'recomp-10-v17-planned-meal-log';
 const APP_SHELL = [
   './',
   './index.html',

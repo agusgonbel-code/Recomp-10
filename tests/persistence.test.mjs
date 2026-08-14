@@ -26,6 +26,12 @@ assert.equal(cleaned.workouts[0].notes.length, 500);
 assert.equal(cleaned.workouts[0].exercises[0].sets[0].rir, null);
 assert.equal(cleaned.photos.length, 0);
 
+const cleanedMeal = cleanBackup({ meals: [{
+  id: 42, date: '2026-08-14', type: 'Comida', name: 'Pollo con arroz', kcal: 650,
+  p: 48, c: 70, f: 16, sourceKey: 'mealPlan30:2026-08-14:0:2'
+}] }).meals[0];
+assert.equal(cleanedMeal.sourceKey, 'mealPlan30:2026-08-14:0:2');
+
 const monthlyPlan = {
   createdAt: '2026-08-14T10:00:00.000Z',
   preferences: { kcal: 2200, protein: 160, meals: 3, diet: 'flexible', excluded: [], pantry: [], maxTime: 30, budget: 'medio', variety: 'alta' },
