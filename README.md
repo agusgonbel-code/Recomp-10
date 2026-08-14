@@ -54,7 +54,8 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - Permite un ajuste manual opcional solo para el menú, además de número de comidas, estilo alimentario, exclusiones, despensa, tiempo, presupuesto y variedad.
 - Plan local de 30 días, navegación semanal, sustitución individual y lista de compra agrupada.
 - El plan mensual se valida al guardar y abrir, se incluye en las copias de seguridad y se elimina con el borrado controlado de Recomp 10M.
-- Cada comida del plan abre su ficha táctil con ingredientes, porción ajustada y macros sin perder la semana seleccionada.
+- El generador usa el catálogo completo de recetas de la app en lugar del listado antiguo reducido.
+- Cada comida del plan abre su ficha táctil con ingredientes, preparación paso a paso, tiempo, dificultad, porción ajustada y macros sin perder la semana seleccionada.
 - Las exclusiones actúan como filtro preventivo; las alergias graves requieren revisión profesional y del etiquetado.
 - Pruebas automáticas cubren duración, restricciones, sustituciones y compra semanal.
 - La interfaz está optimizada para navegación táctil y el área segura de iPhone.

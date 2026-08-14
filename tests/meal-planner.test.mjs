@@ -39,3 +39,15 @@ test('reutiliza objetivos guardados por la calculadora de macros',()=>{
  assert.deepEqual(RecompMealPlanner.macroTargets({kcal:2475,protein:173}),{kcal:2475,protein:173});
  assert.deepEqual(RecompMealPlanner.macroTargets({kcal:'no válido',protein:null}),{kcal:2200,protein:160});
 });
+
+
+test('conecta el catálogo completo y conserva la receta paso a paso',()=>{
+ const catalog=RecompMealPlanner.normalizeRecipeCatalog([{
+   id:'rc1',name:'Pollo al limón',type:'Comida',kcal:610,p:48,c:65,f:18,
+   ingredients:['180 g pollo','100 g arroz'],steps:['Cocina el arroz.','Dora el pollo y sirve.'],time:25,difficulty:'Fácil'
+ }]);
+ assert.deepEqual(catalog[0],{
+   id:'rc1',n:'Pollo al limón',m:'Comida',k:610,p:48,c:65,f:18,
+   i:['180 g pollo','100 g arroz'],s:['Cocina el arroz.','Dora el pollo y sirve.'],time:25,difficulty:'Fácil'
+ });
+});
