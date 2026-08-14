@@ -47,3 +47,10 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 ## Copias de seguridad en iPhone
 - Las descargas usan el nombre `recomp-10m-backup-AAAA-MM-DD.json`.
 - La URL temporal de cada exportación se libera después de descargar para evitar acumular memoria en sesiones largas de Safari.
+
+## Generador de menús de 30 días
+- Formulario guiado con calorías, proteína, número de comidas, estilo alimentario, exclusiones, despensa, tiempo, presupuesto y variedad.
+- Plan local de 30 días, navegación semanal, sustitución individual y lista de compra agrupada.
+- Las exclusiones actúan como filtro preventivo; las alergias graves requieren revisión profesional y del etiquetado.
+- Pruebas automáticas cubren duración, restricciones, sustituciones y compra semanal.
+- La interfaz está optimizada para navegación táctil y el área segura de iPhone.
