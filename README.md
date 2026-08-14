@@ -53,3 +53,4 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - Plan local de 30 días, navegación semanal, sustitución individual y lista de compra agrupada.
 - Las exclusiones actúan como filtro preventivo; las alergias graves requieren revisión profesional y del etiquetado.
 - Pruebas automáticas cubren duración, restricciones, sustituciones y compra semanal.
+- La interfaz está optimizada para navegación táctil y el área segura de iPhone.
