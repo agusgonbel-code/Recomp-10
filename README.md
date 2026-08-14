@@ -49,6 +49,7 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - La URL temporal de cada exportación se libera después de descargar para evitar acumular memoria en sesiones largas de Safari.
 
 ## Generador de menús de 30 días
+- Acceso visible desde la pestaña `Menús` y desde la calculadora de macros; aparece antes que la biblioteca de recetas.
 - Calorías y proteína se cargan automáticamente desde la calculadora de macros y se actualizan al recalcular.
 - Permite un ajuste manual opcional solo para el menú, además de número de comidas, estilo alimentario, exclusiones, despensa, tiempo, presupuesto y variedad.
 - Plan local de 30 días, navegación semanal, sustitución individual y lista de compra agrupada.
