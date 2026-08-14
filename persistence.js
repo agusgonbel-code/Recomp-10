@@ -52,13 +52,17 @@
         if (!plain(item) || !plain(item.recipe)) throw new Error('El plan mensual contiene una comida no válida');
         return {
           recipe: {
+            id: clip(item.recipe.id, 80),
             n: clip(item.recipe.n, 120) || 'Comida',
             m: clip(item.recipe.m, 40),
             k: num(item.recipe.k, 0, 5000),
             p: num(item.recipe.p, 0, 500),
             c: num(item.recipe.c, 0, 1000),
             f: num(item.recipe.f, 0, 500),
-            i: list(item.recipe.i)
+            i: list(item.recipe.i),
+            s: list(item.recipe.s),
+            time: num(item.recipe.time, 0, 240),
+            difficulty: clip(item.recipe.difficulty, 40)
           },
           scale: num(item.scale, 0.1, 5, 1),
           k: num(item.k, 0, 5000),
