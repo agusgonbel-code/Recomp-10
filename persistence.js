@@ -2,6 +2,7 @@
   'use strict';
 
   const MAX_BACKUP_BYTES = 25 * 1024 * 1024;
+  const MEAL_PLAN_KEY = 'recomp10.mealPlan30';
   const plain = value => value && typeof value === 'object' && !Array.isArray(value);
   const clip = (value, length = 120) => String(value ?? '').trim().slice(0, length);
   const num = (value, min, max, fallback = 0) => {
@@ -23,6 +24,61 @@
     value.length <= 4.2 * 1024 * 1024 &&
     /^data:image\/(?:jpeg|png|webp);base64,[a-z0-9+/=\s]+$/i.test(value)
   ) ? value : '';
+
+  function cleanMealPlan30(plan) {
+    if (!plain(plan) || !plain(plan.preferences) || !Array.isArray(plan.days) || plan.days.length !== 30) {
+      throw new Error('Plan mensual no válido');
+    }
+    const allowedDiets = new Set(['flexible', 'vegetariana', 'vegana', 'pescetariana', 'sin-lactosa', 'sin-gluten']);
+    const allowedBudgets = new Set(['bajo', 'medio', 'alto']);
+    const allowedVariety = new Set(['alta', 'media', 'baja']);
+    const list = value => Array.isArray(value) ? value.slice(0, 30).map(item => clip(item, 80)).filter(Boolean) : [];
+    const preferences = {
+      kcal: num(plan.preferences.kcal, 1200, 5000, 2200),
+      protein: num(plan.preferences.protein, 40, 300, 160),
+      meals: Math.round(num(plan.preferences.meals, 3, 5, 4)),
+      diet: allowedDiets.has(plan.preferences.diet) ? plan.preferences.diet : 'flexible',
+      excluded: list(plan.preferences.excluded),
+      pantry: list(plan.preferences.pantry),
+      maxTime: num(plan.preferences.maxTime, 10, 90, 30),
+      budget: allowedBudgets.has(plan.preferences.budget) ? plan.preferences.budget : 'medio',
+      variety: allowedVariety.has(plan.preferences.variety) ? plan.preferences.variety : 'alta'
+    };
+    const days = plan.days.map((day, dayIndex) => {
+      if (!plain(day) || !Array.isArray(day.items) || day.items.length < 3 || day.items.length > 5) {
+        throw new Error('El plan mensual contiene un día no válido');
+      }
+      const items = day.items.map(item => {
+        if (!plain(item) || !plain(item.recipe)) throw new Error('El plan mensual contiene una comida no válida');
+        return {
+          recipe: {
+            n: clip(item.recipe.n, 120) || 'Comida',
+            m: clip(item.recipe.m, 40),
+            k: num(item.recipe.k, 0, 5000),
+            p: num(item.recipe.p, 0, 500),
+            c: num(item.recipe.c, 0, 1000),
+            f: num(item.recipe.f, 0, 500),
+            i: list(item.recipe.i)
+          },
+          scale: num(item.scale, 0.1, 5, 1),
+          k: num(item.k, 0, 5000),
+          p: num(item.p, 0, 500),
+          c: num(item.c, 0, 1000),
+          f: num(item.f, 0, 500),
+          score: num(item.score, -10, 100, 0),
+          slot: clip(item.slot, 40)
+        };
+      });
+      return {
+        day: Math.round(num(day.day, 1, 30, dayIndex + 1)),
+        items,
+        totals: items.reduce((total, item) => ({
+          k: total.k + item.k, p: total.p + item.p, c: total.c + item.c, f: total.f + item.f
+        }), { k: 0, p: 0, c: 0, f: 0 })
+      };
+    });
+    return { createdAt: date(plan.createdAt), preferences, days };
+  }
 
   function cleanBackup(data) {
     if (!plain(data)) throw new Error('La copia debe contener un objeto JSON');
@@ -104,6 +160,9 @@
         note: clip(photo.note, 300),
         data: imageData(photo.data)
       })).filter(photo => photo.data);
+    }
+    if (MEAL_PLAN_KEY in data) {
+      out[MEAL_PLAN_KEY] = cleanMealPlan30(data[MEAL_PLAN_KEY]);
     }
     if (!Object.keys(out).length) throw new Error('La copia no contiene datos compatibles');
     return out;
@@ -206,6 +265,6 @@
   }
 
   globalThis.RecompPersistence = {
-    MAX_BACKUP_BYTES, MAX_SHADOW_BYTES, clip, num, esc, imageData, cleanBackup, storeBackup, createJsonStore
+    MAX_BACKUP_BYTES, MAX_SHADOW_BYTES, MEAL_PLAN_KEY, clip, num, esc, imageData, cleanMealPlan30, cleanBackup, storeBackup, createJsonStore
   };
 })();
