@@ -18,6 +18,15 @@
   })[count]||slotsFor(4);
   const slotAliases=slot=>slot==='Media mañana'?['Media mañana','Merienda','Desayuno']:[slot];
 
+  function macroTargets(input={},fallback={kcal:2200,protein:160}){
+    const kcal=number(input?.kcal,number(fallback?.kcal,2200));
+    const protein=number(input?.protein,number(fallback?.protein,160));
+    return {
+      kcal:kcal>=1200&&kcal<=5000?kcal:number(fallback?.kcal,2200),
+      protein:protein>=40&&protein<=300?protein:number(fallback?.protein,160)
+    };
+  }
+
   function validatePreferences(input={}){
     const kcal=number(input.kcal,0),protein=number(input.protein,0),meals=Math.trunc(number(input.meals,4));
     if(kcal<1200||kcal>5000) throw new Error('Las calorías deben estar entre 1200 y 5000.');
@@ -94,5 +103,5 @@
     }));
     return [...map.values()].sort((a,b)=>a.name.localeCompare(b.name,'es'));
   }
-  globalThis.RecompMealPlanner={validatePreferences,allowedRecipes,generate30Days,swapMeal,shoppingByWeek};
+  globalThis.RecompMealPlanner={macroTargets,validatePreferences,allowedRecipes,generate30Days,swapMeal,shoppingByWeek};
 })();

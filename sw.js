@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v12-menu-planner-30d';
+const CACHE_NAME = 'recomp-10-v13-linked-macro-targets';
 const APP_SHELL = [
   './',
   './index.html',

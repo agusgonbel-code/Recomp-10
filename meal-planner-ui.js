@@ -11,6 +11,13 @@
     return {kcal:$('mpKcal').value,protein:$('mpProtein').value,meals:$('mpMeals').value,diet:$('mpDiet').value,
       excluded:$('mpExcluded').value,pantry:$('mpPantry').value,maxTime:$('mpTime').value,budget:$('mpBudget').value,variety:$('mpVariety').value};
   }
+  function applyMacroTargets(input=savedTargets(),notify=false){
+    const targets=RecompMealPlanner.macroTargets(input);
+    if($('mpKcal'))$('mpKcal').value=targets.kcal;
+    if($('mpProtein'))$('mpProtein').value=targets.protein;
+    if(notify&&$('mpStatus'))$('mpStatus').innerHTML='<div class="good">Objetivos actualizados desde la calculadora: '+targets.kcal+' kcal · '+targets.protein+' g de proteína.</div>';
+    return targets;
+  }
   function generate(){
     try{plan=RecompMealPlanner.generate30Days(recipeSource(),formValues());visibleWeek=0;save();render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'})}
     catch(e){$('mpStatus').innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
@@ -32,13 +39,15 @@
     const root=$('mealPlanner30'); if(!root)return;
     const targets=savedTargets();
     root.innerHTML='<div class="mp-intro"><span class="pill">30 DÍAS</span><h2>Tu menú, decidido de una vez</h2><p>Objetivos, alergias, tiempo y presupuesto en un plan privado que puedes ajustar comida a comida.</p></div>'+
-    '<div class="card mp-form"><h3>1 · Objetivo</h3><div class="row"><div><label>Calorías / día</label><input id="mpKcal" type="number" min="1200" max="5000" value="'+esc(targets.kcal||2200)+'"></div><div><label>Proteína (g)</label><input id="mpProtein" type="number" min="40" max="300" value="'+esc(targets.protein||160)+'"></div></div>'+
+    '<div class="card mp-form"><h3>1 · Objetivo nutricional</h3><div class="good">Sincronizado con tu calculadora de macros. Puedes ajustar estos valores solo para este menú.</div><div class="row"><div><label>Calorías / día</label><input id="mpKcal" type="number" min="1200" max="5000" value="'+esc(targets.kcal)+'"></div><div><label>Proteína (g)</label><input id="mpProtein" type="number" min="40" max="300" value="'+esc(targets.protein)+'"></div></div>'+
     '<div class="row"><div><label>Comidas / día</label><select id="mpMeals"><option>3</option><option selected>4</option><option>5</option></select></div><div><label>Estilo</label><select id="mpDiet"><option value="flexible">Flexible</option><option value="vegetariana">Vegetariano</option><option value="vegana">Vegano</option><option value="pescetariana">Pescetariano</option><option value="sin-lactosa">Sin lactosa</option><option value="sin-gluten">Sin gluten</option></select></div></div>'+
     '<h3>2 · Límites y gustos</h3><label>Alergias o alimentos excluidos <small>· separados por comas</small></label><input id="mpExcluded" placeholder="Ej. cacahuete, marisco, cebolla"><div class="notice">Las exclusiones son un filtro preventivo por texto. Con alergias graves, revisa siempre ingredientes y contaminación cruzada.</div>'+
     '<label>Ingredientes que ya tienes o prefieres</label><input id="mpPantry" placeholder="Ej. arroz, huevos, pollo"><div class="row"><div><label>Tiempo máximo</label><select id="mpTime"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">60 min</option></select></div><div><label>Presupuesto</label><select id="mpBudget"><option value="bajo">Ajustado</option><option value="medio" selected>Medio</option><option value="alto">Flexible</option></select></div></div>'+
     '<label>Variedad</label><select id="mpVariety"><option value="alta" selected>Alta · menos repeticiones</option><option value="media">Media · cocinar por tandas</option><option value="baja">Baja · máxima sencillez</option></select>'+
     '<button id="mpGenerate" style="width:100%;margin-top:14px">Generar mis 30 días</button><p class="small" style="text-align:center">Orientativo · no sustituye consejo sanitario individual.</p></div><div id="mpStatus"></div><div id="mpResult"></div>';
     $('mpGenerate').onclick=generate;
+    document.addEventListener('recomp:targets-updated',event=>applyMacroTargets(event.detail,true));
+    window.addEventListener('pageshow',()=>applyMacroTargets());
     try{plan=JSON.parse(localStorage.getItem(key)||'null')}catch{}
     render();
   }
