@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v10-backup-download-safety';
+const CACHE_NAME = 'recomp-10-v12-menu-planner-30d';
 const APP_SHELL = [
   './',
   './index.html',
@@ -6,6 +6,8 @@ const APP_SHELL = [
   './date-engine.js',
   './training-engine.js',
   './nutrition-engine.js',
+  './meal-planner.js',
+  './meal-planner-ui.js',
   './coach-engine.js',
   './photo-engine.js',
   './manifest.webmanifest',
