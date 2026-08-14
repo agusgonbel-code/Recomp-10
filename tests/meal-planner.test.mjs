@@ -34,3 +34,8 @@ test('permite cambiar una comida y crea compra semanal',()=>{
  assert.notEqual(plan.days[0].items[0].recipe.n,before);
  assert.ok(RecompMealPlanner.shoppingByWeek(plan,0).length>0);
 });
+
+test('reutiliza objetivos guardados por la calculadora de macros',()=>{
+ assert.deepEqual(RecompMealPlanner.macroTargets({kcal:2475,protein:173}),{kcal:2475,protein:173});
+ assert.deepEqual(RecompMealPlanner.macroTargets({kcal:'no válido',protein:null}),{kcal:2200,protein:160});
+});
