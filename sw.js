@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v14-visible-menu-generator';
+const CACHE_NAME = 'recomp-10-v15-persist-monthly-menu';
 const APP_SHELL = [
   './',
   './index.html',
