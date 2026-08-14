@@ -102,6 +102,8 @@ jobs:
           grep -q "src='meal-planner-ui.js'" index.html
           grep -q "recomp:targets-updated" index.html
           grep -q "applyMacroTargets" meal-planner-ui.js
+          grep -q "cleanMealPlan30" meal-planner-ui.js
+          grep -q "MEAL_PLAN_KEY" index.html
           grep -q ">Menús</button>" index.html
           grep -q "Crear menú de 30 días" index.html
           node -e "const h=require('fs').readFileSync('index.html','utf8');if(h.indexOf(\"id='mealPlanner30'\")>h.indexOf(\"id='recipeList'\"))throw new Error('El generador debe aparecer antes que las recetas')"
