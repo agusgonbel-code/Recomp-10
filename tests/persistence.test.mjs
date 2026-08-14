@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 await import('../persistence.js');
 
-const { cleanBackup, storeBackup, esc, imageData } = globalThis.RecompPersistence;
+const { MEAL_PLAN_KEY, cleanMealPlan30, cleanBackup, storeBackup, esc, imageData } = globalThis.RecompPersistence;
 
 assert.equal(esc('<img src=x onerror=alert(1)>'), '&lt;img src=x onerror=alert(1)&gt;');
 assert.equal(imageData('javascript:alert(1)'), '');
@@ -25,6 +25,24 @@ assert.equal(cleaned.workouts.length, 1000);
 assert.equal(cleaned.workouts[0].notes.length, 500);
 assert.equal(cleaned.workouts[0].exercises[0].sets[0].rir, null);
 assert.equal(cleaned.photos.length, 0);
+
+const monthlyPlan = {
+  createdAt: '2026-08-14T10:00:00.000Z',
+  preferences: { kcal: 2200, protein: 160, meals: 3, diet: 'flexible', excluded: [], pantry: [], maxTime: 30, budget: 'medio', variety: 'alta' },
+  days: Array.from({ length: 30 }, (_, day) => ({
+    day: day + 1,
+    items: Array.from({ length: 3 }, (_, meal) => ({
+      recipe: { n: 'Comida '+meal, m: 'Comida', k: 600, p: 40, c: 60, f: 20, i: ['100 g arroz'] },
+      scale: 1, k: 600, p: 40, c: 60, f: 20, score: 0, slot: 'Comida'
+    })),
+    totals: { k: 1800, p: 120, c: 180, f: 60 }
+  }))
+};
+const cleanPlan = cleanMealPlan30(monthlyPlan);
+assert.equal(cleanPlan.days.length, 30);
+assert.deepEqual(cleanPlan.days[0].totals, { k: 1800, p: 120, c: 180, f: 60 });
+assert.equal(cleanBackup({ [MEAL_PLAN_KEY]: monthlyPlan })[MEAL_PLAN_KEY].days.length, 30);
+assert.throws(() => cleanMealPlan30({ ...monthlyPlan, days: monthlyPlan.days.slice(0, 29) }), /Plan mensual/);
 
 const values = new Map([['profile', '{"name":"Anterior"}']]);
 let writes = 0;
@@ -89,14 +107,16 @@ const resetStorage = memoryStorage([
   ['workouts', JSON.stringify([{ volume: 900 }])],
   ['recomp:last-good:workouts', JSON.stringify([{ volume: 800 }])],
   ['profile', JSON.stringify({ name: 'Usuario' })],
+  [MEAL_PLAN_KEY, JSON.stringify(monthlyPlan)],
   ['fitcoach:user-data', JSON.stringify({ sessions: 42 })]
 ]);
 const resetStore = createJsonStore({ storage: resetStorage, prefix: 'recomp' });
 resetStore.recoveredKeys.add('workouts');
-resetStore.clear(['workouts', 'profile', 'workouts']);
+resetStore.clear(['workouts', 'profile', MEAL_PLAN_KEY, 'workouts']);
 assert.equal(resetStorage.getItem('workouts'), null);
 assert.equal(resetStorage.getItem('recomp:last-good:workouts'), null);
 assert.equal(resetStorage.getItem('profile'), null);
+assert.equal(resetStorage.getItem(MEAL_PLAN_KEY), null);
 assert.equal(resetStorage.getItem('fitcoach:user-data'), JSON.stringify({ sessions: 42 }));
 assert.equal(resetStore.recoveredKeys.has('workouts'), false);
 assert.throws(() => resetStore.clear('workouts'), /lista de claves/);
