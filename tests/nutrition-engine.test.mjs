@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 await import('../nutrition-engine.js');
 
 const {
-  calculateTargets, mealTotals, mealEntryFromPlan, scaledRecipe, buildDayMenu, buildWeekMenu, shoppingItems
+  calculateTargets, mealTotals, mealEntryFromPlan, saveMealEntry, mealsForDay,
+  scaledRecipe, buildDayMenu, buildWeekMenu, shoppingItems
 } = globalThis.RecompNutrition;
 
 assert.deepEqual(calculateTargets({
@@ -29,6 +30,30 @@ assert.deepEqual(mealEntryFromPlan({
 });
 assert.throws(() => mealEntryFromPlan(null, '2026-08-14', 'plan:0'), /no es válida/);
 assert.throws(() => mealEntryFromPlan({ recipe: {} }, '14-08-2026', 'plan:0'), /fecha/);
+
+const originalMeals = [{
+  id: 7, date: '2026-08-13', type: 'Cena', name: 'Salmón', kcal: 600,
+  p: 40, c: 50, f: 20, sourceKey: 'mealPlan30:plan:0:3'
+}];
+const editedMeal = saveMealEntry(originalMeals, {
+  date: '2026-08-14', type: 'Cena', name: 'Salmón · media porción',
+  kcal: 300, p: 20, c: 25, f: 10
+}, 7);
+assert.equal(editedMeal.created, false);
+assert.deepEqual(editedMeal.entry, {
+  id: 7, date: '2026-08-14', type: 'Cena', name: 'Salmón · media porción',
+  kcal: 300, p: 20, c: 25, f: 10, sourceKey: 'mealPlan30:plan:0:3'
+});
+assert.equal(originalMeals[0].date, '2026-08-13');
+const addedMeal = saveMealEntry(originalMeals, {
+  id: 9, date: '2026-08-14', type: 'Snack', name: 'Yogur', kcal: 120, p: 12, c: 8, f: 4
+});
+assert.equal(addedMeal.created, true);
+assert.equal(addedMeal.meals.length, 2);
+assert.deepEqual(mealsForDay([addedMeal.entry, originalMeals[0]], '2026-08-14'), [addedMeal.entry]);
+assert.throws(() => saveMealEntry(originalMeals, { date: '2026-08-14', kcal: -1, p: 1, c: 1, f: 1 }), /calorías/);
+assert.throws(() => saveMealEntry(originalMeals, { date: '2026-02-30', kcal: 1, p: 1, c: 1, f: 1 }), /fecha/);
+assert.throws(() => saveMealEntry(originalMeals, { date: '2026-08-14', kcal: 1, p: 1, c: 1, f: 1 }, 99), /ya no existe/);
 
 const recipes = [
   ['Desayuno', 'A'], ['Desayuno', 'A2'], ['Comida', 'B'], ['Comida', 'B2'],
