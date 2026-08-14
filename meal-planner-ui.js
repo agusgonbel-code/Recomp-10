@@ -4,7 +4,7 @@
   const $=id=>document.getElementById(id);
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let plan=null,visibleWeek=0;
-  const recipeSource=()=>globalThis.recipes||[];
+  const recipeSource=()=>typeof recipes!=='undefined'?recipes:(globalThis.recipes||[]);
   const savedTargets=()=>{try{return JSON.parse(localStorage.getItem('targets')||'null')||{}}catch{return {}}};
   function save(){localStorage.setItem(key,JSON.stringify(plan))}
   function formValues(){
