@@ -56,6 +56,9 @@ jobs:
       - name: Test photo engine
         run: node --test tests/photo-engine.test.mjs
 
+      - name: Test backup download safety
+        run: node --test tests/backup-download.test.mjs
+
       - name: Validate inline application script
         shell: bash
         run: |
