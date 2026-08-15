@@ -26,16 +26,19 @@
   ) ? value : '';
 
   function cleanMealPlan30(plan) {
-    if (!plain(plan) || !plain(plan.preferences) || !Array.isArray(plan.days) || plan.days.length !== 30) {
-      throw new Error('Plan mensual no válido');
+    if (!plain(plan) || !plain(plan.preferences) || !Array.isArray(plan.days) || plan.days.length < 1 || plan.days.length > 30) {
+      throw new Error('Plan nutricional no válido');
     }
     const allowedDiets = new Set(['flexible', 'vegetariana', 'vegana', 'pescetariana', 'sin-lactosa', 'sin-gluten']);
     const allowedBudgets = new Set(['bajo', 'medio', 'alto']);
     const allowedVariety = new Set(['alta', 'media', 'baja']);
-    const list = value => Array.isArray(value) ? value.slice(0, 30).map(item => clip(item, 80)).filter(Boolean) : [];
+    const list = value => Array.isArray(value) ? value.slice(0, 30).map(item => clip(item, 120)).filter(Boolean) : [];
     const preferences = {
       kcal: num(plan.preferences.kcal, 1200, 5000, 2200),
       protein: num(plan.preferences.protein, 40, 300, 160),
+      carbs: num(plan.preferences.carbs, 50, 800, 250),
+      fat: num(plan.preferences.fat, 30, 200, 70),
+      days: Math.round(num(plan.preferences.days, 1, 30, plan.days.length)),
       meals: Math.round(num(plan.preferences.meals, 3, 5, 4)),
       diet: allowedDiets.has(plan.preferences.diet) ? plan.preferences.diet : 'flexible',
       excluded: list(plan.preferences.excluded),
@@ -44,12 +47,22 @@
       budget: allowedBudgets.has(plan.preferences.budget) ? plan.preferences.budget : 'medio',
       variety: allowedVariety.has(plan.preferences.variety) ? plan.preferences.variety : 'alta'
     };
+    preferences.days = plan.days.length;
     const days = plan.days.map((day, dayIndex) => {
       if (!plain(day) || !Array.isArray(day.items) || day.items.length < 3 || day.items.length > 5) {
-        throw new Error('El plan mensual contiene un día no válido');
+        throw new Error('El plan nutricional contiene un día no válido');
       }
       const items = day.items.map(item => {
-        if (!plain(item) || !plain(item.recipe)) throw new Error('El plan mensual contiene una comida no válida');
+        if (!plain(item) || !plain(item.recipe)) throw new Error('El plan nutricional contiene una comida no válida');
+        const ingredientAmounts = Array.isArray(item.ingredientAmounts)
+          ? item.ingredientAmounts.slice(0, 30).filter(plain).map(ingredient => ({
+              text: clip(ingredient.text, 160),
+              adjustable: Boolean(ingredient.adjustable),
+              qty: optionalNum(ingredient.qty, 0, 10000),
+              unit: clip(ingredient.unit, 20),
+              name: clip(ingredient.name, 100)
+            }))
+          : [];
         return {
           recipe: {
             id: clip(item.recipe.id, 80),
@@ -70,7 +83,8 @@
           c: num(item.c, 0, 1000),
           f: num(item.f, 0, 500),
           score: num(item.score, -10, 100, 0),
-          slot: clip(item.slot, 40)
+          slot: clip(item.slot, 40),
+          ingredientAmounts
         };
       });
       return {
@@ -78,7 +92,8 @@
         items,
         totals: items.reduce((total, item) => ({
           k: total.k + item.k, p: total.p + item.p, c: total.c + item.c, f: total.f + item.f
-        }), { k: 0, p: 0, c: 0, f: 0 })
+        }), { k: 0, p: 0, c: 0, f: 0 }),
+        error: optionalNum(day.error, 0, 10)
       };
     });
     return { createdAt: date(plan.createdAt), preferences, days };
