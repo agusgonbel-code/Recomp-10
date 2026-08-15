@@ -18,102 +18,145 @@
   })[count]||slotsFor(4);
   const slotAliases=slot=>slot==='Media mañana'?['Media mañana','Merienda','Desayuno']:[slot];
 
-  function macroTargets(input={},fallback={kcal:2200,protein:160}){
+  function macroTargets(input={},fallback={kcal:2200,protein:160,carbs:250,fat:70}){
     const kcal=number(input?.kcal,number(fallback?.kcal,2200));
     const protein=number(input?.protein,number(fallback?.protein,160));
+    let carbs=number(input?.carbs,NaN),fat=number(input?.fat,NaN);
+    if(!Number.isFinite(carbs)||!Number.isFinite(fat)){
+      fat=number(fallback?.fat,Math.round(kcal*.27/9));
+      carbs=number(fallback?.carbs,Math.max(50,Math.round((kcal-protein*4-fat*9)/4)));
+    }
     return {
-      kcal:kcal>=1200&&kcal<=5000?kcal:number(fallback?.kcal,2200),
-      protein:protein>=40&&protein<=300?protein:number(fallback?.protein,160)
+      kcal:clamp(kcal,1200,5000),protein:clamp(protein,40,300),
+      carbs:clamp(carbs,50,800),fat:clamp(fat,30,200)
     };
   }
 
   function validatePreferences(input={}){
-    const kcal=number(input.kcal,0),protein=number(input.protein,0),meals=Math.trunc(number(input.meals,4));
-    if(kcal<1200||kcal>5000) throw new Error('Las calorías deben estar entre 1200 y 5000.');
-    if(protein<40||protein>300) throw new Error('La proteína debe estar entre 40 y 300 g.');
+    const targets=macroTargets(input),meals=Math.trunc(number(input.meals,4)),days=Math.trunc(number(input.days,7));
     if(![3,4,5].includes(meals)) throw new Error('Selecciona entre 3 y 5 comidas.');
+    if(days<1||days>30) throw new Error('Selecciona entre 1 y 30 días.');
     return {
-      kcal,protein,meals,
+      ...targets,meals,days,
       diet:input.diet||'flexible',
-      excluded:String(input.excluded||'').split(',').map(norm).filter(Boolean),
-      pantry:String(input.pantry||'').split(',').map(norm).filter(Boolean),
-      maxTime:clamp(number(input.maxTime,30),10,90),
-      budget:input.budget||'medio',
-      variety:input.variety||'alta'
+      excluded:Array.isArray(input.excluded)?input.excluded.map(norm).filter(Boolean):String(input.excluded||'').split(',').map(norm).filter(Boolean),
+      pantry:Array.isArray(input.pantry)?input.pantry.map(norm).filter(Boolean):String(input.pantry||'').split(',').map(norm).filter(Boolean),
+      maxTime:clamp(number(input.maxTime,30),10,90),budget:input.budget||'medio',variety:input.variety||'alta'
     };
   }
 
   function normalizeRecipeCatalog(catalog){
     return (Array.isArray(catalog)?catalog:[]).map(recipe=>({
-      id:String(recipe?.id||''),
-      n:String(recipe?.n||recipe?.name||'').trim(),
+      id:String(recipe?.id||''),n:String(recipe?.n||recipe?.name||'').trim(),
       m:(recipe?.m||recipe?.type)==='Snack'?'Merienda':String(recipe?.m||recipe?.type||''),
       k:number(recipe?.k??recipe?.kcal,0),p:number(recipe?.p,0),c:number(recipe?.c,0),f:number(recipe?.f,0),
       i:Array.isArray(recipe?.i)?recipe.i:(Array.isArray(recipe?.ingredients)?recipe.ingredients:[]),
       s:Array.isArray(recipe?.s)?recipe.s:(Array.isArray(recipe?.steps)?recipe.steps:[]),
       time:number(recipe?.time,0),difficulty:String(recipe?.difficulty||'')
-    })).filter(recipe=>recipe.n&&recipe.m&&recipe.k>0);
+    })).filter(recipe=>recipe.n&&recipe.m&&recipe.k>0&&recipe.p>=0&&recipe.c>=0&&recipe.f>=0);
   }
 
   function allowedRecipes(recipes,prefs){
     const blocks=[...(DIET_BLOCKS[prefs.diet]||[]),...prefs.excluded].map(norm);
-    return (Array.isArray(recipes)?recipes:[]).filter(r=>{
-      const txt=textOf(r);
-      return !blocks.some(x=>x&&txt.includes(x));
-    });
+    return (Array.isArray(recipes)?recipes:[]).filter(r=>{const txt=textOf(r);return !blocks.some(x=>x&&txt.includes(x));});
   }
 
-  function scoreRecipe(recipe,targetK,targetP,prefs,usage,seed){
-    const scale=clamp(targetK/Math.max(1,number(recipe.k,400)),.65,1.75);
-    const k=Math.round(number(recipe.k,0)*scale),p=Math.round(number(recipe.p,0)*scale);
-    const txt=textOf(recipe);
-    const pantryBonus=prefs.pantry.some(x=>txt.includes(x))?-.18:0;
-    const repeatPenalty=(usage.get(recipe.n)||0)*(prefs.variety==='alta'?.42:prefs.variety==='media'?.25:.12);
-    const budgetPenalty=prefs.budget==='bajo'&&/(salmon|gamba|solomillo|atun fresco)/.test(txt)?.35:0;
-    const timePenalty=prefs.maxTime<=20&&/(horno|guiso|lasaña|risotto)/.test(txt)?.30:0;
-    const jitter=((seed*9301+49297)%233280)/233280*.08;
-    return {recipe,scale,k,p,c:Math.round(number(recipe.c,0)*scale),f:Math.round(number(recipe.f,0)*scale),
-      score:Math.abs(k-targetK)/targetK+Math.abs(p-targetP)/Math.max(1,targetP)+pantryBonus+repeatPenalty+budgetPenalty+timePenalty+jitter};
+  function baseScore(recipe,slot,share,prefs,usage,seed){
+    const target={k:prefs.kcal*share,p:prefs.protein*share,c:prefs.carbs*share,f:prefs.fat*share};
+    const scale=clamp(target.k/Math.max(1,recipe.k),.55,2.2),txt=textOf(recipe);
+    const err=Math.abs(recipe.p*scale-target.p)/Math.max(15,target.p)+Math.abs(recipe.c*scale-target.c)/Math.max(20,target.c)+Math.abs(recipe.f*scale-target.f)/Math.max(8,target.f);
+    const repeat=(usage.get(recipe.n)||0)*(prefs.variety==='alta'?.42:prefs.variety==='media'?.24:.10);
+    const pantry=prefs.pantry.some(x=>txt.includes(x))?-.16:0;
+    const budget=prefs.budget==='bajo'&&/(salmon|gamba|solomillo|atun fresco)/.test(txt)?.3:0;
+    const time=prefs.maxTime<=20&&recipe.time>20?.3:0;
+    const jitter=((seed*9301+49297)%233280)/233280*.06;
+    return err+repeat+pantry+budget+time+jitter;
   }
 
-  function pick(recipes,slot,share,prefs,usage,seed,avoid){
-    let candidates=recipes.filter(r=>slotAliases(slot).includes(r?.m)&&r.n!==avoid);
-    if(!candidates.length) candidates=recipes.filter(r=>r.n!==avoid);
-    if(!candidates.length) throw new Error('No quedan recetas compatibles con tus restricciones.');
-    const ranked=candidates.map(r=>scoreRecipe(r,prefs.kcal*share,prefs.protein*share,prefs,usage,seed)).sort((a,b)=>a.score-b.score||a.recipe.n.localeCompare(b.recipe.n,'es'));
-    const item=ranked[seed%Math.min(4,ranked.length)];
-    usage.set(item.recipe.n,(usage.get(item.recipe.n)||0)+1);
-    return {...item,slot};
+  function pickRecipe(recipes,slot,share,prefs,usage,seed,avoid){
+    let candidates=recipes.filter(r=>slotAliases(slot).includes(r.m)&&r.n!==avoid);
+    if(!candidates.length)candidates=recipes.filter(r=>r.n!==avoid);
+    if(!candidates.length)throw new Error('No quedan recetas compatibles con tus restricciones.');
+    return candidates.map(r=>({r,score:baseScore(r,slot,share,prefs,usage,seed)})).sort((a,b)=>a.score-b.score||a.r.n.localeCompare(b.r.n,'es'))[seed%Math.min(5,candidates.length)].r;
   }
 
+  function optimizeScales(recipes,prefs,initial){
+    const n=recipes.length,targets=[prefs.protein,prefs.carbs,prefs.fat],weights=[1/Math.max(70,prefs.protein),1/Math.max(100,prefs.carbs),1/Math.max(35,prefs.fat)];
+    let x=initial.slice();
+    for(let iter=0;iter<1400;iter++){
+      const sums=[0,0,0];
+      for(let i=0;i<n;i++){sums[0]+=recipes[i].p*x[i];sums[1]+=recipes[i].c*x[i];sums[2]+=recipes[i].f*x[i];}
+      const lr=.09/(1+iter/500);
+      for(let i=0;i<n;i++){
+        const vals=[recipes[i].p,recipes[i].c,recipes[i].f];let g=0;
+        for(let j=0;j<3;j++)g+=2*(sums[j]-targets[j])*weights[j]*weights[j]*vals[j];
+        g+=.012*(x[i]-initial[i]);
+        x[i]=clamp(x[i]-lr*g,.35,3.25);
+      }
+    }
+    return x;
+  }
+
+  function scaledItem(recipe,slot,scale,score=0){
+    return {recipe,slot,scale,k:Math.round(recipe.k*scale),p:Math.round(recipe.p*scale),c:Math.round(recipe.c*scale),f:Math.round(recipe.f*scale),score};
+  }
   function totals(items){return items.reduce((a,x)=>({k:a.k+x.k,p:a.p+x.p,c:a.c+x.c,f:a.f+x.f}),{k:0,p:0,c:0,f:0});}
-  function generate30Days(recipes,input){
+  function macroError(t,prefs){return Math.abs(t.p-prefs.protein)/Math.max(1,prefs.protein)+Math.abs(t.c-prefs.carbs)/Math.max(1,prefs.carbs)+Math.abs(t.f-prefs.fat)/Math.max(1,prefs.fat);}
+
+  function buildDay(pool,prefs,usage,day,forced={}){
+    const slots=slotsFor(prefs.meals);let best=null;
+    for(let attempt=0;attempt<28;attempt++){
+      const chosen=slots.map(([slot,share],i)=>forced[i]||pickRecipe(pool,slot,share,prefs,usage,day*97+attempt*19+i*7,forced.avoid));
+      const init=slots.map(([,share],i)=>clamp((prefs.kcal*share)/Math.max(1,chosen[i].k),.5,2.4));
+      const scales=optimizeScales(chosen,prefs,init),items=chosen.map((r,i)=>scaledItem(r,slots[i][0],scales[i]));
+      const t=totals(items),err=macroError(t,prefs);
+      if(!best||err<best.err)best={items,t,err};
+      if(err<.035)break;
+    }
+    best.items.forEach(x=>usage.set(x.recipe.n,(usage.get(x.recipe.n)||0)+1));
+    return {day:day+1,items:best.items,totals:best.t};
+  }
+
+  function generateDays(recipes,input){
     const prefs=validatePreferences(input),pool=allowedRecipes(recipes,prefs);
-    if(pool.length<4) throw new Error('Las restricciones dejan muy pocas recetas. Revisa las exclusiones.');
-    const usage=new Map(),slots=slotsFor(prefs.meals);
-    const days=Array.from({length:30},(_,day)=>{
-      const items=slots.map(([slot,share],i)=>pick(pool,slot,share,prefs,usage,day*11+i*3,null));
-      return {day:day+1,items,totals:totals(items)};
-    });
+    if(pool.length<4)throw new Error('Las restricciones dejan muy pocas recetas. Revisa las exclusiones.');
+    const usage=new Map(),days=Array.from({length:prefs.days},(_,day)=>buildDay(pool,prefs,usage,day));
     return {createdAt:new Date().toISOString(),preferences:prefs,days};
   }
+  const generate30Days=(recipes,input)=>generateDays(recipes,{...input,days:30});
+
   function swapMeal(plan,recipes,dayIndex,itemIndex){
-    if(!plan?.days?.[dayIndex]) throw new Error('Día no válido.');
-    const prefs=validatePreferences(plan.preferences),pool=allowedRecipes(recipes,prefs),usage=new Map();
+    if(!plan?.days?.[dayIndex])throw new Error('Día no válido.');
+    const prefs=validatePreferences({...plan.preferences,days:plan.days.length}),pool=allowedRecipes(recipes,prefs),usage=new Map();
     plan.days.flatMap(d=>d.items).forEach(x=>usage.set(x.recipe.n,(usage.get(x.recipe.n)||0)+1));
-    const old=plan.days[dayIndex].items[itemIndex],share=slotsFor(prefs.meals)[itemIndex]?.[1]||1/prefs.meals;
-    plan.days[dayIndex].items[itemIndex]=pick(pool,old.slot,share,prefs,usage,Date.now()%997,old.recipe.n);
-    plan.days[dayIndex].totals=totals(plan.days[dayIndex].items);
+    const old=plan.days[dayIndex].items[itemIndex],slots=slotsFor(prefs.meals),share=slots[itemIndex]?.[1]||1/prefs.meals;
+    const replacement=pickRecipe(pool,old.slot,share,prefs,usage,Date.now()%997,old.recipe.n);
+    const forced={};forced[itemIndex]=replacement;forced.avoid=old.recipe.n;
+    plan.days[dayIndex]=buildDay(pool,prefs,usage,dayIndex,forced);
     return plan;
   }
+
+  function scaleIngredient(raw,scale){
+    const text=String(raw||'').trim();
+    const m=text.match(/^\s*(\d+(?:[.,]\d+)?)(\s*)(g|kg|ml|l|ud|uds|unidad(?:es)?|cucharad(?:a|as)|cuchar(?:ada|adas))\b\s*(.*)$/i);
+    if(!m)return {text,scaled:false};
+    let value=Number(m[1].replace(',','.'))*scale,unit=m[3],rest=m[4];
+    if(/^kg$/i.test(unit)){value*=1000;unit='g'}
+    if(/^l$/i.test(unit)){value*=1000;unit='ml'}
+    const whole=/^(g|ml|ud|uds|unidad|unidades)$/i.test(unit);
+    const shown=whole?Math.max(1,Math.round(value)):Math.round(value*10)/10;
+    return {text:`${shown} ${unit}${rest?' '+rest:''}`,scaled:true};
+  }
+  function ingredientsFor(item){return (item?.recipe?.i||[]).map(raw=>scaleIngredient(raw,item.scale).text);}
+
   function shoppingByWeek(plan,week=0){
-    const start=week*7,end=Math.min(start+7,30),map=new Map();
-    (plan?.days||[]).slice(start,end).flatMap(d=>d.items).forEach(item=>(item.recipe.i||[]).forEach(raw=>{
-      const key=norm(raw).replace(/^\d+[\d.,/]*\s*(g|kg|ml|l|ud|unidad(?:es)?)?\s*/,'').trim()||norm(raw);
-      if(!map.has(key)) map.set(key,{name:raw,count:0});
-      map.get(key).count+=1;
+    const start=week*7,end=Math.min(start+7,plan?.days?.length||0),map=new Map();
+    (plan?.days||[]).slice(start,end).flatMap(d=>d.items).forEach(item=>ingredientsFor(item).forEach(raw=>{
+      const key=norm(raw).replace(/^\d+[\d.,/]*\s*(g|kg|ml|l|ud|uds|unidad(?:es)?)?\s*/,'').trim()||norm(raw);
+      if(!map.has(key))map.set(key,{name:raw,count:0});map.get(key).count+=1;
     }));
     return [...map.values()].sort((a,b)=>a.name.localeCompare(b.name,'es'));
   }
-  globalThis.RecompMealPlanner={macroTargets,validatePreferences,normalizeRecipeCatalog,allowedRecipes,generate30Days,swapMeal,shoppingByWeek};
+
+  globalThis.RecompMealPlanner={macroTargets,validatePreferences,normalizeRecipeCatalog,allowedRecipes,generateDays,generate30Days,swapMeal,ingredientsFor,shoppingByWeek,totals};
 })();
