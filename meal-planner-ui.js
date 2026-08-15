@@ -9,89 +9,76 @@
       (typeof recipes!=='undefined'?recipes:(globalThis.recipes||[]))
   );
   const savedTargets=()=>{try{return JSON.parse(localStorage.getItem('targets')||'null')||{}}catch{return {}}};
-  const sourceKey=(day,item)=>'mealPlan30:'+String(plan?.createdAt||'unknown')+':'+day+':'+item;
+  const sourceKey=(day,item)=>'mealPlan:'+String(plan?.createdAt||'unknown')+':'+day+':'+item;
   const loggedToday=source=>{try{return (JSON.parse(localStorage.getItem('meals')||'[]')||[]).some(meal=>meal?.date===RecompDate.localDayKey()&&meal?.sourceKey===source)}catch{return false}};
+
+  function moveIntoNutrition(){
+    const nutrition=$('nutricion'),root=$('mealPlanner30');
+    if(!nutrition||!root)return;
+    let heading=$('mealPlannerHeading');
+    if(!heading){heading=document.createElement('h2');heading.id='mealPlannerHeading';heading.textContent='Generador de menús';}
+    const macroResult=$('macroResult');
+    if(macroResult){macroResult.insertAdjacentElement('afterend',heading);heading.insertAdjacentElement('afterend',root)}
+    const oldButton=[...nutrition.querySelectorAll('button')].find(b=>/Crear menú de 30 días/i.test(b.textContent||''));if(oldButton)oldButton.style.display='none';
+  }
   function logMeal(day,item){
-    const meal=plan?.days?.[day]?.items?.[item]; if(!meal)return;
-    const source=sourceKey(day,item);
-    if(loggedToday(source))return;
+    const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;const source=sourceKey(day,item);if(loggedToday(source))return;
     document.dispatchEvent(new CustomEvent('recomp:log-planned-meal',{detail:{item:meal,sourceKey:source}}));
   }
-  function save(){
-    const cleaner=globalThis.RecompPersistence?.cleanMealPlan30;
-    plan=typeof cleaner==='function'?cleaner(plan):plan;
-    localStorage.setItem(key,JSON.stringify(plan));
-  }
-  function formValues(){
-    return {kcal:$('mpKcal').value,protein:$('mpProtein').value,meals:$('mpMeals').value,diet:$('mpDiet').value,
-      excluded:$('mpExcluded').value,pantry:$('mpPantry').value,maxTime:$('mpTime').value,budget:$('mpBudget').value,variety:$('mpVariety').value};
-  }
+  function save(){localStorage.setItem(key,JSON.stringify(plan));}
+  function formValues(){return {
+    kcal:$('mpKcal').value,protein:$('mpProtein').value,carbs:$('mpCarbs').value,fat:$('mpFat').value,
+    days:$('mpDays').value,meals:$('mpMeals').value,diet:$('mpDiet').value,excluded:$('mpExcluded').value,
+    pantry:$('mpPantry').value,maxTime:$('mpTime').value,budget:$('mpBudget').value,variety:$('mpVariety').value
+  }}
   function applyMacroTargets(input=savedTargets(),notify=false){
-    const targets=RecompMealPlanner.macroTargets(input);
-    if($('mpKcal'))$('mpKcal').value=targets.kcal;
-    if($('mpProtein'))$('mpProtein').value=targets.protein;
-    if(notify&&$('mpStatus'))$('mpStatus').innerHTML='<div class="good">Objetivos actualizados desde la calculadora: '+targets.kcal+' kcal · '+targets.protein+' g de proteína.</div>';
-    return targets;
+    const t=RecompMealPlanner.macroTargets(input);
+    [['mpKcal','kcal'],['mpProtein','protein'],['mpCarbs','carbs'],['mpFat','fat']].forEach(([id,k])=>{if($(id))$(id).value=t[k]});
+    if(notify&&$('mpStatus'))$('mpStatus').innerHTML='<div class="good">Macros sincronizados: '+t.kcal+' kcal · P '+t.protein+' g · C '+t.carbs+' g · G '+t.fat+' g.</div>';
+    return t;
   }
   function generate(){
     const button=$('mpGenerate');
     try{
-      if(button){button.disabled=true;button.textContent='Creando 30 días…'}
-      const catalog=recipeSource();
-      if(!catalog.length)throw new Error('La biblioteca de recetas todavía no está lista. Cierra y vuelve a abrir la aplicación.');
-      plan=RecompMealPlanner.generate30Days(catalog,formValues());visibleWeek=0;save();render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'});
-    }
-    catch(e){$('mpStatus').innerHTML='<div class="notice"><b>No se pudo crear el menú.</b><br>'+esc(e.message)+'</div>'}
-    finally{if(button){button.disabled=false;button.textContent='Generar mis 30 días'}}
+      if(button){button.disabled=true;button.textContent='Calculando menú…'}
+      const catalog=recipeSource();if(!catalog.length)throw new Error('La biblioteca de recetas todavía no está lista.');
+      plan=RecompMealPlanner.generateDays(catalog,formValues());visibleWeek=0;save();render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'});
+    }catch(e){$('mpStatus').innerHTML='<div class="notice"><b>No se pudo crear el menú.</b><br>'+esc(e.message)+'</div>'}
+    finally{if(button){button.disabled=false;button.textContent='Generar menú'}}
   }
-  function swap(day,item){try{RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render()}catch(e){alert(e.message)}}
+  function swap(day,item){try{RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render();showRecipe(day,item)}catch(e){alert(e.message)}}
   function showRecipe(day,item){
-    const meal=plan?.days?.[day]?.items?.[item];
-    if(!meal)return;
-    const ingredients=(meal.recipe.i||[]).map(value=>'<li>'+meal.scale.toFixed(2)+'× '+esc(value)+'</li>').join('');
-    const matched=recipeSource().find(recipe=>recipe.id===meal.recipe.id||recipe.n===meal.recipe.n);
+    const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;
+    const ingredients=RecompMealPlanner.ingredientsFor(meal).map(value=>'<li>'+esc(value)+'</li>').join('');
+    const matched=recipeSource().find(r=>r.id===meal.recipe.id||r.n===meal.recipe.n);
     const steps=(meal.recipe.s?.length?meal.recipe.s:(matched?.s||[])).map(value=>'<li>'+esc(value)+'</li>').join('');
-    const preparation=steps?'<h3>Preparación</h3><ol>'+steps+'</ol>':'<div class="notice">Este plan antiguo no guardó los pasos. Cambia esta comida para cargar una receta completa.</div>';
-    const meta=[meal.recipe.time&&meal.recipe.time+' min',meal.recipe.difficulty].filter(Boolean).map(esc).join(' · ');
-    const logged=loggedToday(sourceKey(day,item));
-    $('mpRecipeDetail').innerHTML='<div class="card mp-recipe-detail"><button class="secondary mp-recipe-close" aria-label="Cerrar receta">Cerrar</button><span class="pill">'+esc(meal.slot||meal.recipe.m)+'</span><h2>'+esc(meal.recipe.n)+'</h2><div class="kcal">'+meal.k+' kcal</div><p class="small">Proteína '+meal.p+' g · Carbohidratos '+meal.c+' g · Grasas '+meal.f+' g · Porción '+meal.scale.toFixed(2)+'×'+(meta?' · '+meta:'')+'</p><button class="mp-log-detail '+(logged?'secondary':'')+'" '+(logged?'disabled':'')+'>'+(logged?'✓ Registrada hoy':'Añadir al diario de hoy')+'</button><h3>Ingredientes ajustados</h3><ul>'+ingredients+'</ul>'+preparation+'</div>';
-    $('mpRecipeDetail').querySelector('.mp-recipe-close').onclick=()=>{$('mpRecipeDetail').innerHTML='';$('mpResult').scrollIntoView({behavior:'smooth',block:'start'})};
-    const logButton=$('mpRecipeDetail').querySelector('.mp-log-detail');
-    if(!logged)logButton.onclick=()=>logMeal(day,item);
+    const preparation=steps?'<h3>Cómo prepararla</h3><ol>'+steps+'</ol>':'<div class="notice">Esta receta no tiene todavía pasos de elaboración en la biblioteca. Cámbiala por otra receta completa.</div>';
+    const meta=[meal.recipe.time&&meal.recipe.time+' min',meal.recipe.difficulty].filter(Boolean).map(esc).join(' · '),logged=loggedToday(sourceKey(day,item));
+    $('mpRecipeDetail').innerHTML='<div class="card mp-recipe-detail"><button class="secondary mp-recipe-close">Cerrar</button><span class="pill">'+esc(meal.slot||meal.recipe.m)+'</span><h2>'+esc(meal.recipe.n)+'</h2><div class="kcal">'+meal.k+' kcal</div><p class="small">P '+meal.p+' g · C '+meal.c+' g · G '+meal.f+' g'+(meta?' · '+meta:'')+'</p><div class="good">Cantidades calculadas para encajar esta receta dentro de los macros diarios.</div><button class="mp-log-detail '+(logged?'secondary':'')+'" '+(logged?'disabled':'')+'>'+(logged?'✓ Registrada hoy':'Añadir al diario de hoy')+'</button><h3>Ingredientes exactos</h3><ul>'+ingredients+'</ul>'+preparation+'</div>';
+    $('mpRecipeDetail').querySelector('.mp-recipe-close').onclick=()=>{$('mpRecipeDetail').innerHTML=''};
+    const logButton=$('mpRecipeDetail').querySelector('.mp-log-detail');if(!logged)logButton.onclick=()=>logMeal(day,item);
     $('mpRecipeDetail').scrollIntoView({behavior:'smooth',block:'start'});
   }
   function render(){
-    if(!plan){$('mpResult').innerHTML='<div class="empty">Completa el formulario para crear tus 30 días.</div>';return}
-    const start=visibleWeek*7,end=Math.min(start+7,30);
-    const tabs=Array.from({length:5},(_,i)=>'<button class="'+(i===visibleWeek?'active':'')+'" data-week="'+i+'">S'+(i+1)+'</button>').join('');
-    const days=plan.days.slice(start,end).map((d,di)=>'<details class="mp-day" '+(di===0?'open':'')+'><summary><span><b>Día '+d.day+'</b><small>'+d.totals.k+' kcal · P '+d.totals.p+' g</small></span><span>›</span></summary>'+
-      d.items.map((x,ii)=>{const day=start+di,logged=loggedToday(sourceKey(day,ii));return '<div class="mp-meal"><button class="mp-recipe-link" data-recipe="'+day+','+ii+'"><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · '+x.scale.toFixed(2)+'× · Ver receta</span></button><button class="secondary mp-log" data-log="'+day+','+ii+'" '+(logged?'disabled':'')+' aria-label="'+(logged?'Registrada hoy':'Añadir '+esc(x.slot)+' al diario de hoy')+'">'+(logged?'✓':'+')+'</button><button class="secondary" data-swap="'+day+','+ii+'" aria-label="Cambiar '+esc(x.slot)+'">↻</button></div>'}).join('')+'</details>').join('');
+    if(!plan){$('mpResult').innerHTML='<div class="empty">Calcula tus macros, elige cuántos días quieres y genera el menú.</div>';return}
+    const totalDays=plan.days.length,weeks=Math.ceil(totalDays/7),start=visibleWeek*7,end=Math.min(start+7,totalDays);
+    if(visibleWeek>=weeks)visibleWeek=Math.max(0,weeks-1);
+    const tabs=Array.from({length:weeks},(_,i)=>'<button class="'+(i===visibleWeek?'active':'')+'" data-week="'+i+'">S'+(i+1)+'</button>').join('');
+    const target=plan.preferences;
+    const days=plan.days.slice(start,end).map((d,di)=>'<details class="mp-day" '+(di===0?'open':'')+'><summary><span><b>Día '+d.day+'</b><small>'+d.totals.k+' kcal · P '+d.totals.p+' · C '+d.totals.c+' · G '+d.totals.f+'</small></span><span>›</span></summary>'+d.items.map((x,ii)=>{const day=start+di,logged=loggedToday(sourceKey(day,ii));return '<div class="mp-meal"><button class="mp-recipe-link" data-recipe="'+day+','+ii+'"><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · C '+x.c+' · G '+x.f+' · Ver receta</span></button><button class="secondary mp-log" data-log="'+day+','+ii+'" '+(logged?'disabled':'')+'>'+(logged?'✓':'+')+'</button><button class="secondary" data-swap="'+day+','+ii+'">↻</button></div>'}).join('')+'</details>').join('');
     const shop=RecompMealPlanner.shoppingByWeek(plan,visibleWeek).map(x=>'<label class="mp-check"><input type="checkbox"> <span>'+esc(x.name)+'</span><small>×'+x.count+'</small></label>').join('');
-    $('mpStatus').innerHTML='<div class="good">Plan guardado en este dispositivo · '+plan.preferences.kcal+' kcal · '+plan.preferences.protein+' g proteína</div>';
-    $('mpResult').innerHTML='<div class="mp-tabs">'+tabs+'</div>'+days+'<div class="card mp-shop"><h3>Compra · semana '+(visibleWeek+1)+'</h3><p class="small">Agrupada a partir de las recetas de esta semana.</p>'+shop+'</div>';
+    $('mpStatus').innerHTML='<div class="good"><b>'+totalDays+' días · objetivo diario:</b> '+target.kcal+' kcal · P '+target.protein+' g · C '+target.carbs+' g · G '+target.fat+' g. Al cambiar una comida se recalcula el día completo.</div>';
+    $('mpResult').innerHTML='<div class="mp-tabs">'+tabs+'</div>'+days+'<div class="card mp-shop"><h3>Compra · semana '+(visibleWeek+1)+'</h3>'+shop+'</div>';
     document.querySelectorAll('[data-recipe]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.recipe.split(',').map(Number);showRecipe(d,i)});
     document.querySelectorAll('[data-week]').forEach(b=>b.onclick=()=>{visibleWeek=+b.dataset.week;render()});
     document.querySelectorAll('[data-swap]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.swap.split(',').map(Number);swap(d,i)});
     document.querySelectorAll('[data-log]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.log.split(',').map(Number);logMeal(d,i)});
   }
   function init(){
-    const root=$('mealPlanner30'); if(!root)return;
-    const targets=RecompMealPlanner.macroTargets(savedTargets());
-    root.innerHTML='<div class="mp-intro"><span class="pill">30 DÍAS</span><h2>Tu menú, decidido de una vez</h2><p>Objetivos, alergias, tiempo y presupuesto en un plan privado que puedes ajustar comida a comida.</p></div>'+
-    '<div class="card mp-form"><h3>1 · Objetivo nutricional</h3><div class="good">Sincronizado con tu calculadora de macros. Puedes ajustar estos valores solo para este menú.</div><div class="row"><div><label>Calorías / día</label><input id="mpKcal" type="number" min="1200" max="5000" value="'+esc(targets.kcal)+'"></div><div><label>Proteína (g)</label><input id="mpProtein" type="number" min="40" max="300" value="'+esc(targets.protein)+'"></div></div>'+
-    '<div class="row"><div><label>Comidas / día</label><select id="mpMeals"><option>3</option><option selected>4</option><option>5</option></select></div><div><label>Estilo</label><select id="mpDiet"><option value="flexible">Flexible</option><option value="vegetariana">Vegetariano</option><option value="vegana">Vegano</option><option value="pescetariana">Pescetariano</option><option value="sin-lactosa">Sin lactosa</option><option value="sin-gluten">Sin gluten</option></select></div></div>'+
-    '<h3>2 · Límites y gustos</h3><label>Alergias o alimentos excluidos <small>· separados por comas</small></label><input id="mpExcluded" placeholder="Ej. cacahuete, marisco, cebolla"><div class="notice">Las exclusiones son un filtro preventivo por texto. Con alergias graves, revisa siempre ingredientes y contaminación cruzada.</div>'+
-    '<label>Ingredientes que ya tienes o prefieres</label><input id="mpPantry" placeholder="Ej. arroz, huevos, pollo"><div class="row"><div><label>Tiempo máximo</label><select id="mpTime"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">60 min</option></select></div><div><label>Presupuesto</label><select id="mpBudget"><option value="bajo">Ajustado</option><option value="medio" selected>Medio</option><option value="alto">Flexible</option></select></div></div>'+
-    '<label>Variedad</label><select id="mpVariety"><option value="alta" selected>Alta · menos repeticiones</option><option value="media">Media · cocinar por tandas</option><option value="baja">Baja · máxima sencillez</option></select>'+
-    '<button id="mpGenerate" style="width:100%;margin-top:14px">Generar mis 30 días</button><p class="small" style="text-align:center">Orientativo · no sustituye consejo sanitario individual.</p></div><div id="mpRecipeDetail"></div><div id="mpStatus"></div><div id="mpResult"></div>';
-    $('mpGenerate').onclick=generate;
-    document.addEventListener('recomp:targets-updated',event=>applyMacroTargets(event.detail,true));
-    document.addEventListener('recomp:planned-meal-logged',()=>{render();$('mpRecipeDetail').innerHTML=''});
-    document.addEventListener('recomp:meal-log-changed',render);
-    window.addEventListener('pageshow',()=>applyMacroTargets());
-    try{const saved=JSON.parse(localStorage.getItem(key)||'null');const cleaner=globalThis.RecompPersistence?.cleanMealPlan30;plan=saved?(typeof cleaner==='function'?cleaner(saved):saved):null}
-    catch{$('mpStatus').innerHTML='<div class="notice">El plan guardado está dañado. Genera uno nuevo o restaura una copia válida.</div>';plan=null}
-    render();
+    moveIntoNutrition();const root=$('mealPlanner30');if(!root)return;const t=RecompMealPlanner.macroTargets(savedTargets());
+    root.innerHTML='<div class="mp-intro"><span class="pill">NUTRICIÓN</span><h2>Menú ajustado a tus macros</h2><p>Usa directamente los macros calculados arriba. Elige los días y la app ajustará las cantidades de cada receta.</p></div><div class="card mp-form"><h3>1 · Macros diarios</h3><div class="good">Se rellenan desde tu calculadora de macros.</div><div class="row"><div><label>Calorías</label><input id="mpKcal" type="number" value="'+esc(t.kcal)+'"></div><div><label>Proteína (g)</label><input id="mpProtein" type="number" value="'+esc(t.protein)+'"></div></div><div class="row"><div><label>Carbohidratos (g)</label><input id="mpCarbs" type="number" value="'+esc(t.carbs)+'"></div><div><label>Grasas (g)</label><input id="mpFat" type="number" value="'+esc(t.fat)+'"></div></div><div class="row"><div><label>Días</label><input id="mpDays" type="number" min="1" max="30" value="7"></div><div><label>Comidas / día</label><select id="mpMeals"><option>3</option><option selected>4</option><option>5</option></select></div></div><h3>2 · Preferencias</h3><label>Estilo</label><select id="mpDiet"><option value="flexible">Flexible</option><option value="vegetariana">Vegetariano</option><option value="vegana">Vegano</option><option value="pescetariana">Pescetariano</option><option value="sin-lactosa">Sin lactosa</option><option value="sin-gluten">Sin gluten</option></select><label>Alergias o alimentos excluidos</label><input id="mpExcluded" placeholder="Ej. cacahuete, marisco, cebolla"><label>Ingredientes que ya tienes o prefieres</label><input id="mpPantry" placeholder="Ej. arroz, huevos, pollo"><div class="row"><div><label>Tiempo máximo</label><select id="mpTime"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">60 min</option></select></div><div><label>Presupuesto</label><select id="mpBudget"><option value="bajo">Ajustado</option><option value="medio" selected>Medio</option><option value="alto">Flexible</option></select></div></div><label>Variedad</label><select id="mpVariety"><option value="alta" selected>Alta</option><option value="media">Media</option><option value="baja">Baja</option></select><button id="mpGenerate" style="width:100%;margin-top:14px">Generar menú</button></div><div id="mpRecipeDetail"></div><div id="mpStatus"></div><div id="mpResult"></div>';
+    $('mpGenerate').onclick=generate;document.addEventListener('recomp:targets-updated',event=>applyMacroTargets(event.detail,true));document.addEventListener('recomp:planned-meal-logged',()=>render());document.addEventListener('recomp:meal-log-changed',render);window.addEventListener('pageshow',()=>applyMacroTargets());
+    try{plan=JSON.parse(localStorage.getItem(key)||'null')}catch{plan=null}render();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
