@@ -32,25 +32,32 @@ const cleanedMeal = cleanBackup({ meals: [{
 }] }).meals[0];
 assert.equal(cleanedMeal.sourceKey, 'mealPlan30:2026-08-14:0:2');
 
-const monthlyPlan = {
+const nutritionPlan = {
   createdAt: '2026-08-14T10:00:00.000Z',
-  preferences: { kcal: 2200, protein: 160, meals: 3, diet: 'flexible', excluded: [], pantry: [], maxTime: 30, budget: 'medio', variety: 'alta' },
-  days: Array.from({ length: 30 }, (_, day) => ({
+  preferences: { kcal: 2200, protein: 160, carbs: 250, fat: 70, days: 7, meals: 3, diet: 'flexible', excluded: [], pantry: [], maxTime: 30, budget: 'medio', variety: 'alta' },
+  days: Array.from({ length: 7 }, (_, day) => ({
     day: day + 1,
     items: Array.from({ length: 3 }, (_, meal) => ({
       recipe: { id: 'rc'+meal, n: 'Comida '+meal, m: 'Comida', k: 600, p: 40, c: 60, f: 20, i: ['100 g arroz'], s: ['Cocina y sirve.'], time: 20, difficulty: 'Fácil' },
-      scale: 1, k: 600, p: 40, c: 60, f: 20, score: 0, slot: 'Comida'
+      scale: 1, k: 600, p: 40, c: 60, f: 20, score: 0, slot: 'Comida',
+      ingredientAmounts: [{ text: '145 g de arroz', adjustable: true, qty: 145, unit: 'g', name: 'arroz' }]
     })),
-    totals: { k: 1800, p: 120, c: 180, f: 60 }
+    totals: { k: 1800, p: 120, c: 180, f: 60 }, error: 0.01
   }))
 };
-const cleanPlan = cleanMealPlan30(monthlyPlan);
-assert.equal(cleanPlan.days.length, 30);
+const cleanPlan = cleanMealPlan30(nutritionPlan);
+assert.equal(cleanPlan.days.length, 7);
+assert.equal(cleanPlan.preferences.days, 7);
+assert.equal(cleanPlan.preferences.carbs, 250);
+assert.equal(cleanPlan.preferences.fat, 70);
 assert.deepEqual(cleanPlan.days[0].totals, { k: 1800, p: 120, c: 180, f: 60 });
 assert.deepEqual(cleanPlan.days[0].items[0].recipe.s, ['Cocina y sirve.']);
 assert.equal(cleanPlan.days[0].items[0].recipe.id, 'rc0');
-assert.equal(cleanBackup({ [MEAL_PLAN_KEY]: monthlyPlan })[MEAL_PLAN_KEY].days.length, 30);
-assert.throws(() => cleanMealPlan30({ ...monthlyPlan, days: monthlyPlan.days.slice(0, 29) }), /Plan mensual/);
+assert.equal(cleanPlan.days[0].items[0].ingredientAmounts[0].qty, 145);
+assert.equal(cleanPlan.days[0].items[0].ingredientAmounts[0].text, '145 g de arroz');
+assert.equal(cleanBackup({ [MEAL_PLAN_KEY]: nutritionPlan })[MEAL_PLAN_KEY].days.length, 7);
+assert.throws(() => cleanMealPlan30({ ...nutritionPlan, days: [] }), /Plan nutricional/);
+assert.throws(() => cleanMealPlan30({ ...nutritionPlan, days: Array.from({length:31},(_,i)=>nutritionPlan.days[i%7]) }), /Plan nutricional/);
 
 const values = new Map([['profile', '{"name":"Anterior"}']]);
 let writes = 0;
@@ -66,7 +73,6 @@ const storage = {
 assert.throws(() => storeBackup({ profile: { name: 'Nuevo' }, targets: { kcal: 2000 } }, storage));
 assert.equal(values.get('profile'), '{"name":"Anterior"}');
 assert.equal(values.has('targets'), false);
-
 
 const { createJsonStore } = globalThis.RecompPersistence;
 function memoryStorage(entries = []) {
@@ -110,12 +116,11 @@ assert.deepEqual(JSON.parse(rollbackStorage.getItem('workouts')), [{ volume: 100
 assert.equal(rollbackStorage.getItem('recomp:last-good:workouts'), null);
 assert.equal(reported, 'QuotaExceededError');
 
-
 const resetStorage = memoryStorage([
   ['workouts', JSON.stringify([{ volume: 900 }])],
   ['recomp:last-good:workouts', JSON.stringify([{ volume: 800 }])],
   ['profile', JSON.stringify({ name: 'Usuario' })],
-  [MEAL_PLAN_KEY, JSON.stringify(monthlyPlan)],
+  [MEAL_PLAN_KEY, JSON.stringify(nutritionPlan)],
   ['fitcoach:user-data', JSON.stringify({ sessions: 42 })]
 ]);
 const resetStore = createJsonStore({ storage: resetStorage, prefix: 'recomp' });
