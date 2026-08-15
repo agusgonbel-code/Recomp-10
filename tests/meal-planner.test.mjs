@@ -15,31 +15,36 @@ const recipes=[
 ];
 
 test('genera exactamente 30 días dentro de objetivos razonables',()=>{
- const plan=RecompMealPlanner.generate30Days(recipes,{kcal:2200,protein:150,meals:4,diet:'flexible',variety:'alta'});
+ const plan=RecompMealPlanner.generate30Days(recipes,{kcal:2200,protein:150,carbs:250,fat:70,meals:4,diet:'flexible',variety:'alta'});
  assert.equal(plan.days.length,30);
  assert.ok(plan.days.every(d=>d.items.length===4));
  assert.ok(plan.days.every(d=>d.totals.k>1400&&d.totals.k<3000));
 });
 
 test('respeta exclusiones explícitas y dieta vegetariana',()=>{
- const plan=RecompMealPlanner.generate30Days(recipes,{kcal:2000,protein:120,meals:4,diet:'vegetariana',excluded:'salmón',variety:'media'});
+ const plan=RecompMealPlanner.generate30Days(recipes,{kcal:2000,protein:120,carbs:230,fat:60,meals:4,diet:'vegetariana',excluded:'salmón',variety:'media'});
  const names=plan.days.flatMap(d=>d.items.map(x=>x.recipe.n.toLowerCase()));
  assert.ok(names.every(n=>!n.includes('pollo')&&!n.includes('salmón')));
 });
 
 test('permite cambiar una comida y crea compra semanal',()=>{
- const plan=RecompMealPlanner.generate30Days(recipes,{kcal:2200,protein:150,meals:4,diet:'flexible'});
+ const plan=RecompMealPlanner.generate30Days(recipes,{kcal:2200,protein:150,carbs:250,fat:70,meals:4,diet:'flexible'});
  const before=plan.days[0].items[0].recipe.n;
  RecompMealPlanner.swapMeal(plan,recipes,0,0);
  assert.notEqual(plan.days[0].items[0].recipe.n,before);
  assert.ok(RecompMealPlanner.shoppingByWeek(plan,0).length>0);
 });
 
-test('reutiliza objetivos guardados por la calculadora de macros',()=>{
- assert.deepEqual(RecompMealPlanner.macroTargets({kcal:2475,protein:173}),{kcal:2475,protein:173});
- assert.deepEqual(RecompMealPlanner.macroTargets({kcal:'no válido',protein:null}),{kcal:2200,protein:160});
+test('reutiliza los cuatro objetivos guardados por la calculadora de macros',()=>{
+ assert.deepEqual(
+   RecompMealPlanner.macroTargets({kcal:2475,protein:173,carbs:301,fat:71}),
+   {kcal:2475,protein:173,carbs:301,fat:71}
+ );
+ assert.deepEqual(
+   RecompMealPlanner.macroTargets({kcal:'no válido',protein:null,carbs:null,fat:null}),
+   {kcal:2200,protein:160,carbs:250,fat:70}
+ );
 });
-
 
 test('conecta el catálogo completo y conserva la receta paso a paso',()=>{
  const catalog=RecompMealPlanner.normalizeRecipeCatalog([{
