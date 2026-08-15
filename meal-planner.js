@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
-  const number=(v,fallback)=>Number.isFinite(Number(v))?Number(v):fallback;
+  const number=(v,fallback)=>v===null||v===undefined||v===''?fallback:(Number.isFinite(Number(v))?Number(v):fallback);
   const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const textOf=r=>norm([r?.n,...(r?.i||[])].join(' '));
   const DIET_BLOCKS={
