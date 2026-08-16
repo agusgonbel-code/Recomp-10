@@ -81,45 +81,39 @@ jobs:
       - name: Verify PWA shell
         shell: bash
         run: |
-          test -s index.html
-          test -s manifest.webmanifest
-          test -s sw.js
-          test -s persistence.js
-          test -s date-engine.js
-          test -s training-engine.js
-          test -s nutrition-engine.js
-          test -s meal-planner.js
-          test -s meal-planner-ui.js
-          test -s coach-engine.js
-          test -s photo-engine.js
-          test -s icon-192.png
-          test -s icon-512.png
-          grep -q "navigator.serviceWorker.register('./sw.js')" index.html
-          grep -q "src='persistence.js'" index.html
-          grep -q "src='date-engine.js'" index.html
-          grep -q "'./date-engine.js'" sw.js
-          grep -q "src='training-engine.js'" index.html
-          grep -q "src='nutrition-engine.js'" index.html
-          grep -q "src='meal-planner.js'" index.html
-          grep -q "'./meal-planner.js'" sw.js
-          grep -q "src='meal-planner-ui.js'" index.html
-          grep -q "recomp:targets-updated" index.html
-          grep -q "applyMacroTargets" meal-planner-ui.js
-          grep -q "cleanMealPlan30" meal-planner-ui.js
-          grep -q "generateDays" meal-planner-ui.js
-          grep -q 'min="1"' meal-planner-ui.js
-          grep -q 'max="30"' meal-planner-ui.js
-          grep -q "data-recipe" meal-planner-ui.js
-          grep -q "data-log" meal-planner-ui.js
-          grep -q "recomp:log-planned-meal" index.html
-          grep -q "saveMealEntry" index.html
-          grep -q "mealJournalDate" index.html
-          grep -q "recomp:meal-log-changed" meal-planner-ui.js
-          grep -q "mpRecipeDetail" meal-planner-ui.js
-          grep -q "MEAL_PLAN_KEY" index.html
-          grep -q ">Menús</button>" index.html
+          set -euo pipefail
+          require_file(){ test -s "$1" || { echo "Missing or empty file: $1"; exit 1; }; }
+          require_text(){ local file="$1"; local text="$2"; local label="$3"; grep -Fq "$text" "$file" || { echo "Missing check: $label ($text) in $file"; exit 1; }; }
+
+          for file in index.html manifest.webmanifest sw.js persistence.js date-engine.js training-engine.js nutrition-engine.js meal-planner.js meal-planner-ui.js coach-engine.js photo-engine.js icon-192.png icon-512.png; do
+            require_file "$file"
+          done
+
+          require_text index.html "navigator.serviceWorker.register('./sw.js')" "service worker registration"
+          require_text index.html "src='persistence.js'" "persistence script"
+          require_text index.html "src='date-engine.js'" "date engine script"
+          require_text sw.js "'./date-engine.js'" "date engine cache"
+          require_text index.html "src='training-engine.js'" "training engine script"
+          require_text index.html "src='nutrition-engine.js'" "nutrition engine script"
+          require_text index.html "src='meal-planner.js'" "meal planner script"
+          require_text sw.js "'./meal-planner.js'" "meal planner cache"
+          require_text index.html "src='meal-planner-ui.js'" "meal planner UI script"
+          require_text index.html "recomp:targets-updated" "macro update event"
+          require_text meal-planner-ui.js "applyMacroTargets" "macro sync"
+          require_text meal-planner-ui.js "generateDays" "variable-day generation"
+          require_text meal-planner-ui.js 'min="1"' "minimum menu days"
+          require_text meal-planner-ui.js 'max="30"' "maximum menu days"
+          require_text meal-planner-ui.js "data-recipe" "recipe links"
+          require_text meal-planner-ui.js "data-log" "meal log links"
+          require_text index.html "recomp:log-planned-meal" "planned meal logging event"
+          require_text index.html "saveMealEntry" "meal persistence"
+          require_text index.html "mealJournalDate" "meal journal date"
+          require_text meal-planner-ui.js "recomp:meal-log-changed" "meal log refresh"
+          require_text meal-planner-ui.js "mpRecipeDetail" "recipe detail panel"
+          require_text index.html "MEAL_PLAN_KEY" "meal plan persistence key"
+          require_text index.html ">Menús</button>" "menus navigation"
           node -e "const h=require('fs').readFileSync('index.html','utf8');if(h.indexOf(\"id='mealPlanner30'\")>h.indexOf(\"id='recipeList'\"))throw new Error('El generador debe aparecer antes que las recetas')"
-          grep -q "'./meal-planner-ui.js'" sw.js
-          grep -q "src='coach-engine.js'" index.html
-          grep -q "'./coach-engine.js'" sw.js
-          grep -q "src='photo-engine.js'" index.html
+          require_text sw.js "'./meal-planner-ui.js'" "meal planner UI cache"
+          require_text index.html "src='coach-engine.js'" "coach engine script"
+          require_text sw.js "'./coach-engine.js'" "coach engine cache"
+          require_text index.html "src='photo-engine.js'" "photo engine script"
