@@ -107,8 +107,8 @@ jobs:
           grep -q "applyMacroTargets" meal-planner-ui.js
           grep -q "cleanMealPlan30" meal-planner-ui.js
           grep -q "generateDays" meal-planner-ui.js
-          grep -q "min='1'" meal-planner-ui.js
-          grep -q "max='30'" meal-planner-ui.js
+          grep -q 'min="1"' meal-planner-ui.js
+          grep -q 'max="30"' meal-planner-ui.js
           grep -q "data-recipe" meal-planner-ui.js
           grep -q "data-log" meal-planner-ui.js
           grep -q "recomp:log-planned-meal" index.html
