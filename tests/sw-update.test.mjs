@@ -11,9 +11,11 @@ test('los scripts usan red primero para no mezclar versiones en iPhone',()=>{
   assert.ok(block.indexOf('fetch(event.request)')<block.indexOf('caches.match(event.request)'));
 });
 
-test('el formulario siempre arranca con objetivos válidos y muestra errores',()=>{
+test('el formulario siempre arranca con objetivos válidos y soporta planes de 1 a 30 días',()=>{
   const ui=readFileSync(new URL('../meal-planner-ui.js',import.meta.url),'utf8');
   assert.match(ui,/macroTargets\(savedTargets\(\)\)/);
   assert.match(ui,/No se pudo crear el menú/);
-  assert.match(ui,/Creando 30 días/);
+  assert.match(ui,/id="mpDays"[^>]*min="1"[^>]*max="30"/);
+  assert.match(ui,/generateDays\(catalog,formValues\(\)\)/);
+  assert.match(ui,/Calculando menú/);
 });
