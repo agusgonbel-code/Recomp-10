@@ -1,0 +1,99 @@
+# Recomp 10M · App Store release
+
+Objetivo de esta rama principal: mantener una versión publicable y verificable automáticamente antes de subirla a App Store Connect.
+
+## Estado técnico automatizado
+
+La CI web debe superar antes de cada entrega:
+
+- sintaxis y manifiesto PWA;
+- persistencia y fechas;
+- motor de entrenamiento;
+- motor nutricional;
+- generación de menús de 1 a 30 días;
+- simulación de 30 días de nutrición con objetivos estándar y manuales;
+- simulación mensual usando el catálogo real de recetas incluido en `index.html`;
+- sustituciones nutricionalmente equivalentes;
+- cantidades numéricas para todos los ingredientes;
+- recetas con elaboración paso a paso;
+- cuatro semanas / 16 sesiones de entrenamiento simuladas;
+- backup, Coach y progreso fotográfico;
+- privacidad, soporte y shell offline.
+
+La CI nativa de iOS debe:
+
+1. ejecutarse en `macos-26`;
+2. verificar un SDK iPhoneOS 26 o posterior;
+3. instalar Capacitor 8;
+4. ejecutar toda la suite de tests;
+5. crear `www/` con los assets que irán dentro del binario;
+6. generar el proyecto iOS;
+7. compilar el esquema `App` para iOS Simulator sin firma.
+
+## Identidad actual del binario
+
+- Nombre: `Recomp 10M`
+- Bundle ID configurado: `com.agusgonbel.recomp10m`
+- Versión inicial del paquete: `1.0.0`
+- Categoría prevista: Health & Fitness / Salud y forma física
+
+El Bundle ID debe coincidir exactamente con el identificador que se registre en Apple Developer y App Store Connect antes del archive final.
+
+## URLs públicas ya preparadas
+
+GitHub Pages publica desde `main` con HTTPS:
+
+- App: `https://agusgonbel-code.github.io/Recomp-10/`
+- Política de privacidad: `https://agusgonbel-code.github.io/Recomp-10/privacy.html`
+- Soporte: `https://agusgonbel-code.github.io/Recomp-10/support.html`
+
+La política y el soporte también son accesibles desde dentro de la propia aplicación.
+
+## Privacidad prevista para App Store Connect
+
+La versión actual funciona sin cuenta y mantiene los registros de entrenamiento, nutrición, métricas y fotografías en almacenamiento local. No contiene SDK de publicidad ni analítica remota en los módulos principales. Antes de responder las preguntas de App Privacy hay que confirmar de nuevo el binario nativo final y cualquier plugin adicional que se añada.
+
+Si el binario final mantiene esta arquitectura sin telemetría/servidor, la respuesta de App Privacy debe reflejar que Recomp 10M no recopila los datos locales del usuario en servidores del desarrollador. No se debe seleccionar esta respuesta automáticamente si después se integra analítica, crash reporting, cuentas, cloud sync, publicidad o un backend.
+
+## Metadatos pendientes en App Store Connect
+
+Estas acciones requieren la cuenta Apple del desarrollador y no pueden resolverse solo con el repositorio:
+
+- crear/confirmar el App ID y Bundle ID;
+- crear la ficha de App Store Connect;
+- seleccionar categoría, disponibilidad y clasificación por edades;
+- completar App Privacy usando el binario final;
+- introducir Privacy Policy URL y Support URL;
+- añadir descripción, subtítulo, palabras clave y copyright;
+- subir capturas reales del binario final;
+- completar información de revisión y contacto;
+- seleccionar el build subido desde Xcode/TestFlight;
+- enviar a App Review.
+
+## Firma y subida final
+
+El archive de distribución requiere un Apple Developer Team válido y credenciales/certificados de firma. La CI del repositorio compila sin firma para detectar errores de código y empaquetado, pero no debe almacenar certificados privados en el repositorio.
+
+Para distribución final, desde un Mac con Xcode 26 o posterior:
+
+```bash
+npm install
+npm run build:mobile
+npx cap sync ios
+npx cap open ios
+```
+
+En Xcode se selecciona el Team correcto, se comprueba `com.agusgonbel.recomp10m`, se incrementa versión/build si corresponde, se crea el Archive y se distribuye a App Store Connect.
+
+## Criterio de congelación para release
+
+No subir un build a App Store Connect si cualquiera de estos puntos está rojo:
+
+- Recomp 10 CI;
+- Recomp 10 iOS Native CI;
+- GitHub Pages;
+- simulación mensual de producción;
+- release-readiness;
+- build de simulador iOS.
+
+Después de alcanzar verde total se permiten únicamente cambios críticos hasta completar la primera publicación.
