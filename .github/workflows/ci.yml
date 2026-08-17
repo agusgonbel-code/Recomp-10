@@ -58,6 +58,9 @@ jobs:
       - name: Simulate full month nutrition and training
         run: node --test tests/month-simulation.test.mjs
 
+      - name: Simulate production recipe month
+        run: node --test tests/production-month.test.mjs
+
       - name: Test explainable coach
         run: node --test tests/coach-engine.test.mjs
 
