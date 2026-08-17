@@ -73,6 +73,9 @@ jobs:
       - name: Test backup download safety
         run: node --test tests/backup-download.test.mjs
 
+      - name: Test App Store release readiness
+        run: node --test tests/release-readiness.test.mjs
+
       - name: Validate inline application script
         shell: bash
         run: |
@@ -91,7 +94,7 @@ jobs:
           require_file(){ test -s "$1" || { echo "Missing or empty file: $1"; exit 1; }; }
           require_text(){ local file="$1"; local text="$2"; local label="$3"; grep -Fq "$text" "$file" || { echo "Missing check: $label ($text) in $file"; exit 1; }; }
 
-          for file in index.html manifest.webmanifest sw.js persistence.js date-engine.js training-engine.js nutrition-engine.js meal-planner.js meal-planner-ui.js coach-engine.js photo-engine.js icon-192.png icon-512.png; do
+          for file in index.html privacy.html support.html manifest.webmanifest sw.js persistence.js date-engine.js training-engine.js nutrition-engine.js meal-planner.js meal-planner-ui.js coach-engine.js photo-engine.js icon-192.png icon-512.png; do
             require_file "$file"
           done
 
@@ -113,6 +116,10 @@ jobs:
           require_text meal-planner-ui.js 'max="30"' "maximum menu days"
           require_text meal-planner-ui.js "data-recipe" "recipe links"
           require_text meal-planner-ui.js "data-log" "meal log links"
+          require_text meal-planner-ui.js "privacy.html" "in-app privacy link"
+          require_text meal-planner-ui.js "support.html" "in-app support link"
+          require_text sw.js "'./privacy.html'" "privacy offline cache"
+          require_text sw.js "'./support.html'" "support offline cache"
           require_text index.html "recomp:log-planned-meal" "planned meal logging event"
           require_text index.html "saveMealEntry" "meal persistence"
           require_text index.html "mealJournalDate" "meal journal date"
