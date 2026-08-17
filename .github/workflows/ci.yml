@@ -76,6 +76,9 @@ jobs:
       - name: Test App Store release readiness
         run: node --test tests/release-readiness.test.mjs
 
+      - name: Run complete test inventory
+        run: npm test
+
       - name: Validate inline application script
         shell: bash
         run: |
