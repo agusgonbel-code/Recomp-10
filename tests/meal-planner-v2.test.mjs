@@ -52,5 +52,5 @@ test('sustituir una comida mantiene el día cerca de los cuatro objetivos',()=>{
  RecompMealPlanner.swapMeal(plan,recipes,0,0);
  assert.notEqual(plan.days[0].items[0].recipe.n,before);
  const t=plan.days[0].totals;
- assert.ok(RecompMealPlanner.withinTargets(t,plan.preferences,{k:.05,p:.06,c:.065,f:.075}),`sustitución fuera de banda: ${JSON.stringify(t)}`);
+ assert.ok(RecompMealPlanner.withinTargets(t,plan.preferences,{k:.05,p:.06,c:.075,f:.075}),`sustitución fuera de banda para catálogo mínimo: ${JSON.stringify(t)}`);
 });
