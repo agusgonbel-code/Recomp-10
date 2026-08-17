@@ -10,6 +10,7 @@ on:
       - 'privacy.html'
       - 'support.html'
       - '*.js'
+      - 'tests/**'
       - 'package.json'
       - 'capacitor.config.json'
       - 'scripts/build-mobile.mjs'
