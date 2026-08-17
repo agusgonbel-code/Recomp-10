@@ -1,0 +1,8 @@
+{
+  "appId": "com.agusgonbel.recomp10m",
+  "appName": "Recomp 10M",
+  "webDir": "www",
+  "server": {
+    "iosScheme": "capacitor"
+  }
+}
