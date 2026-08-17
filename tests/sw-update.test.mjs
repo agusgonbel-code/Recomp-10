@@ -11,11 +11,15 @@ test('los scripts usan red primero para no mezclar versiones en iPhone',()=>{
   assert.ok(block.indexOf('fetch(event.request)')<block.indexOf('caches.match(event.request)'));
 });
 
-test('el formulario siempre arranca con objetivos válidos y soporta planes de 1 a 30 días',()=>{
+test('el formulario usa objetivos editables persistentes y soporta planes de 1 a 30 días',()=>{
   const ui=readFileSync(new URL('../meal-planner-ui.js',import.meta.url),'utf8');
-  assert.match(ui,/macroTargets\(savedTargets\(\)\)/);
-  assert.match(ui,/No se pudo crear el menú/);
+  assert.match(ui,/manualKey='recomp10\.manualTargets'/);
+  assert.match(ui,/savedManualTargets/);
+  assert.match(ui,/persistManualTargets/);
+  assert.match(ui,/Usar y guardar estos objetivos/);
+  assert.match(ui,/Recuperar calculadora/);
   assert.match(ui,/id="mpDays"[^>]*min="1"[^>]*max="30"/);
   assert.match(ui,/generateDays\(catalog,formValues\(\)\)/);
   assert.match(ui,/Calculando menú/);
+  assert.match(ui,/savedManualTargets\(\)\|\|savedTargets\(\)/);
 });
