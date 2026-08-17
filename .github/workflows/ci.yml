@@ -55,6 +55,9 @@ jobs:
       - name: Test meal planner
         run: node --test tests/meal-planner.test.mjs
 
+      - name: Simulate full month nutrition and training
+        run: node --test tests/month-simulation.test.mjs
+
       - name: Test explainable coach
         run: node --test tests/coach-engine.test.mjs
 
@@ -100,6 +103,8 @@ jobs:
           require_text index.html "src='meal-planner-ui.js'" "meal planner UI script"
           require_text index.html "recomp:targets-updated" "macro update event"
           require_text meal-planner-ui.js "applyMacroTargets" "macro sync"
+          require_text meal-planner-ui.js "recomp10.manualTargets" "manual target persistence"
+          require_text meal-planner-ui.js "persistManualTargets" "manual target save"
           require_text meal-planner-ui.js "generateDays" "variable-day generation"
           require_text meal-planner-ui.js 'min="1"' "minimum menu days"
           require_text meal-planner-ui.js 'max="30"' "maximum menu days"
