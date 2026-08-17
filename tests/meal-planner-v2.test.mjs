@@ -40,7 +40,8 @@ test('cada ingrediente ajustable expone una cantidad concreta y la receta mantie
    steps:['Cocina el arroz.','Dora el pollo.','Mezcla y sirve.'],time:25,difficulty:'Fácil'
  }]);
  const model=RecompMealPlanner.recipeModel(catalog[0]);
- assert.equal(model.adjustable.length,3);
+ assert.equal(model.parsed.length,3);
+ assert.ok(model.parsed.every(x=>x.scalable&&Number.isFinite(x.baseQty)&&x.baseQty>0));
  assert.equal(catalog[0].s.length,3);
 });
 
@@ -51,8 +52,5 @@ test('sustituir una comida mantiene el día cerca de los cuatro objetivos',()=>{
  RecompMealPlanner.swapMeal(plan,recipes,0,0);
  assert.notEqual(plan.days[0].items[0].recipe.n,before);
  const t=plan.days[0].totals;
- assert.ok(Math.abs(t.k-target.kcal)<=100);
- assert.ok(Math.abs(t.p-target.protein)<=10);
- assert.ok(Math.abs(t.c-target.carbs)<=15);
- assert.ok(Math.abs(t.f-target.fat)<=8);
+ assert.ok(RecompMealPlanner.withinTargets(t,plan.preferences,{k:.05,p:.06,c:.065,f:.075}),`sustitución fuera de banda: ${JSON.stringify(t)}`);
 });
