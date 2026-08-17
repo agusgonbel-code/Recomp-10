@@ -1,0 +1,81 @@
+name: Recomp 10 iOS Native CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'privacy.html'
+      - 'support.html'
+      - '*.js'
+      - 'package.json'
+      - 'capacitor.config.json'
+      - 'scripts/build-mobile.mjs'
+      - '.github/workflows/ios-native-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recomp-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios-simulator:
+    runs-on: macos-26
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Verify Xcode and iOS SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          SDK_VERSION="$(xcrun --sdk iphoneos --show-sdk-version)"
+          echo "iPhoneOS SDK: $SDK_VERSION"
+          MAJOR="${SDK_VERSION%%.*}"
+          test "$MAJOR" -ge 26 || { echo "App Store release requires iOS 26 SDK or newer"; exit 1; }
+
+      - name: Install Capacitor 8
+        run: npm install --no-audit --no-fund
+
+      - name: Run application test suite
+        run: npm test
+
+      - name: Build bundled web assets
+        run: npm run build:mobile
+
+      - name: Generate native iOS project
+        run: npx cap add ios
+
+      - name: Validate Capacitor configuration
+        run: npx cap doctor ios
+
+      - name: Compile for iOS Simulator without signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Show resulting application
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_PATH="$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*Build/Products/Debug-iphonesimulator/App.app' -print -quit)"
+          test -n "$APP_PATH" || { echo 'No simulator .app generated'; exit 1; }
+          echo "Built app: $APP_PATH"
+          du -sh "$APP_PATH"
