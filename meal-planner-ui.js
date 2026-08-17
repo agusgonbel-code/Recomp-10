@@ -13,6 +13,13 @@
   const sourceKey=(day,item)=>'mealPlan:'+String(plan?.createdAt||'unknown')+':'+day+':'+item;
   const loggedToday=source=>{try{return (JSON.parse(localStorage.getItem('meals')||'[]')||[]).some(meal=>meal?.date===RecompDate.localDayKey()&&meal?.sourceKey===source)}catch{return false}};
 
+  function ensureLegalLinks(){
+    if($('recompLegalLinks')||!document.body)return;
+    const footer=document.createElement('footer');footer.id='recompLegalLinks';footer.setAttribute('aria-label','Información legal y soporte');
+    footer.style.cssText='padding:18px 16px 90px;text-align:center;font-size:13px;opacity:.82';
+    footer.innerHTML='<a href="./privacy.html">Privacidad</a> · <a href="./support.html">Soporte</a>';
+    document.body.appendChild(footer);
+  }
   function moveIntoNutrition(){
     const nutrition=$('nutricion'),root=$('mealPlanner30');
     if(!nutrition||!root)return;
@@ -79,7 +86,7 @@
     document.querySelectorAll('[data-log]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.log.split(',').map(Number);logMeal(d,i)});
   }
   function init(){
-    moveIntoNutrition();const root=$('mealPlanner30');if(!root)return;const manual=savedManualTargets(),t=RecompMealPlanner.macroTargets(manual||savedTargets());
+    ensureLegalLinks();moveIntoNutrition();const root=$('mealPlanner30');if(!root)return;const manual=savedManualTargets(),t=RecompMealPlanner.macroTargets(manual||savedTargets());
     root.innerHTML='<div class="mp-intro"><span class="pill">NUTRICIÓN</span><h2>Menú ajustado a tus macros</h2><p>La calculadora propone unos objetivos, pero tú mandas: puedes editar los cuatro valores antes de generar y la app recordará tus ajustes.</p></div><div class="card mp-form"><h3>1 · Objetivos diarios editables</h3><div class="good">Puedes cambiar estos valores después de calcularlos. El menú se genera con lo que aparezca aquí, no con valores ocultos.</div><div class="row"><div><label>Calorías</label><input id="mpKcal" type="number" value="'+esc(t.kcal)+'"></div><div><label>Proteína (g)</label><input id="mpProtein" type="number" value="'+esc(t.protein)+'"></div></div><div class="row"><div><label>Carbohidratos (g)</label><input id="mpCarbs" type="number" value="'+esc(t.carbs)+'"></div><div><label>Grasas (g)</label><input id="mpFat" type="number" value="'+esc(t.fat)+'"></div></div><div class="row"><button id="mpSaveTargets" class="secondary">Usar y guardar estos objetivos</button><button id="mpCalculatorTargets" class="secondary">Recuperar calculadora</button></div><div class="row"><div><label>Días</label><input id="mpDays" type="number" min="1" max="30" value="7"></div><div><label>Comidas / día</label><select id="mpMeals"><option>3</option><option selected>4</option><option>5</option></select></div></div><h3>2 · Preferencias</h3><label>Estilo</label><select id="mpDiet"><option value="flexible">Flexible</option><option value="vegetariana">Vegetariano</option><option value="vegana">Vegano</option><option value="pescetariana">Pescetariano</option><option value="sin-lactosa">Sin lactosa</option><option value="sin-gluten">Sin gluten</option></select><label>Alergias o alimentos excluidos</label><input id="mpExcluded" placeholder="Ej. cacahuete, marisco, cebolla"><label>Ingredientes que ya tienes o prefieres</label><input id="mpPantry" placeholder="Ej. arroz, huevos, pollo"><div class="row"><div><label>Tiempo máximo</label><select id="mpTime"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">60 min</option></select></div><div><label>Presupuesto</label><select id="mpBudget"><option value="bajo">Ajustado</option><option value="medio" selected>Medio</option><option value="alto">Flexible</option></select></div></div><label>Variedad</label><select id="mpVariety"><option value="alta" selected>Alta</option><option value="media">Media</option><option value="baja">Baja</option></select><button id="mpGenerate" style="width:100%;margin-top:14px">Generar menú</button></div><div id="mpRecipeDetail"></div><div id="mpStatus"></div><div id="mpResult"></div>';
     $('mpGenerate').onclick=generate;$('mpSaveTargets').onclick=()=>persistManualTargets(true);$('mpCalculatorTargets').onclick=useCalculatorTargets;
     ['mpKcal','mpProtein','mpCarbs','mpFat'].forEach(id=>$(id).addEventListener('change',()=>persistManualTargets(false)));
