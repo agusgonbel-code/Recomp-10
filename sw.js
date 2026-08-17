@@ -1,7 +1,9 @@
-const CACHE_NAME = 'recomp-10-v19-menu-generator-reliability';
+const CACHE_NAME = 'recomp-10-v20-release-readiness';
 const APP_SHELL = [
   './',
   './index.html',
+  './privacy.html',
+  './support.html',
   './persistence.js',
   './date-engine.js',
   './training-engine.js',
@@ -42,11 +44,11 @@ self.addEventListener('fetch', event => {
         .then(response => {
           if (response.ok) {
             const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
           }
           return response;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match(event.request).then(cached => cached || caches.match('./index.html')))
     );
     return;
   }
