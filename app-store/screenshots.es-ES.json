@@ -1,0 +1,75 @@
+{
+  "locale": "es-ES",
+  "platform": "IPHONE",
+  "orientation": "PORTRAIT",
+  "minimumScreenshots": 1,
+  "maximumScreenshots": 10,
+  "privacyRules": [
+    "Usar exclusivamente datos ficticios y coherentes en entrenamientos, métricas y nutrición.",
+    "No incluir fotografías reales, nombres completos, notificaciones ni información identificable.",
+    "Mantener visibles las mismas kcal, proteínas, carbohidratos y grasas en objetivo, menú y receta.",
+    "Capturar la interfaz del binario final sin marcos, textos promocionales superpuestos ni elementos externos."
+  ],
+  "scenes": [
+    {
+      "order": 1,
+      "id": "resumen-coach",
+      "surface": "inicio",
+      "headline": "Tu plan, claro cada día",
+      "supportingText": "Entrenamiento, macros y Coach en un resumen privado.",
+      "setup": [
+        "Usar el perfil ficticio Alex y objetivos de 2500 kcal, 170 g P, 300 g C y 70 g G.",
+        "Registrar dos sesiones ficticias y comidas suficientes para mostrar progreso parcial.",
+        "Abrir Inicio y confirmar que el Coach no muestra alertas médicas ni datos reales."
+      ]
+    },
+    {
+      "order": 2,
+      "id": "entrenamiento-progresivo",
+      "surface": "entreno",
+      "headline": "Progresa serie a serie",
+      "supportingText": "Registra cargas, repeticiones y RIR sin perder el historial.",
+      "setup": [
+        "Seleccionar Lunes y completar valores ficticios plausibles en la primera sesión.",
+        "Mantener visibles al menos tres ejercicios con series, repeticiones y RIR.",
+        "Ocultar cualquier nota que pueda identificar a una persona."
+      ]
+    },
+    {
+      "order": 3,
+      "id": "calculadora-macros",
+      "surface": "nutricion",
+      "headline": "Macros hechos para tu objetivo",
+      "supportingText": "Calcula kcal, proteína, carbohidratos y grasas en segundos.",
+      "setup": [
+        "Introducir un perfil ficticio y calcular objetivos antes de capturar.",
+        "Usar exactamente 2500 kcal, 170 g P, 300 g C y 70 g G como resultado visible.",
+        "Mostrar la calculadora y su resultado completo sin datos personales."
+      ]
+    },
+    {
+      "order": 4,
+      "id": "menu-multidia",
+      "surface": "recetas",
+      "headline": "Menús equilibrados para varios días",
+      "supportingText": "Cantidades reales y los mismos objetivos cada día.",
+      "setup": [
+        "Generar siete días desde los objetivos ficticios de la captura anterior.",
+        "Abrir un día y mostrar sus comidas, cantidades y total de kcal, P, C y G.",
+        "Confirmar que el total visible utiliza las mismas cantidades que las recetas."
+      ]
+    },
+    {
+      "order": 5,
+      "id": "receta-y-sustitucion",
+      "surface": "mealPlanner30",
+      "headline": "Cambia una comida, conserva el plan",
+      "supportingText": "Sustituye y reequilibra con receta completa paso a paso.",
+      "setup": [
+        "Sustituir una comida del día por una alternativa equivalente.",
+        "Abrir la comida nueva y mostrar ingredientes, cantidades, macros y elaboración.",
+        "Comprobar que el total diario reequilibrado mantiene los objetivos ficticios."
+      ]
+    }
+  ]
+}
