@@ -56,6 +56,7 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - El plan mensual se valida al guardar y abrir, se incluye en las copias de seguridad y se elimina con el borrado controlado de Recomp 10M.
 - El generador usa el catálogo completo de recetas de la app en lugar del listado antiguo reducido.
 - Cada comida del plan abre su ficha táctil con ingredientes, preparación paso a paso, tiempo, dificultad, porción ajustada y macros sin perder la semana seleccionada.
+- Las cantidades prácticas que aparecen en cada ingrediente son exactamente las utilizadas para calcular los macros; la ficha muestra además su aporte nutricional estimado y este desglose sobrevive al guardado y a las copias de seguridad.
 - Cada comida planificada se puede registrar una sola vez en el diario del día, desde la lista o desde su receta; el registro actualiza inmediatamente los totales y conserva su vínculo en las copias de seguridad.
 - El diario permite navegar por fechas, revisar los totales de cada día y corregir los valores realmente consumidos sin perder el vínculo con el plan mensual.
 - Las eliminaciones requieren confirmación y liberan la comida planificada para poder registrarla de nuevo si fue borrada por error.
