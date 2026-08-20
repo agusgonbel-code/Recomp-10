@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v20-release-readiness';
+const CACHE_NAME = 'recomp-10-v21-exact-ingredient-nutrition';
 const APP_SHELL = [
   './',
   './index.html',
