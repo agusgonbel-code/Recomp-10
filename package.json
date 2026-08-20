@@ -6,9 +6,10 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "build:mobile": "node scripts/build-mobile.mjs",
-    "ios:prepare": "npm run build:mobile && npx cap sync ios",
-    "ios:add": "npm run build:mobile && npx cap add ios",
-    "ios:open": "npm run ios:prepare && npx cap open ios"
+    "ios:prepare": "npm run build:mobile && npx cap sync ios && npm run ios:privacy",
+    "ios:add": "npm run build:mobile && npx cap add ios && npm run ios:privacy",
+    "ios:open": "npm run ios:prepare && npx cap open ios",
+    "ios:privacy": "node scripts/configure-ios-privacy.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.0.0",
