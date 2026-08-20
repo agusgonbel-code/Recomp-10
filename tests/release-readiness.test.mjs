@@ -51,3 +51,15 @@ test('release: no hay dependencias remotas evidentes en el runtime principal',()
     assert.doesNotMatch(text,/XMLHttpRequest\s*\(/,`${file} usa XMLHttpRequest remoto`);
   }
 });
+
+test('nutrición integra calculadora y planificador multidía en la misma pantalla',()=>{
+  const html=read('index.html');
+  const nutrition=html.match(/<section id=['"]nutricion['"][\s\S]*?<\/section>/)?.[0]||'';
+  const recipes=html.match(/<section id=['"]recetas['"][\s\S]*?<\/section>/)?.[0]||'';
+
+  assert.match(nutrition,/id=['"]macroResult['"]/,'Falta el resultado de la calculadora en Nutrición');
+  assert.match(nutrition,/id=['"]mealPlanner30['"]/,'El planificador multidía debe estar dentro de Nutrición');
+  assert.match(nutrition,/id=['"]mealPlannerHeading['"]/,'El planificador necesita un encabezado visible');
+  assert.doesNotMatch(recipes,/id=['"]mealPlanner30['"]/,'No debe existir una segunda instancia del planificador');
+  assert.equal((html.match(/id=['"]mealPlanner30['"]/g)||[]).length,1,'El planificador debe tener una única raíz');
+});
