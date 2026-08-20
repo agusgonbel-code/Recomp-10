@@ -35,6 +35,35 @@ test('App Store: la ficha española está completa y dentro de límites', () => 
   assert.doesNotMatch(JSON.stringify(metadata), /TODO|TBD|PLACEHOLDER|example\.com/i);
 });
 
+test('App Store: el guion de capturas es reproducible, privado y corresponde a la interfaz', () => {
+  const screenshots = json('app-store/screenshots.es-ES.json');
+  const html = read('index.html');
+
+  assert.equal(screenshots.locale, 'es-ES');
+  assert.equal(screenshots.platform, 'IPHONE');
+  assert.equal(screenshots.orientation, 'PORTRAIT');
+  assert.equal(screenshots.minimumScreenshots, 1);
+  assert.equal(screenshots.maximumScreenshots, 10);
+  assert.ok(screenshots.scenes.length >= screenshots.minimumScreenshots);
+  assert.ok(screenshots.scenes.length <= screenshots.maximumScreenshots);
+  assert.deepEqual(screenshots.scenes.map(scene => scene.order),
+    screenshots.scenes.map((_, index) => index + 1));
+  assert.equal(new Set(screenshots.scenes.map(scene => scene.id)).size, screenshots.scenes.length);
+
+  for (const scene of screenshots.scenes) {
+    assert.ok(scene.headline.length > 0 && scene.headline.length <= 40);
+    assert.ok(scene.supportingText.length > 0 && scene.supportingText.length <= 70);
+    assert.ok(Array.isArray(scene.setup) && scene.setup.length >= 2);
+    assert.ok(scene.setup.every(step => typeof step === 'string' && step.trim().length > 0));
+    assert.match(html, new RegExp(`id=['"]${scene.surface}['"]`));
+  }
+
+  const privacy = screenshots.privacyRules.join(' ');
+  assert.match(privacy, /datos ficticios/i);
+  assert.match(privacy, /no incluir fotografías reales/i);
+  assert.match(privacy, /kcal.*proteínas.*carbohidratos.*grasas/i);
+});
+
 test('App Store: el configurador y CI fijan y validan versión y build', () => {
   const configure = read('scripts/configure-ios-privacy.mjs');
   const workflow = read('.github/workflows/ios-native-ci.yml');
