@@ -1,0 +1,12 @@
+{
+  "locale": "es-ES",
+  "name": "Recomp 10M",
+  "subtitle": "Entrena, come y progresa",
+  "promotionalText": "Organiza entrenamiento, nutrición y progreso con menús ajustados a tus objetivos y seguimiento privado en tu dispositivo.",
+  "description": "Recomp 10M reúne en una sola aplicación las herramientas necesarias para organizar tu recomposición corporal y mantener un seguimiento constante.\n\nENTRENAMIENTO\n• Planifica sesiones y registra series, repeticiones, cargas y RIR.\n• Consulta tus marcas anteriores y recibe indicaciones de progresión basadas en tu historial.\n• Utiliza una biblioteca de ejercicios con alternativas y seguimiento de volumen.\n\nNUTRICIÓN\n• Calcula una referencia de calorías y macronutrientes o ajusta manualmente tus objetivos.\n• Genera menús de 1 a 30 días usando las kcal, proteínas, carbohidratos y grasas establecidos.\n• Consulta ingredientes con cantidades reales, aporte nutricional y elaboración paso a paso.\n• Sustituye comidas por alternativas equivalentes y conserva el equilibrio del día.\n\nPROGRESO Y PRIVACIDAD\n• Guarda métricas corporales, entrenamientos, comidas y fotografías de progreso.\n• Exporta una copia de seguridad para conservar tus datos.\n• Funciona sin cuenta y mantiene los registros principales localmente en tu dispositivo.\n\nRecomp 10M está orientada al bienestar y la organización personal. Sus cálculos y sugerencias no sustituyen el consejo individualizado de profesionales sanitarios, nutricionales o deportivos.",
+  "keywords": "entrenamiento,nutrición,macros,fuerza,progreso,recetas,fitness,rutinas,recomposición",
+  "primaryCategory": "HEALTH_AND_FITNESS",
+  "privacyUrl": "https://agusgonbel-code.github.io/Recomp-10/privacy.html",
+  "supportUrl": "https://agusgonbel-code.github.io/Recomp-10/support.html",
+  "reviewNotes": "No requiere registro. En Nutrición se pueden calcular macros, generar un menú de 1 a 30 días, abrir recetas y sustituir comidas. Los datos funcionales principales permanecen en almacenamiento local."
+}
