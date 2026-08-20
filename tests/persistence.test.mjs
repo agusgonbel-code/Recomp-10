@@ -40,7 +40,7 @@ const nutritionPlan = {
     items: Array.from({ length: 3 }, (_, meal) => ({
       recipe: { id: 'rc'+meal, n: 'Comida '+meal, m: 'Comida', k: 600, p: 40, c: 60, f: 20, i: ['100 g arroz'], s: ['Cocina y sirve.'], time: 20, difficulty: 'Fácil' },
       scale: 1, k: 600, p: 40, c: 60, f: 20, score: 0, slot: 'Comida',
-      ingredientAmounts: [{ text: '145 g de arroz', adjustable: true, qty: 145, unit: 'g', name: 'arroz' }]
+      ingredientAmounts: [{ text: '145 g de arroz', adjustable: true, qty: 145, unit: 'g', name: 'arroz', nutrients: { k: 522, p: 10.2, c: 115, f: 1.4 }, estimated: true }]
     })),
     totals: { k: 1800, p: 120, c: 180, f: 60 }, error: 0.01
   }))
@@ -55,6 +55,8 @@ assert.deepEqual(cleanPlan.days[0].items[0].recipe.s, ['Cocina y sirve.']);
 assert.equal(cleanPlan.days[0].items[0].recipe.id, 'rc0');
 assert.equal(cleanPlan.days[0].items[0].ingredientAmounts[0].qty, 145);
 assert.equal(cleanPlan.days[0].items[0].ingredientAmounts[0].text, '145 g de arroz');
+assert.deepEqual(cleanPlan.days[0].items[0].ingredientAmounts[0].nutrients, { k: 522, p: 10.2, c: 115, f: 1.4 });
+assert.equal(cleanPlan.days[0].items[0].ingredientAmounts[0].estimated, true);
 assert.equal(cleanBackup({ [MEAL_PLAN_KEY]: nutritionPlan })[MEAL_PLAN_KEY].days.length, 7);
 assert.throws(() => cleanMealPlan30({ ...nutritionPlan, days: [] }), /Plan nutricional/);
 assert.throws(() => cleanMealPlan30({ ...nutritionPlan, days: Array.from({length:31},(_,i)=>nutritionPlan.days[i%7]) }), /Plan nutricional/);
