@@ -2,6 +2,20 @@ name: Recomp 10 iOS Native CI
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'privacy.html'
+      - 'support.html'
+      - 'PrivacyInfo.xcprivacy'
+      - '*.js'
+      - 'tests/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.json'
+      - 'scripts/build-mobile.mjs'
+      - 'scripts/configure-ios-privacy.mjs'
+      - '.github/workflows/ios-native-ci.yml'
   push:
     branches:
       - main
@@ -9,11 +23,14 @@ on:
       - 'index.html'
       - 'privacy.html'
       - 'support.html'
+      - 'PrivacyInfo.xcprivacy'
       - '*.js'
       - 'tests/**'
       - 'package.json'
+      - 'package-lock.json'
       - 'capacitor.config.json'
       - 'scripts/build-mobile.mjs'
+      - 'scripts/configure-ios-privacy.mjs'
       - '.github/workflows/ios-native-ci.yml'
 
 permissions:
@@ -57,6 +74,9 @@ jobs:
       - name: Generate native iOS project
         run: npx cap add ios
 
+      - name: Install native privacy manifest
+        run: npm run ios:privacy
+
       - name: Validate Capacitor configuration
         run: npx cap doctor ios
 
@@ -91,6 +111,18 @@ jobs:
           echo "Built app: $APP_PATH"
           du -sh "$APP_PATH"
           echo "path=$APP_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Validate bundled privacy manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          PRIVACY="${{ steps.app.outputs.path }}/PrivacyInfo.xcprivacy"
+          test -f "$PRIVACY" || { echo 'PrivacyInfo.xcprivacy is missing from the built app'; exit 1; }
+          plutil -lint "$PRIVACY"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :NSPrivacyTracking' "$PRIVACY")" = 'false'
+          test "$(plutil -extract NSPrivacyTrackingDomains json -o - "$PRIVACY" | tr -d '[:space:]')" = '[]'
+          test "$(plutil -extract NSPrivacyCollectedDataTypes json -o - "$PRIVACY" | tr -d '[:space:]')" = '[]'
+          test "$(plutil -extract NSPrivacyAccessedAPITypes json -o - "$PRIVACY" | tr -d '[:space:]')" = '[]'
 
       - name: Stage simulator application artifact
         shell: bash
