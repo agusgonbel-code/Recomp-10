@@ -43,6 +43,15 @@ function validateFullMonth(targets){
       const exact=globalThis.RecompMealPlanner.ingredientsFor(item);
       assert.equal(exact.length,item.recipe.i.length);
       assert.ok(exact.every(x=>/^\d/.test(x)),`${item.recipe.n}: cantidad no exacta: ${exact.join(' | ')}`);
+      const calculated=item.ingredientAmounts.reduce((sum,ingredient)=>({
+        k:sum.k+ingredient.nutrients.k,p:sum.p+ingredient.nutrients.p,
+        c:sum.c+ingredient.nutrients.c,f:sum.f+ingredient.nutrients.f
+      }),{k:0,p:0,c:0,f:0});
+      assert.deepEqual(
+        {k:item.k,p:item.p,c:item.c,f:item.f},
+        {k:Math.round(calculated.k),p:Math.round(calculated.p),c:Math.round(calculated.c),f:Math.round(calculated.f)},
+        `${item.recipe.n}: los macros no proceden de las cantidades mostradas`
+      );
     }
   }
   for(const dayIndex of [0,7,14,21,29]){

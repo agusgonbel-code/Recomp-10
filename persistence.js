@@ -60,7 +60,14 @@
               adjustable: Boolean(ingredient.adjustable),
               qty: optionalNum(ingredient.qty, 0, 10000),
               unit: clip(ingredient.unit, 20),
-              name: clip(ingredient.name, 100)
+              name: clip(ingredient.name, 100),
+              nutrients: plain(ingredient.nutrients) ? {
+                k: num(ingredient.nutrients.k, 0, 5000),
+                p: num(ingredient.nutrients.p, 0, 500),
+                c: num(ingredient.nutrients.c, 0, 1000),
+                f: num(ingredient.nutrients.f, 0, 500)
+              } : null,
+              estimated: Boolean(ingredient.estimated)
             }))
           : [];
         return {

@@ -22,4 +22,6 @@ test('el formulario usa objetivos editables persistentes y soporta planes de 1 a
   assert.match(ui,/generateDays\(catalog,formValues\(\)\)/);
   assert.match(ui,/Calculando menú/);
   assert.match(ui,/savedManualTargets\(\)\|\|savedTargets\(\)/);
+  assert.match(ui,/ingredientDetailsFor\(meal\)/);
+  assert.match(ui,/cantidades visibles son exactamente las usadas/);
 });
