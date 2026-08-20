@@ -48,6 +48,14 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - Las descargas usan el nombre `recomp-10m-backup-AAAA-MM-DD.json`.
 - La URL temporal de cada exportación se libera después de descargar para evitar acumular memoria en sesiones largas de Safari.
 
+
+## Privacidad nativa y App Store
+- El proyecto iOS instala `PrivacyInfo.xcprivacy` dentro del target y del paquete compilado.
+- La versión actual declara que no realiza seguimiento ni recopila en servidores los datos locales de entrenamiento, nutrición, métricas o fotografías.
+- La CI abre y valida el manifiesto dentro de `Recomp10M.app` para impedir entregas sin esta declaración.
+- La política pública y el soporte siguen disponibles en `privacy.html` y `support.html`.
+- Si se añaden cuentas, sincronización, analítica, publicidad, crash reporting o backend, la declaración deberá revisarse antes de publicar.
+
 ## Generador de menús de 30 días
 - Acceso visible desde la pestaña `Menús` y desde la calculadora de macros; aparece antes que la biblioteca de recetas.
 - Calorías y proteína se cargan automáticamente desde la calculadora de macros y se actualizan al recalcular.
