@@ -8,6 +8,7 @@ on:
       - 'privacy.html'
       - 'support.html'
       - 'PrivacyInfo.xcprivacy'
+      - 'app-store/**'
       - '*.js'
       - 'tests/**'
       - 'package.json'
@@ -24,6 +25,7 @@ on:
       - 'privacy.html'
       - 'support.html'
       - 'PrivacyInfo.xcprivacy'
+      - 'app-store/**'
       - '*.js'
       - 'tests/**'
       - 'package.json'
@@ -74,7 +76,7 @@ jobs:
       - name: Generate native iOS project
         run: npx cap add ios
 
-      - name: Install native privacy manifest
+      - name: Install native release identity and privacy manifest
         run: npm run ios:privacy
 
       - name: Validate Capacitor configuration
@@ -87,7 +89,7 @@ jobs:
           xcodebuild \
             -project ios/App/App.xcodeproj \
             -scheme App \
-            -configuration Debug \
+            -configuration Release \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             build
@@ -97,15 +99,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          APP_PATH="$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*Build/Products/Debug-iphonesimulator/App.app' -print -quit)"
+          APP_PATH="$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*Build/Products/Release-iphonesimulator/App.app' -print -quit)"
           test -n "$APP_PATH" || { echo 'No simulator .app generated'; exit 1; }
           PLIST="$APP_PATH/Info.plist"
           BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$PLIST")"
           VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
           BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
-          test "$BUNDLE_ID" = 'com.agusgonbel.recomp10m' || { echo "Unexpected Bundle ID: $BUNDLE_ID"; exit 1; }
-          test -n "$VERSION" || { echo 'Missing CFBundleShortVersionString'; exit 1; }
-          test -n "$BUILD" || { echo 'Missing CFBundleVersion'; exit 1; }
+          EXPECTED_BUNDLE="$(node -p "require('./app-store/release.json').bundleId")"
+          EXPECTED_VERSION="$(node -p "require('./app-store/release.json').marketingVersion")"
+          EXPECTED_BUILD="$(node -p "require('./app-store/release.json').buildNumber")"
+          test "$BUNDLE_ID" = "$EXPECTED_BUNDLE" || { echo "Unexpected Bundle ID: $BUNDLE_ID"; exit 1; }
+          test "$VERSION" = "$EXPECTED_VERSION" || { echo "Unexpected version: $VERSION"; exit 1; }
+          test "$BUILD" = "$EXPECTED_BUILD" || { echo "Unexpected build: $BUILD"; exit 1; }
           echo "Bundle ID: $BUNDLE_ID"
           echo "Version: $VERSION ($BUILD)"
           echo "Built app: $APP_PATH"
