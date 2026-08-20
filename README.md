@@ -56,6 +56,13 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - La política pública y el soporte siguen disponibles en `privacy.html` y `support.html`.
 - Si se añaden cuentas, sincronización, analítica, publicidad, crash reporting o backend, la declaración deberá revisarse antes de publicar.
 
+## Identidad de distribución
+
+- `app-store/release.json` fija bundle `com.agusgonbel.recomp10m`, versión `1.0.0`, build `1` e iOS mínimo 15.
+- El proyecto Xcode generado recibe automáticamente esos valores.
+- La CI compila en configuración `Release` y comprueba versión, build, bundle y privacidad dentro de `Recomp10M.app`.
+- `app-store/metadata.es-ES.json` contiene la ficha española y sus límites editoriales se validan en las pruebas.
+
 ## Generador de menús de 30 días
 - Acceso visible desde la pestaña `Menús` y desde la calculadora de macros; aparece antes que la biblioteca de recetas.
 - Calorías y proteína se cargan automáticamente desde la calculadora de macros y se actualizan al recalcular.
