@@ -3,6 +3,7 @@ import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
 const privacySource = path.join(root, 'PrivacyInfo.xcprivacy');
+const releasePath = path.join(root, 'app-store', 'release.json');
 const privacyDestination = path.join(root, 'ios', 'App', 'App', 'PrivacyInfo.xcprivacy');
 const projectPath = path.join(root, 'ios', 'App', 'App.xcodeproj', 'project.pbxproj');
 
@@ -15,6 +16,12 @@ for (const file of [privacySource, projectPath]) {
 }
 
 await copyFile(privacySource, privacyDestination);
+
+const release = JSON.parse(await readFile(releasePath, 'utf8'));
+if (release.bundleId !== 'com.agusgonbel.recomp10m') throw new Error('El bundleId de distribución no coincide con Recomp 10M.');
+if (!/^\d+\.\d+\.\d+$/.test(release.marketingVersion)) throw new Error('La versión de distribución debe usar formato semántico.');
+if (!Number.isInteger(release.buildNumber) || release.buildNumber < 1) throw new Error('El número de compilación debe ser un entero positivo.');
+if (!/^\d+\.\d+$/.test(release.minimumIos)) throw new Error('La versión mínima de iOS no es válida.');
 
 let project = await readFile(projectPath, 'utf8');
 const fileRef = 'A11CE1010000000000000001';
@@ -44,5 +51,16 @@ if (!project.includes(resourceLine.trim())) {
   project = project.replace(resources, `$1${resourceLine}`);
 }
 
+const replaceBuildSetting = (source, name, value) => {
+  const pattern = new RegExp(`(${name} = )[^;]+;`, 'g');
+  const matches = source.match(pattern) ?? [];
+  if (!matches.length) throw new Error(`No se encontró ${name} en el proyecto Xcode.`);
+  return source.replace(pattern, (_, prefix) => `${prefix}${value};`);
+};
+
+project = replaceBuildSetting(project, 'MARKETING_VERSION', release.marketingVersion);
+project = replaceBuildSetting(project, 'CURRENT_PROJECT_VERSION', String(release.buildNumber));
+project = replaceBuildSetting(project, 'IPHONEOS_DEPLOYMENT_TARGET', release.minimumIos);
+
 await writeFile(projectPath, project, 'utf8');
-console.log('Manifiesto de privacidad instalado en el proyecto iOS.');
+console.log(`Recomp 10M ${release.marketingVersion} (${release.buildNumber}): identidad y privacidad instaladas en iOS.`);
