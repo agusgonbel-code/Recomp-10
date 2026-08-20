@@ -50,7 +50,7 @@
     {
       "order": 4,
       "id": "menu-multidia",
-      "surface": "recetas",
+      "surface": "mealPlanner30",
       "headline": "Menús equilibrados para varios días",
       "supportingText": "Cantidades reales y los mismos objetivos cada día.",
       "setup": [
