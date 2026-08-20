@@ -62,6 +62,7 @@ Sustituye en la raíz del repositorio todos estos archivos y haz un commit con e
 - El proyecto Xcode generado recibe automáticamente esos valores.
 - La CI compila en configuración `Release` y comprueba versión, build, bundle y privacidad dentro de `Recomp10M.app`.
 - `app-store/metadata.es-ES.json` contiene la ficha española y sus límites editoriales se validan en las pruebas.
+- `app-store/screenshots.es-ES.json` fija cinco capturas reproducibles con datos ficticios y valida que cada escena exista en la interfaz.
 
 ## Generador de menús de 30 días
 - Acceso visible desde la pestaña `Menús` y desde la calculadora de macros; aparece antes que la biblioteca de recetas.
