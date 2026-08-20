@@ -28,7 +28,9 @@ La CI nativa de iOS debe:
 4. ejecutar toda la suite de tests;
 5. crear `www/` con los assets que irán dentro del binario;
 6. generar el proyecto iOS;
-7. compilar el esquema `App` para iOS Simulator sin firma.
+7. instalar `PrivacyInfo.xcprivacy` como recurso del target;
+8. compilar el esquema `App` para iOS Simulator sin firma;
+9. abrir el manifiesto del `.app` generado y validar que no declara seguimiento ni recopilación.
 
 ## Identidad actual del binario
 
@@ -49,11 +51,11 @@ GitHub Pages publica desde `main` con HTTPS:
 
 La política y el soporte también son accesibles desde dentro de la propia aplicación.
 
-## Privacidad prevista para App Store Connect
+## Privacidad verificada en el paquete iOS
 
-La versión actual funciona sin cuenta y mantiene los registros de entrenamiento, nutrición, métricas y fotografías en almacenamiento local. No contiene SDK de publicidad ni analítica remota en los módulos principales. Antes de responder las preguntas de App Privacy hay que confirmar de nuevo el binario nativo final y cualquier plugin adicional que se añada.
+La versión actual funciona sin cuenta y mantiene los registros de entrenamiento, nutrición, métricas y fotografías en almacenamiento local. No contiene SDK de publicidad ni analítica remota en los módulos principales. `PrivacyInfo.xcprivacy` declara sin seguimiento, sin dominios de seguimiento y sin tipos de datos recopilados por la aplicación. La CI comprueba estas claves directamente dentro del `.app` compilado.
 
-Si el binario final mantiene esta arquitectura sin telemetría/servidor, la respuesta de App Privacy debe reflejar que Recomp 10M no recopila los datos locales del usuario en servidores del desarrollador. No se debe seleccionar esta respuesta automáticamente si después se integra analítica, crash reporting, cuentas, cloud sync, publicidad o un backend.
+Mientras el binario final mantenga esta arquitectura sin telemetría ni servidor, la respuesta de App Privacy debe reflejar que Recomp 10M no recopila los datos locales del usuario en servidores del desarrollador. No se debe seleccionar esta respuesta automáticamente si después se integra analítica, crash reporting, cuentas, cloud sync, publicidad o un backend.
 
 ## Metadatos pendientes en App Store Connect
 
