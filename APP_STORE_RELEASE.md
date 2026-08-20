@@ -64,6 +64,12 @@ Mientras el binario final mantenga esta arquitectura sin telemetría ni servidor
 
 `app-store/metadata.es-ES.json` contiene nombre, subtítulo, texto promocional, descripción, palabras clave, categoría, URLs y notas de revisión. Las pruebas verifican que la ficha esté completa, no contenga marcadores provisionales y respete los límites editoriales.
 
+## Capturas de App Store preparadas
+
+`app-store/screenshots.es-ES.json` define un guion reproducible de cinco capturas verticales para iPhone: resumen y Coach, entrenamiento, calculadora de macros, menú multidía y receta con sustitución. Cada escena enlaza con una superficie que existe en la aplicación, incluye la preparación exacta de los datos y limita la extensión del texto promocional.
+
+Las capturas deben usar exclusivamente el perfil ficticio Alex y objetivos coherentes de 2500 kcal, 170 g de proteína, 300 g de carbohidratos y 70 g de grasas. No deben aparecer fotografías reales, nombres completos, notificaciones ni información identificable. La prueba automática también impide que el guion supere las diez capturas y comprueba que objetivo, menú y receta mantengan los cuatro macros.
+
 ## Acciones pendientes en App Store Connect
 
 Estas acciones requieren la cuenta Apple del desarrollador y no pueden resolverse solo con el repositorio:
@@ -74,7 +80,7 @@ Estas acciones requieren la cuenta Apple del desarrollador y no pueden resolvers
 - completar App Privacy usando el binario final;
 - introducir Privacy Policy URL y Support URL;
 - añadir descripción, subtítulo, palabras clave y copyright;
-- subir capturas reales del binario final;
+- producir con el binario final las capturas definidas en `app-store/screenshots.es-ES.json` y subirlas;
 - completar información de revisión y contacto;
 - seleccionar el build subido desde Xcode/TestFlight;
 - enviar a App Review.
