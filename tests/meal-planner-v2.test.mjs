@@ -33,6 +33,25 @@ test('generateDays respeta el número solicitado y los cuatro macros con toleran
  }
 });
 
+test('los macros se calculan desde las mismas cantidades redondeadas que ve el usuario',()=>{
+ const plan=RecompMealPlanner.generateDays(recipes,{kcal:2217,protein:163,carbs:247,fat:69,days:2,meals:4,diet:'flexible'});
+ for(const item of plan.days.flatMap(day=>day.items)){
+   assert.ok(item.ingredientAmounts.length>0);
+   const calculated=item.ingredientAmounts.reduce((sum,ingredient)=>({
+     k:sum.k+ingredient.nutrients.k,p:sum.p+ingredient.nutrients.p,
+     c:sum.c+ingredient.nutrients.c,f:sum.f+ingredient.nutrients.f
+   }),{k:0,p:0,c:0,f:0});
+   assert.deepEqual(
+     {k:item.k,p:item.p,c:item.c,f:item.f},
+     {k:Math.round(calculated.k),p:Math.round(calculated.p),c:Math.round(calculated.c),f:Math.round(calculated.f)}
+   );
+   for(const ingredient of item.ingredientAmounts){
+     const shown=Number(ingredient.text.match(/^\d+(?:\.\d+)?/)?.[0]);
+     assert.equal(shown,ingredient.qty,'La cantidad visible y la utilizada deben coincidir');
+   }
+ }
+});
+
 test('cada ingrediente ajustable expone una cantidad concreta y la receta mantiene elaboración',()=>{
  const catalog=RecompMealPlanner.normalizeRecipeCatalog([{
    id:'rc1',name:'Pollo al limón',type:'Comida',kcal:610,p:48,c:65,f:18,
