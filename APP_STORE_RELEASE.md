@@ -36,8 +36,11 @@ La CI nativa de iOS debe:
 
 - Nombre: `Recomp 10M`
 - Bundle ID configurado: `com.agusgonbel.recomp10m`
-- Versión inicial del paquete: `1.0.0`
+- Versión inicial del paquete: `1.0.0` (build `1`)
+- iOS mínimo: `15.0`
 - Categoría prevista: Health & Fitness / Salud y forma física
+
+La fuente única de estos valores es `app-store/release.json`. El configurador los aplica al proyecto Xcode generado y la CI los valida dentro del `.app` compilado en configuración `Release`.
 
 El Bundle ID debe coincidir exactamente con el identificador que se registre en Apple Developer y App Store Connect antes del archive final.
 
@@ -57,7 +60,11 @@ La versión actual funciona sin cuenta y mantiene los registros de entrenamiento
 
 Mientras el binario final mantenga esta arquitectura sin telemetría ni servidor, la respuesta de App Privacy debe reflejar que Recomp 10M no recopila los datos locales del usuario en servidores del desarrollador. No se debe seleccionar esta respuesta automáticamente si después se integra analítica, crash reporting, cuentas, cloud sync, publicidad o un backend.
 
-## Metadatos pendientes en App Store Connect
+## Metadatos preparados
+
+`app-store/metadata.es-ES.json` contiene nombre, subtítulo, texto promocional, descripción, palabras clave, categoría, URLs y notas de revisión. Las pruebas verifican que la ficha esté completa, no contenga marcadores provisionales y respete los límites editoriales.
+
+## Acciones pendientes en App Store Connect
 
 Estas acciones requieren la cuenta Apple del desarrollador y no pueden resolverse solo con el repositorio:
 
