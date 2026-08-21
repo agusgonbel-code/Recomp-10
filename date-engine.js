@@ -29,9 +29,7 @@
     if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new TypeError('Fecha no válida');
     const parts = day.split('-').map(Number);
     const date = new Date(parts[0], parts[1] - 1, parts[2], 12);
-    if (date.getFullYear() !== parts[0] || date.getMonth() !== parts[1] - 1 || date.getDate() !== parts[2]) {
-      throw new TypeError('Fecha no válida');
-    }
+    if (date.getFullYear() !== parts[0] || date.getMonth() !== parts[1] - 1 || date.getDate() !== parts[2]) throw new TypeError('Fecha no válida');
     amount = Number(amount);
     if (!Number.isInteger(amount) || Math.abs(amount) > 3660) throw new TypeError('Desplazamiento no válido');
     date.setDate(date.getDate() + amount);
@@ -39,4 +37,14 @@
   }
 
   globalThis.RecompDate = { localDayKey, localTimestamp, shiftLocalDay };
+
+  if (typeof document !== 'undefined') {
+    const load = src => new Promise((resolve, reject) => {
+      if (document.querySelector(`script[data-r10-v2="${src}"]`)) return resolve();
+      const script = document.createElement('script');
+      script.src = src; script.dataset.r10V2 = src; script.onload = resolve; script.onerror = reject;
+      document.head.append(script);
+    });
+    load('recomp-profile-v2.js').then(() => load('recomp-intake-v2.js')).catch(() => {});
+  }
 })();
