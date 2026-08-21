@@ -45,6 +45,10 @@
       script.src = src; script.dataset.r10V2 = src; script.onload = resolve; script.onerror = reject;
       document.head.append(script);
     });
-    load('recomp-profile-v2.js').then(() => load('recomp-intake-v2.js')).catch(() => {});
+    load('recomp-profile-v2.js')
+      .then(() => load('recomp-intake-v2.js'))
+      .then(() => load('recomp-trend-v3.js'))
+      .then(() => load('recomp-trend-ui-v3.js'))
+      .catch(() => {});
   }
 })();
