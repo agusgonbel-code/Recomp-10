@@ -1,4 +1,4 @@
-# Recomp 10M — Rediseño Nutrición + Menús v5.1
+# Recomp 10M — Rediseño Nutrición + Menús v5.2
 
 Fecha: 2026-08-22
 
@@ -6,12 +6,14 @@ Fecha: 2026-08-22
 
 La auditoría de uso detectó que Nutrición y Menús se comportaban como herramientas acumuladas y no como dos recorridos coherentes. Nutrición abría con una calculadora de macros aunque la tarea frecuente es saber qué se ha comido y qué queda. Menús contenía dos generadores distintos y el planificador multidía se reubicaba dinámicamente dentro de Nutrición.
 
-La v5.1 separa definitivamente las responsabilidades:
+La reconstrucción v5.2 separa definitivamente las responsabilidades y, además, hace que el perfil único sea la fuente real de verdad para nutrición y planificación:
 
 - **Nutrición = Hoy + Diario + Objetivos.**
 - **Menús = Planificación + Recetas + Compra.**
+- **Perfil único = objetivos + número de comidas + preferencias que recibe el planificador.**
+- **3–6 comidas reales**, incluida planificación avanzada en seis tomas.
 
-Los motores nutricionales y datos existentes se conservan; se reconstruye la jerarquía y el recorrido del usuario.
+Los motores nutricionales y datos existentes se conservan cuando aportan valor; se reconstruye la jerarquía, el recorrido y la conexión entre datos.
 
 ## Problemas detectados como usuario
 
@@ -24,8 +26,11 @@ Los motores nutricionales y datos existentes se conservan; se reconstruye la jer
 7. El reparto real de kcal entre las comidas quedaba oculto.
 8. Biblioteca, compra, generadores y menú competían por la misma prioridad visual.
 9. La primera propuesta v5 introducía un `MutationObserver` que podía reaccionar a su propio redibujado de Menús y crear actualizaciones recursivas. Fue detectado durante revisión de ingeniería y eliminado antes de publicación.
+10. El perfil único guardaba los objetivos en `recomp_unified_nutrition_v2`, mientras el planificador avanzado seguía leyendo `targets`. Podían existir dos objetivos diferentes para el mismo usuario.
+11. El onboarding permitía elegir 6 comidas, pero el planificador avanzado solo aceptaba 3–5. Era una contradicción directa entre lo prometido y lo generado.
+12. El redondeo visual del reparto por comidas podía sumar 101% aunque las kcal fueran correctas.
 
-## Arquitectura v5.1
+## Arquitectura v5.2
 
 ### Nutrición · Hoy
 
@@ -42,7 +47,7 @@ Se reutiliza el diario existente, incluida la edición y eliminación, para no d
 
 ### Nutrición · Objetivos
 
-La calculadora se mantiene, pero deja de dominar el uso diario. Sus objetivos siguen alimentando el diario y el planificador.
+La calculadora se mantiene, pero deja de dominar el uso diario. Sus objetivos alimentan el diario y el planificador. Cuando el perfil único genera una nueva estrategia, `nutrition-target-sync-v51.js` sincroniza los objetivos comunes y emite el evento de actualización.
 
 ### Menús
 
@@ -50,24 +55,46 @@ La calculadora se mantiene, pero deja de dominar el uso diario. Sus objetivos si
 - objetivos, días, comidas y preferencias en el mismo flujo;
 - generadores rápidos legacy ocultos para eliminar duplicidad;
 - cabecera del plan activo con días, comidas/día y kcal promedio;
-- reparto energético real por comida;
-- receta completa, cantidades, sustitución, registro y compra semanal mediante el motor avanzado existente;
-- biblioteca de recetas como herramienta secundaria.
+- reparto energético real por comida, reconciliado visualmente al 100%;
+- receta completa, cantidades, sustitución, registro y compra semanal;
+- biblioteca de recetas como herramienta secundaria;
+- preferencias del perfil único propagadas al planificador;
+- soporte real de 3, 4, 5 o 6 comidas.
+
+### Seis comidas
+
+La extensión `meal-planner-six-v52.js` amplía el planificador avanzado con seis franjas:
+
+1. Desayuno
+2. Media mañana
+3. Comida
+4. Merienda
+5. Cena
+6. Snack nocturno
+
+El motor selecciona recetas compatibles, evita repeticiones dentro del día cuando el catálogo lo permite y optimiza las escalas de las seis recetas contra kcal, proteína, carbohidratos y grasas. Las sustituciones vuelven a optimizar el día completo.
 
 ## Decisiones de producto
 
 El registro real y el plan previsto son conceptos distintos y se muestran como tales. El usuario puede desviarse del menú sin perder el seguimiento del día. La aplicación no recomienda compensaciones extremas cuando se supera el objetivo energético y no presenta una comida aislada como fracaso.
 
+El perfil único tiene prioridad sobre valores antiguos. Si el usuario modifica manualmente los objetivos dentro del planificador, esa elección se respeta hasta que vuelva a recalcular su estrategia.
+
 ## Implementación
 
-Archivo de producto definitivo:
+Archivos de producto:
 
 - `nutrition-menu-experience-v51.js`
+- `nutrition-target-sync-v51.js`
+- `meal-planner-six-v52.js`
+- `meal-planner-profile-sync-v52.js`
 
 QA:
 
-- `tests/nutrition-menu-experience-v5.test.mjs` (motor v5.1)
-- `qa/nutrition-menu-v5.spec.js` (recorridos reales)
+- `tests/nutrition-menu-experience-v5.test.mjs`
+- `tests/meal-planner-six-v52.test.mjs`
+- `qa/nutrition-menu-v5.spec.js`
+- `qa/browser-smoke.spec.js`
 
 Integración actualizada:
 
@@ -76,7 +103,7 @@ Integración actualizada:
 - `sw.js`
 - `.github/workflows/browser-smoke.yml`
 
-La v5.1 no utiliza observadores recursivos: refresca la cabecera después de acciones explícitas y eventos de datos.
+La experiencia no utiliza observadores recursivos: refresca las cabeceras tras acciones explícitas y eventos de datos.
 
 ## QA profesional
 
@@ -85,7 +112,11 @@ La v5.1 no utiliza observadores recursivos: refresca la cabecera después de acc
 - suma del diario por fecha;
 - restante de kcal/macros;
 - estado contextual del día;
-- reparto real de kcal del menú.
+- reparto real de kcal del menú y suma visual exacta al 100%;
+- aceptación de 6 comidas;
+- generación de seis franjas reales;
+- sustitución en un día de seis comidas;
+- lista de compra compatible con seis comidas.
 
 ### Usuario · Nutrición
 
@@ -107,17 +138,31 @@ La v5.1 no utiliza observadores recursivos: refresca la cabecera después de acc
 6. abrir una receta y sus ingredientes;
 7. sustituir una comida y comprobar que el día sigue utilizable;
 8. confirmar que el planificador pertenece a Menús;
-9. verificar ausencia de errores JavaScript.
+9. seleccionar/perfilar seis comidas y comprobar seis comidas reales en el día;
+10. verificar ausencia de errores JavaScript.
 
-## Fallos encontrados durante la iteración
+### Usuario · Fuente única
 
-- **PWA CI:** el primer cambio del service worker conservaba la misma semántica network-first, pero su minificación rompió una prueba de regresión que exigía la forma explícita `destination === 'script'`. Se restauró una implementación legible y compatible con el test.
+1. completar el perfil único;
+2. generar nutrición y entrenamiento;
+3. comprobar `recomp_unified_nutrition_v2.targets`;
+4. comprobar que `targets` coincide exactamente;
+5. abrir Menús y confirmar que utiliza esos objetivos;
+6. comprobar que el número de comidas del perfil aparece en el planificador.
+
+## Fallos encontrados y corregidos durante la iteración
+
+- **PWA CI:** el primer cambio del service worker conservaba la semántica network-first, pero su minificación rompió una regresión protegida. Se restauró una implementación legible y compatible.
 - **Arquitectura UI v5:** riesgo de bucle de `MutationObserver` al redibujar Menús. Eliminado en v5.1.
-- **Runtime v5:** la primera variante necesitaba helpers globales para la UI. v5.1 encapsula sus helpers y elimina esa dependencia.
+- **Runtime v5:** dependencia innecesaria de helpers globales. Eliminada en v5.1.
+- **Reparto visual:** porcentajes redondeados podían totalizar 101%. El último elemento absorbe ahora el residual y el total visible es exactamente 100%.
+- **Fuente de verdad:** el intake y el planificador podían usar claves distintas para los objetivos. Se creó sincronización explícita y QA que exige igualdad exacta.
+- **Número de comidas:** el perfil ofrecía 6 y el planificador rechazaba 6. La v5.2 amplía generación, sustitución, QA y UI a 3–6 comidas.
+- **Deuda de producto:** PR #19, que proponía mover el planificador a Nutrición, fue cerrado sin fusionar para no reintroducir la arquitectura descartada.
 
 ## Release gate
 
-No fusionar hasta que estén verdes:
+No fusionar hasta que estén verdes en el mismo HEAD:
 
 - Recomp 10 CI
 - Recomp Browser Smoke
