@@ -21,9 +21,19 @@
     const bmr = 10 * weight + 6.25 * height - 5 * age + (sex === 'm' ? 5 : -161);
     const tdee = bmr * activity;
     const kcal = Math.round(tdee * (1 + goal));
+    if (!Number.isFinite(kcal) || kcal < 1200 || kcal > 5000) {
+      throw new Error('El objetivo calculado queda fuera del rango nutricional compatible (1200–5000 kcal). Revisa edad, peso, altura, actividad y objetivo.');
+    }
     const protein = Math.round(weight * (goal < 0 ? 2.2 : 2));
     const fat = Math.round(weight * 0.9);
-    const carbs = Math.max(0, Math.round((kcal - protein * 4 - fat * 9) / 4));
+    const committedKcal = protein * 4 + fat * 9;
+    if (committedKcal >= kcal) {
+      throw new Error('El objetivo calórico no permite repartir proteína, grasas y carbohidratos de forma coherente. Revisa tus datos u objetivo.');
+    }
+    const carbs = Math.round((kcal - committedKcal) / 4);
+    if (!Number.isFinite(carbs) || carbs < 0) {
+      throw new Error('No se ha podido calcular un reparto de macronutrientes coherente.');
+    }
     return { kcal, protein, carbs, fat, bmr: Math.round(bmr), tdee: Math.round(tdee) };
   }
 
