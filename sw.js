@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v51-nutrition-menu-redesign';
+const CACHE_NAME = 'recomp-10-v52-nutrition-menu-redesign';
 const APP_SHELL = [
   './',
   './index.html',
@@ -10,6 +10,8 @@ const APP_SHELL = [
   './nutrition-engine.js',
   './meal-planner.js',
   './meal-planner-ui.js',
+  './meal-planner-six-v52.js',
+  './meal-planner-profile-sync-v52.js',
   './coach-engine.js',
   './photo-engine.js',
   './recomp-profile-v2.js',
