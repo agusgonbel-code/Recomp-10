@@ -11,7 +11,7 @@
 
   function localDayKey(value = new Date()) {
     const date = validDate(value);
-    return date.getFullYear() + '-' + pad(date.getMonth() + 1, 2) + '-' + pad(date.getDate(), 2);
+    return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
   }
 
   function localTimestamp(value = new Date()) {
