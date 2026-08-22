@@ -3,12 +3,17 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
+concurrency:
+  group: recomp-browser-smoke-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   smoke:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,5 +25,38 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Start app
         run: python3 -m http.server 4173 >/tmp/recomp-http.log 2>&1 &
-      - name: Run user journeys, nutrition and mobile quality gates
-        run: npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js qa/mobile-layout.spec.js qa/meal-intelligence-v60.spec.js --reporter=line
+      - name: Run user journeys, nutrition, mobile and accessibility gates
+        id: gate
+        shell: bash
+        run: |
+          set +e
+          npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js qa/mobile-layout.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js --reporter=line > /tmp/recomp-gate.log 2>&1
+          code=$?
+          set -e
+          mkdir -p qa
+          {
+            echo 'RECOMP 10M FAST RELEASE GATE'
+            echo "SOURCE_COMMIT: $GITHUB_SHA"
+            if [ "$code" -eq 0 ]; then echo 'RESULT: PASS'; else echo 'RESULT: FAIL'; fi
+            echo "EXIT_CODE: $code"
+            echo "UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo 'COVERAGE: browser + nutrition + mobile + meal intelligence + accessibility'
+            echo '--- TEST OUTPUT (tail) ---'
+            tail -n 300 /tmp/recomp-gate.log
+          } > qa/latest-release-gate.txt
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+      - name: Persist gate evidence
+        if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Recomp QA Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add qa/latest-release-gate.txt
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'QA result: Recomp fast release gate [skip ci]'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Enforce gate
+        if: always()
+        run: test "${{ steps.gate.outputs.code }}" = "0"
