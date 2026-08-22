@@ -55,6 +55,7 @@
       .then(() => load('recomp-trend-v3.js'))
       .then(() => load('recomp-trend-ui-v3.js'))
       .then(() => load('recomp-checkin-v4.js'))
+      .then(() => load('checkin-local-v55.js'))
       .then(() => load('nutrition-menu-experience-v51.js'))
       .catch(error => console.error('Recomp enhancement load failed', error));
   }
