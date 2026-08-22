@@ -12,14 +12,23 @@ function totalsForDate(meals=[],date=''){return (Array.isArray(meals)?meals:[]).
 function remaining(t={},u={}){return{kcal:r(n(t.kcal)-n(u.kcal)),protein:r(n(t.protein)-n(u.protein)),carbs:r(n(t.carbs)-n(u.carbs)),fat:r(n(t.fat)-n(u.fat))}}
 function progress(used,target){return target>0?clamp(n(used)/n(target)*100,0,140):0}
 function dayStatus(t={},u={}){const k=n(u.kcal)/Math.max(1,n(t.kcal)),p=n(u.protein)/Math.max(1,n(t.protein));if(k>1.12)return{tone:'over',label:'Por encima del objetivo',message:'Ya has superado el objetivo energético. No hace falta compensar de forma extrema.'};if(k>=.88&&p>=.9)return{tone:'good',label:'Día bien encaminado',message:'Energía y proteína están cerca del objetivo. Mantén el plan sin perseguir la perfección.'};if(p<.55&&k>.55)return{tone:'warn',label:'Proteína retrasada',message:'La próxima comida puede priorizar proteína sin necesidad de rehacer todo el día.'};if(k<.35)return{tone:'neutral',label:'Día en curso',message:'Todavía queda margen amplio. Registra lo que realmente comas y usa el menú como guía.'};return{tone:'neutral',label:'En progreso',message:'La valoración se hace sobre el día completo, no sobre una comida aislada.'}}
-function mealDistribution(day){const items=day?.items||[],total=items.reduce((s,x)=>s+Math.max(0,n(x.k)),0)||1;return items.map(x=>({slot:x.slot||x.recipe?.m||'Comida',name:x.recipe?.n||'Comida',kcal:r(x.k),protein:r(x.p),share:r(n(x.k)/total*100)}))}
+function mealDistribution(day){
+  const items=day?.items||[],total=items.reduce((s,x)=>s+Math.max(0,n(x.k)),0)||1;
+  let usedShare=0;
+  return items.map((x,index)=>{
+    const last=index===items.length-1;
+    const share=last?Math.max(0,100-usedShare):r(n(x.k)/total*100);
+    usedShare+=share;
+    return{slot:x.slot||x.recipe?.m||'Comida',name:x.recipe?.n||'Comida',kcal:r(x.k),protein:r(x.p),share};
+  });
+}
 return{totalsForDate,remaining,progress,dayStatus,mealDistribution};
 });
 
 if(typeof document!=='undefined')(()=>{
 'use strict';
 const $=id=>document.getElementById(id),num=(v,f=0)=>{const x=Number(v);return Number.isFinite(x)?x:f},round=v=>Math.round(num(v));
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??f}catch{return f}};
 const localToday=()=>globalThis.RecompDate?.localDayKey?.()||new Date().toISOString().slice(0,10);
 function installStyles(){if($('r10NutritionV51Styles'))return;const s=document.createElement('style');s.id='r10NutritionV51Styles';s.textContent=`
