@@ -8,6 +8,7 @@ const files=[
   'index.html','privacy.html','support.html','manifest.webmanifest',
   'persistence.js','date-engine.js','training-engine.js','nutrition-engine.js',
   'meal-planner.js','meal-planner-ui.js','coach-engine.js','photo-engine.js',
+  'recomp-profile-v2.js','recomp-intake-v2.js','recomp-review-v3.js','recomp-trend-v3.js','recomp-trend-ui-v3.js','recomp-checkin-v4.js',
   'icon-192.png','icon-512.png'
 ];
 
@@ -19,9 +20,6 @@ for(const file of files){
   await cp(source,path.join(out,file));
 }
 
-// Capacitor sirve los assets desde un origen nativo. No necesitamos registrar el
-// service worker dentro del binario: todos los recursos esenciales ya viajan
-// empaquetados y esto evita mezclar el caché PWA con el contenedor iOS.
 const indexPath=path.join(out,'index.html');
 let html=await readFile(indexPath,'utf8');
 html=html.replace(
