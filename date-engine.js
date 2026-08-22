@@ -11,7 +11,7 @@
 
   function localDayKey(value = new Date()) {
     const date = validDate(value);
-    return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+    return date.getFullYear() + '-' + pad(date.getMonth() + 1, 2) + '-' + pad(date.getDate(), 2);
   }
 
   function localTimestamp(value = new Date()) {
@@ -48,6 +48,8 @@
     load('recomp-profile-v2.js')
       .then(() => load('recomp-intake-v2.js'))
       .then(() => load('nutrition-target-sync-v51.js'))
+      .then(() => load('meal-planner-six-v52.js'))
+      .then(() => load('meal-planner-profile-sync-v52.js'))
       .then(() => load('recomp-review-v3.js'))
       .then(() => load('recomp-trend-v3.js'))
       .then(() => load('recomp-trend-ui-v3.js'))
