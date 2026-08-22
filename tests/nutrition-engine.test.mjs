@@ -15,6 +15,12 @@ assert.throws(() => calculateTargets({
 assert.equal(calculateTargets({
   sex: 'f', age: 40, height: 165, weight: 60, activity: 1.3, goal: -0.15
 }).carbs >= 0, true);
+assert.throws(() => calculateTargets({
+  sex: 'f', age: 100, height: 120, weight: 35, activity: 1.1, goal: -0.3
+}), /fuera del rango nutricional compatible/);
+assert.throws(() => calculateTargets({
+  sex: 'm', age: 14, height: 230, weight: 350, activity: 2.2, goal: 0.2
+}), /fuera del rango nutricional compatible/);
 
 assert.deepEqual(mealTotals([
   { date: '2026-08-11', kcal: 500, p: 30, c: 50, f: 10 },
