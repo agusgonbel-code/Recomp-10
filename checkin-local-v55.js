@@ -11,8 +11,9 @@
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   }
   function install(engine,dateApi){
-    if(!engine||engine.__localV55)return engine;
-    const originalAdd=engine.add?.bind(engine);
+    if(!engine)return engine;
+    if(!engine.__localV55OriginalAdd&&typeof engine.add==='function')engine.__localV55OriginalAdd=engine.add.bind(engine);
+    const originalAdd=engine.__localV55OriginalAdd;
     if(typeof originalAdd==='function')engine.add=(history,input={})=>{
       const localDay=(dateApi?.localDayKey||fallbackLocalDay)();
       const next=input&&input.date?input:{...input,date:localDay};

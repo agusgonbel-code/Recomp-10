@@ -21,4 +21,4 @@ jobs:
       - name: Start app
         run: python3 -m http.server 4173 >/tmp/recomp-http.log 2>&1 &
       - name: Run user journeys, nutrition and mobile quality gates
-        run: npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js qa/mobile-layout.spec.js --reporter=line
+        run: npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js qa/mobile-layout.spec.js qa/meal-intelligence-v60.spec.js --reporter=line
