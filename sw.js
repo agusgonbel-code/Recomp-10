@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v5-nutrition-menu-redesign';
+const CACHE_NAME = 'recomp-10-v51-nutrition-menu-redesign';
 const APP_SHELL = [
   './',
   './index.html',
@@ -18,8 +18,7 @@ const APP_SHELL = [
   './recomp-trend-v3.js',
   './recomp-trend-ui-v3.js',
   './recomp-checkin-v4.js',
-  './nutrition-menu-runtime-v5.js',
-  './nutrition-menu-experience-v5.js',
+  './nutrition-menu-experience-v51.js',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png'
