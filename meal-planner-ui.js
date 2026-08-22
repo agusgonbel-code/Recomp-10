@@ -13,6 +13,42 @@
   const sourceKey=(day,item)=>'mealPlan:'+String(plan?.createdAt||'unknown')+':'+day+':'+item;
   const loggedToday=source=>{try{return (JSON.parse(localStorage.getItem('meals')||'[]')||[]).some(meal=>meal?.date===RecompDate.localDayKey()&&meal?.sourceKey===source)}catch{return false}};
 
+  function installProfessionalMobile(){
+    if(document.getElementById('recompProfessionalMobile'))return;
+    const style=document.createElement('style');style.id='recompProfessionalMobile';style.textContent=`
+      html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%}
+      main,.section,.hero,.card,.row,.grid,.mp-day,.mp-meal,.mp-recipe-link,#mealPlanner30,#mpResult{min-width:0;max-width:100%}
+      img,canvas,svg{max-width:100%}button,input,select,textarea{min-width:0;max-width:100%}
+      .navicon{height:22px;display:grid;place-items:center;margin:0 auto 3px;font-size:0}.navicon svg{width:21px;height:21px;display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+      @media(max-width:600px){
+        main{width:100%;padding:14px 12px calc(112px + env(safe-area-inset-bottom))}
+        .hero{padding:20px;border-radius:24px}.hero h1{font-size:32px;line-height:1.04}
+        .row{flex-wrap:wrap}.row>*{flex:1 1 min(100%,240px);min-width:0}
+        .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.card{min-width:0}
+        .mp-day{width:100%}.mp-day summary{gap:10px;align-items:flex-start;min-width:0}.mp-day summary span:first-child{min-width:0;flex:1}
+        .mp-meal{display:grid;grid-template-columns:minmax(0,1fr) 46px 46px;gap:8px;align-items:center;padding:12px;min-width:0}
+        .mp-meal>div,.mp-recipe-link{min-width:0;width:100%;max-width:100%}.mp-recipe-link{padding:8px 4px;overflow-wrap:normal;word-break:normal;white-space:normal}
+        .mp-recipe-link small,.mp-recipe-link b,.mp-recipe-link span{display:block;max-width:100%;overflow-wrap:normal;word-break:normal;white-space:normal}
+        .mp-meal button:not(.mp-recipe-link){width:46px;min-width:46px;max-width:46px;height:46px;min-height:46px;padding:0;display:grid;place-items:center}
+        .setrow{grid-template-columns:32px repeat(3,minmax(0,1fr));gap:6px}.setrow input{padding:10px 8px}
+        nav{grid-template-columns:repeat(6,minmax(0,1fr));padding:7px max(4px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left));gap:2px}
+        nav button{min-width:0;padding:7px 1px;font-size:9px;line-height:1.15;overflow:hidden;text-overflow:ellipsis}
+        .mp-tabs{max-width:100%;overscroll-behavior-inline:contain}.mp-form .row button{min-height:46px}
+      }
+      @media(max-width:360px){main{padding-left:10px;padding-right:10px}.mp-meal{grid-template-columns:minmax(0,1fr) 44px 44px;padding:10px;gap:6px}.mp-meal button:not(.mp-recipe-link){width:44px;min-width:44px;max-width:44px;height:44px}.hero h1{font-size:29px}}
+    `;document.head.appendChild(style);
+  }
+  function upgradeNavIcons(){
+    const icons=[
+      '<svg viewBox="0 0 24 24"><path d="m3 11 9-7 9 7v9H6v-9"/><path d="M10 20v-6h4v6"/></svg>',
+      '<svg viewBox="0 0 24 24"><path d="M4 15h3l2-6 3 10 3-8 2 4h3"/><path d="M4 5v14M20 5v14"/></svg>',
+      '<svg viewBox="0 0 24 24"><path d="M5 19c0-7 3-12 7-14 4 2 7 7 7 14"/><path d="M8 11h8M7 15h10"/></svg>',
+      '<svg viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>',
+      '<svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="m7 15 4-4 3 2 5-6"/></svg>',
+      '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9 7 7m10 10 2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg>'
+    ];document.querySelectorAll('nav .navicon').forEach((el,i)=>{if(icons[i])el.innerHTML=icons[i]});
+  }
+
   function ensureLegalLinks(){
     if($('recompLegalLinks')||!document.body)return;
     const footer=document.createElement('footer');footer.id='recompLegalLinks';footer.setAttribute('aria-label','Información legal y soporte');
@@ -76,7 +112,7 @@
     if(visibleWeek>=weeks)visibleWeek=Math.max(0,weeks-1);
     const tabs=Array.from({length:weeks},(_,i)=>'<button class="'+(i===visibleWeek?'active':'')+'" data-week="'+i+'">S'+(i+1)+'</button>').join('');
     const target=plan.preferences;
-    const days=plan.days.slice(start,end).map((d,di)=>'<details class="mp-day" '+(di===0?'open':'')+'><summary><span><b>Día '+d.day+'</b><small>'+d.totals.k+' kcal · P '+d.totals.p+' · C '+d.totals.c+' · G '+d.totals.f+'</small></span><span>›</span></summary>'+d.items.map((x,ii)=>{const day=start+di,logged=loggedToday(sourceKey(day,ii));return '<div class="mp-meal"><button class="mp-recipe-link" data-recipe="'+day+','+ii+'"><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · C '+x.c+' · G '+x.f+' · Ver receta</span></button><button class="secondary mp-log" data-log="'+day+','+ii+'" '+(logged?'disabled':'')+'>'+(logged?'✓':'+')+'</button><button class="secondary" data-swap="'+day+','+ii+'">↻</button></div>'}).join('')+'</details>').join('');
+    const days=plan.days.slice(start,end).map((d,di)=>'<details class="mp-day" '+(di===0?'open':'')+'><summary><span><b>Día '+d.day+'</b><small>'+d.totals.k+' kcal · P '+d.totals.p+' · C '+d.totals.c+' · G '+d.totals.f+'</small></span><span>›</span></summary>'+d.items.map((x,ii)=>{const day=start+di,logged=loggedToday(sourceKey(day,ii));return '<div class="mp-meal"><button class="mp-recipe-link" data-recipe="'+day+','+ii+'"><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · C '+x.c+' · G '+x.f+' · Ver receta</span></button><button class="secondary mp-log" data-log="'+day+','+ii+'" '+(logged?'disabled':'')+' aria-label="'+(logged?'Comida registrada':'Registrar comida')+'">'+(logged?'✓':'+')+'</button><button class="secondary" data-swap="'+day+','+ii+'" aria-label="Cambiar receta">↻</button></div>'}).join('')+'</details>').join('');
     const shop=RecompMealPlanner.shoppingByWeek(plan,visibleWeek).map(x=>'<label class="mp-check"><input type="checkbox"> <span>'+esc(x.name)+'</span><small>×'+x.count+'</small></label>').join('');
     $('mpStatus').innerHTML='<div class="good"><b>'+totalDays+' días · objetivos usados:</b> '+target.kcal+' kcal · P '+target.protein+' g · C '+target.carbs+' g · G '+target.fat+' g. Todos los días se mantienen en la misma banda nutricional; si una combinación variada no cuadra, se reutiliza una combinación válida antes que entregar macros incorrectos.</div>';
     $('mpResult').innerHTML='<div class="mp-tabs">'+tabs+'</div>'+days+'<div class="card mp-shop"><h3>Compra · semana '+(visibleWeek+1)+'</h3>'+shop+'</div>';
@@ -86,7 +122,7 @@
     document.querySelectorAll('[data-log]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.log.split(',').map(Number);logMeal(d,i)});
   }
   function init(){
-    ensureLegalLinks();moveIntoNutrition();const root=$('mealPlanner30');if(!root)return;const manual=savedManualTargets(),t=RecompMealPlanner.macroTargets(manual||savedTargets());
+    installProfessionalMobile();upgradeNavIcons();ensureLegalLinks();moveIntoNutrition();const root=$('mealPlanner30');if(!root)return;const manual=savedManualTargets(),t=RecompMealPlanner.macroTargets(manual||savedTargets());
     root.innerHTML='<div class="mp-intro"><span class="pill">NUTRICIÓN</span><h2>Menú ajustado a tus macros</h2><p>La calculadora propone unos objetivos, pero tú mandas: puedes editar los cuatro valores antes de generar y la app recordará tus ajustes.</p></div><div class="card mp-form"><h3>1 · Objetivos diarios editables</h3><div class="good">Puedes cambiar estos valores después de calcularlos. El menú se genera con lo que aparezca aquí, no con valores ocultos.</div><div class="row"><div><label>Calorías</label><input id="mpKcal" type="number" value="'+esc(t.kcal)+'"></div><div><label>Proteína (g)</label><input id="mpProtein" type="number" value="'+esc(t.protein)+'"></div></div><div class="row"><div><label>Carbohidratos (g)</label><input id="mpCarbs" type="number" value="'+esc(t.carbs)+'"></div><div><label>Grasas (g)</label><input id="mpFat" type="number" value="'+esc(t.fat)+'"></div></div><div class="row"><button id="mpSaveTargets" class="secondary">Usar y guardar estos objetivos</button><button id="mpCalculatorTargets" class="secondary">Recuperar calculadora</button></div><div class="row"><div><label>Días</label><input id="mpDays" type="number" min="1" max="30" value="7"></div><div><label>Comidas / día</label><select id="mpMeals"><option>3</option><option selected>4</option><option>5</option></select></div></div><h3>2 · Preferencias</h3><label>Estilo</label><select id="mpDiet"><option value="flexible">Flexible</option><option value="vegetariana">Vegetariano</option><option value="vegana">Vegano</option><option value="pescetariana">Pescetariano</option><option value="sin-lactosa">Sin lactosa</option><option value="sin-gluten">Sin gluten</option></select><label>Alergias o alimentos excluidos</label><input id="mpExcluded" placeholder="Ej. cacahuete, marisco, cebolla"><label>Ingredientes que ya tienes o prefieres</label><input id="mpPantry" placeholder="Ej. arroz, huevos, pollo"><div class="row"><div><label>Tiempo máximo</label><select id="mpTime"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">60 min</option></select></div><div><label>Presupuesto</label><select id="mpBudget"><option value="bajo">Ajustado</option><option value="medio" selected>Medio</option><option value="alto">Flexible</option></select></div></div><label>Variedad</label><select id="mpVariety"><option value="alta" selected>Alta</option><option value="media">Media</option><option value="baja">Baja</option></select><button id="mpGenerate" style="width:100%;margin-top:14px">Generar menú</button></div><div id="mpRecipeDetail"></div><div id="mpStatus"></div><div id="mpResult"></div>';
     $('mpGenerate').onclick=generate;$('mpSaveTargets').onclick=()=>persistManualTargets(true);$('mpCalculatorTargets').onclick=useCalculatorTargets;
     ['mpKcal','mpProtein','mpCarbs','mpFat'].forEach(id=>$(id).addEventListener('change',()=>persistManualTargets(false)));
