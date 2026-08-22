@@ -8,7 +8,7 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,5 +20,5 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Start app
         run: python3 -m http.server 4173 >/tmp/recomp-http.log 2>&1 &
-      - name: Run user journeys
-        run: npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js --reporter=line
+      - name: Run user journeys, nutrition and mobile quality gates
+        run: npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js qa/mobile-layout.spec.js --reporter=line
