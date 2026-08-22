@@ -47,6 +47,7 @@
     });
     load('recomp-profile-v2.js')
       .then(() => load('recomp-intake-v2.js'))
+      .then(() => load('nutrition-target-sync-v51.js'))
       .then(() => load('recomp-review-v3.js'))
       .then(() => load('recomp-trend-v3.js'))
       .then(() => load('recomp-trend-ui-v3.js'))
