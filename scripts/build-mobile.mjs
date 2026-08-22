@@ -8,7 +8,7 @@ const files=[
   'index.html','privacy.html','support.html','manifest.webmanifest',
   'persistence.js','date-engine.js','training-engine.js','nutrition-engine.js',
   'meal-planner.js','meal-planner-ui.js','coach-engine.js','photo-engine.js',
-  'recomp-profile-v2.js','recomp-intake-v2.js','recomp-review-v3.js','recomp-trend-v3.js','recomp-trend-ui-v3.js','recomp-checkin-v4.js',
+  'recomp-profile-v2.js','recomp-intake-v2.js','recomp-review-v3.js','recomp-trend-v3.js','recomp-trend-ui-v3.js','recomp-checkin-v4.js','nutrition-menu-experience-v5.js',
   'icon-192.png','icon-512.png'
 ];
 
