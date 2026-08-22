@@ -21,3 +21,10 @@ test('rejects a plan with fewer requested days',()=>{
   const day={items:[{k:500},{k:500},{k:500},{k:500}]};
   assert.throws(()=>quality.validatePlan({days:[day],preferences:{meals:4}},{days:2,meals:4}),/se solicitaron 2 días/);
 });
+
+test('rejects malformed energy shares even when meal count matches',()=>{
+  const base={items:[{k:500},{k:500},{k:500},{k:500}]};
+  assert.throws(()=>quality.validatePlan({days:[{...base,energyDistribution:{shares:[.4,.4,.4,-.2]}}],preferences:{meals:4}},{days:1,meals:4}),/reparto energético inconsistente/);
+  assert.throws(()=>quality.validatePlan({days:[{...base,energyDistribution:{shares:[.2,.2,.2,.2]}}],preferences:{meals:4}},{days:1,meals:4}),/reparto energético inconsistente/);
+  assert.equal(quality.validShares([.22,.34,.14,.30],4),true);
+});
