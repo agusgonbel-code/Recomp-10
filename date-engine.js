@@ -49,6 +49,7 @@
       .then(() => load('recomp-intake-v2.js'))
       .then(() => load('nutrition-target-sync-v51.js'))
       .then(() => load('meal-planner-six-v52.js'))
+      .then(() => load('quality-v53.js'))
       .then(() => load('meal-planner-profile-sync-v52.js'))
       .then(() => load('recomp-review-v3.js'))
       .then(() => load('recomp-trend-v3.js'))
