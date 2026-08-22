@@ -1,130 +1,126 @@
-# Recomp 10M — Rediseño Nutrición + Menús v5
+# Recomp 10M — Rediseño Nutrición + Menús v5.1
 
 Fecha: 2026-08-22
 
 ## Resumen ejecutivo
 
-La auditoría de uso detectó que las pestañas Nutrición y Menús se comportaban como un conjunto de herramientas acumuladas, no como dos flujos de producto coherentes. Nutrición abría con una calculadora de macros aunque la tarea frecuente del usuario es saber qué ha consumido y qué le queda. Menús contenía dos generadores distintos, biblioteca y compra en la misma jerarquía; además el generador de 30 días era reubicado dinámicamente dentro de Nutrición, rompiendo el modelo mental de navegación.
+La auditoría de uso detectó que Nutrición y Menús se comportaban como herramientas acumuladas y no como dos recorridos coherentes. Nutrición abría con una calculadora de macros aunque la tarea frecuente es saber qué se ha comido y qué queda. Menús contenía dos generadores distintos y el planificador multidía se reubicaba dinámicamente dentro de Nutrición.
 
-El rediseño v5 separa responsabilidades:
+La v5.1 separa definitivamente las responsabilidades:
 
-- Nutrición = estado de hoy, diario y objetivos.
-- Menús = planificación, recetas y compra.
+- **Nutrición = Hoy + Diario + Objetivos.**
+- **Menús = Planificación + Recetas + Compra.**
 
-Se preservan los motores existentes, datos locales y compatibilidad con el diario, pero se sustituye la jerarquía de interfaz.
+Los motores nutricionales y datos existentes se conservan; se reconstruye la jerarquía y el recorrido del usuario.
 
-## Benchmark de producto
+## Problemas detectados como usuario
 
-Patrones adoptados de productos líderes del ámbito nutricional:
+1. La calculadora era la primera experiencia de Nutrición aunque es una tarea ocasional.
+2. Nutrición mezclaba estrategia, diario y planificación.
+3. Menús tenía generador multidía y generadores rápidos paralelos.
+4. `mealPlanner30` era movido de Menús a Nutrición, rompiendo el modelo mental de navegación.
+5. El menú activo no tenía una cabecera que explicase días, comidas y energía media.
+6. No se veía de un vistazo consumido frente a objetivo/restante.
+7. El reparto real de kcal entre las comidas quedaba oculto.
+8. Biblioteca, compra, generadores y menú competían por la misma prioridad visual.
+9. La primera propuesta v5 introducía un `MutationObserver` que podía reaccionar a su propio redibujado de Menús y crear actualizaciones recursivas. Fue detectado durante revisión de ingeniería y eliminado antes de publicación.
 
-- Dashboard diario primero; configuración después.
-- Comparación consumido/restante frente a objetivos.
-- Registro y edición de comidas como flujo principal de baja fricción.
-- Planificación separada del registro real.
-- Recetas revisables antes de registrarlas.
-- Recomendaciones basadas en el día completo y en tendencias, evitando respuestas agresivas a una sola comida.
+## Arquitectura v5.1
 
-No se copian diseños, textos, marcas ni activos de terceros.
+### Nutrición · Hoy
 
-## Problemas encontrados como usuario
+- kcal, proteína, carbohidratos y grasas consumidos frente a objetivo;
+- barras de progreso y restante;
+- estado contextual del día sin juzgar una comida aislada;
+- resumen de comidas realmente registradas;
+- plan previsto procedente de Menús;
+- accesos directos a registrar comida y al menú.
 
-1. La primera pantalla de Nutrición era una calculadora, una tarea ocasional presentada como tarea principal.
-2. Nutrición mezclaba calculadora, diario y acceso al generador de 30 días.
-3. Menús tenía un generador de 30 días y, además, generadores rápidos diario/semanal, creando dos fuentes de verdad.
-4. El generador de 30 días se movía automáticamente desde Menús a Nutrición.
-5. La biblioteca de recetas tenía el mismo peso visual que el menú activo.
-6. Era difícil responder de un vistazo a: kcal consumidas, proteína consumida y cuánto queda.
-7. El reparto energético entre las comidas del plan no se visualizaba claramente.
-8. En móvil había demasiados bloques largos antes de llegar a la acción principal.
+### Nutrición · Diario
 
-## Nueva arquitectura UX
+Se reutiliza el diario existente, incluida la edición y eliminación, para no duplicar almacenamiento ni crear dos fuentes de verdad.
 
-### Nutrición
+### Nutrición · Objetivos
 
-#### Hoy
-- Hero con estado diario.
-- kcal, proteína, carbohidratos y grasas consumidos/objetivo.
-- barras de progreso.
-- restante aproximado.
-- estado contextual: día en curso, proteína retrasada, día bien encaminado o exceso energético.
-- resumen de comidas registradas.
-- tira con el plan de comidas previsto desde Menús.
-
-#### Diario
-- selector de fecha existente.
-- alta, edición y eliminación de comidas mediante el motor existente.
-- registro real separado del menú planificado.
-
-#### Objetivos
-- cálculo de macros desplazado a una tarea secundaria.
-- objetivos compartidos con el generador de menú.
+La calculadora se mantiene, pero deja de dominar el uso diario. Sus objetivos siguen alimentando el diario y el planificador.
 
 ### Menús
 
-- Un único estudio de planificación.
-- Si no existe plan: mensaje y generador principal.
-- Si existe plan: número de días, comidas/día y kcal promedio visibles antes del detalle.
-- reparto real de kcal del primer día mostrado por comida.
-- generadores rápidos legacy ocultos para evitar fuentes de verdad paralelas.
-- biblioteca de recetas mantenida como herramienta opcional.
-- recetas, sustituciones, registro y lista de compra continúan usando el motor avanzado existente.
+- un solo estudio de planificación;
+- objetivos, días, comidas y preferencias en el mismo flujo;
+- generadores rápidos legacy ocultos para eliminar duplicidad;
+- cabecera del plan activo con días, comidas/día y kcal promedio;
+- reparto energético real por comida;
+- receta completa, cantidades, sustitución, registro y compra semanal mediante el motor avanzado existente;
+- biblioteca de recetas como herramienta secundaria.
 
-## Lógica de seguridad nutricional
+## Decisiones de producto
 
-La interfaz no etiqueta una comida aislada como éxito o fracaso. El estado diario considera energía y proteína acumuladas. Cuando el usuario supera el objetivo energético se evita recomendar compensación extrema. Las recomendaciones son informativas y no sustituyen consejo médico.
+El registro real y el plan previsto son conceptos distintos y se muestran como tales. El usuario puede desviarse del menú sin perder el seguimiento del día. La aplicación no recomienda compensaciones extremas cuando se supera el objetivo energético y no presenta una comida aislada como fracaso.
 
-## Integración técnica
+## Implementación
 
-Archivos nuevos:
+Archivo de producto definitivo:
 
-- `nutrition-menu-experience-v5.js`
-- `nutrition-menu-runtime-v5.js`
-- `tests/nutrition-menu-experience-v5.test.mjs`
-- `qa/nutrition-menu-v5.spec.js`
+- `nutrition-menu-experience-v51.js`
 
-Archivos actualizados:
+QA:
+
+- `tests/nutrition-menu-experience-v5.test.mjs` (motor v5.1)
+- `qa/nutrition-menu-v5.spec.js` (recorridos reales)
+
+Integración actualizada:
 
 - `date-engine.js`
 - `scripts/build-mobile.mjs`
 - `sw.js`
 - `.github/workflows/browser-smoke.yml`
 
-La experiencia v5 se carga después de los motores Recomp v2/v3/v4. El build nativo empaqueta explícitamente todos los recursos nuevos y la PWA los incluye en la caché versionada.
+La v5.1 no utiliza observadores recursivos: refresca la cabecera después de acciones explícitas y eventos de datos.
 
-## QA
+## QA profesional
 
 ### Unitario
-- totales diarios por fecha.
-- cálculo de restante.
-- clasificación del estado diario.
-- reparto porcentual de kcal del menú.
 
-### Navegador como usuario
+- suma del diario por fecha;
+- restante de kcal/macros;
+- estado contextual del día;
+- reparto real de kcal del menú.
 
-Recorrido Nutrición:
-1. abrir app con perfil existente;
-2. entrar en Nutrición;
-3. verificar dashboard diario;
-4. comprobar comida ya registrada;
-5. abrir Objetivos;
-6. abrir Diario;
-7. verificar ausencia de errores JS.
+### Usuario · Nutrición
 
-Recorrido Menús:
-1. entrar en Menús;
-2. comprobar un único estudio de planificación;
-3. confirmar que el generador rápido legacy está oculto;
+1. entrar con perfil existente;
+2. abrir Nutrición;
+3. verificar que la pantalla comienza por el estado del día;
+4. comprobar una comida ya registrada;
+5. abrir Objetivos y encontrar la calculadora;
+6. abrir Diario y comprobar el editor;
+7. verificar que no hay errores JavaScript.
+
+### Usuario · Menús
+
+1. abrir Menús;
+2. confirmar un único planificador;
+3. confirmar que el generador rápido legacy no compite en pantalla;
 4. generar 7 días;
-5. comprobar aparición de días y resumen;
-6. confirmar que `mealPlanner30` pertenece a la pestaña Menús;
-7. verificar ausencia de errores JS.
+5. comprobar resumen y días;
+6. abrir una receta y sus ingredientes;
+7. sustituir una comida y comprobar que el día sigue utilizable;
+8. confirmar que el planificador pertenece a Menús;
+9. verificar ausencia de errores JavaScript.
 
-## Gate de publicación
+## Fallos encontrados durante la iteración
 
-No fusionar hasta obtener verde en:
+- **PWA CI:** el primer cambio del service worker conservaba la misma semántica network-first, pero su minificación rompió una prueba de regresión que exigía la forma explícita `destination === 'script'`. Se restauró una implementación legible y compatible con el test.
+- **Arquitectura UI v5:** riesgo de bucle de `MutationObserver` al redibujar Menús. Eliminado en v5.1.
+- **Runtime v5:** la primera variante necesitaba helpers globales para la UI. v5.1 encapsula sus helpers y elimina esa dependencia.
+
+## Release gate
+
+No fusionar hasta que estén verdes:
 
 - Recomp 10 CI
 - Recomp Browser Smoke
 - Recomp 10 iOS Native CI
 
-Después de fusionar, GitHub Pages debe desplegar `main` y se realizará una comprobación web final.
+Tras fusión, GitHub Pages debe desplegar `main` y se comprobará la versión pública.
