@@ -1,6 +1,6 @@
 const CACHE_NAME = 'recomp-10-v5-nutrition-menu-redesign';
 const APP_SHELL = [
-  './','./index.html','./privacy.html','./support.html','./persistence.js','./date-engine.js','./training-engine.js','./nutrition-engine.js','./meal-planner.js','./meal-planner-ui.js','./coach-engine.js','./photo-engine.js','./recomp-profile-v2.js','./recomp-intake-v2.js','./recomp-review-v3.js','./recomp-trend-v3.js','./recomp-trend-ui-v3.js','./recomp-checkin-v4.js','./nutrition-menu-experience-v5.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'
+  './','./index.html','./privacy.html','./support.html','./persistence.js','./date-engine.js','./training-engine.js','./nutrition-engine.js','./meal-planner.js','./meal-planner-ui.js','./coach-engine.js','./photo-engine.js','./recomp-profile-v2.js','./recomp-intake-v2.js','./recomp-review-v3.js','./recomp-trend-v3.js','./recomp-trend-ui-v3.js','./recomp-checkin-v4.js','./nutrition-menu-runtime-v5.js','./nutrition-menu-experience-v5.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'
 ];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_NAME).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
