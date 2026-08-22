@@ -48,7 +48,7 @@ jobs:
           set -euo pipefail
           for i in $(seq 1 100); do
             echo "=== Recomp shard ${{ matrix.shard }} browser pass $i/100 ==="
-            npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/nutrition-menu-v5.spec.js qa/meal-intelligence-v60.spec.js --reporter=line
+            npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/nutrition-menu-v5.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js --reporter=line
           done
       - name: Write shard evidence
         if: always()
@@ -100,7 +100,7 @@ jobs:
             echo "SOURCE_COMMIT: $GITHUB_SHA"
             echo "RESULT: $result"
             echo "SHARDS: $success/10 successful"
-            echo 'PLANNED_REPETITIONS: 1000 unit passes and 1000 browser/mobile/nutrition/intelligence journeys'
+            echo 'PLANNED_REPETITIONS: 1000 unit passes and 1000 browser/mobile/nutrition/intelligence/accessibility journeys'
             echo "UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
             echo '--- SHARDS ---'
             cat /tmp/recomp-evidence/shard-*.txt || true
