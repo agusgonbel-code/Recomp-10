@@ -14,6 +14,7 @@ const APP_SHELL = [
   './photo-engine.js',
   './recomp-profile-v2.js',
   './recomp-intake-v2.js',
+  './nutrition-target-sync-v51.js',
   './recomp-review-v3.js',
   './recomp-trend-v3.js',
   './recomp-trend-ui-v3.js',
