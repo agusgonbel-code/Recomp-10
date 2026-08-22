@@ -50,6 +50,8 @@
       .then(() => load('recomp-review-v3.js'))
       .then(() => load('recomp-trend-v3.js'))
       .then(() => load('recomp-trend-ui-v3.js'))
-      .catch(() => {});
+      .then(() => load('recomp-checkin-v4.js'))
+      .then(() => load('nutrition-menu-experience-v5.js'))
+      .catch(error => console.error('Recomp enhancement load failed', error));
   }
 })();
