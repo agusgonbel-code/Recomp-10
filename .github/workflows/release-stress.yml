@@ -1,0 +1,43 @@
+name: Recomp 10M Release Stress
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Run unit suite 10 times
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 10); do
+            echo "=== Recomp 10M unit pass $i/10 ==="
+            npm test
+          done
+      - name: Install Chromium for repeated user journeys
+        run: |
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Start app
+        run: python3 -m http.server 4173 >/tmp/recomp-http.log 2>&1 &
+      - name: Run browser journeys 10 times
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 10); do
+            echo "=== Recomp 10M browser pass $i/10 ==="
+            npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js --reporter=line
+          done
