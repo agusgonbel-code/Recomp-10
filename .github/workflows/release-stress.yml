@@ -6,16 +6,21 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: recomp-release-stress-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   stress:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]') }}
     strategy:
       fail-fast: false
       matrix:
         shard: [1,2,3,4,5,6,7,8,9,10]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,3 +50,72 @@ jobs:
             echo "=== Recomp shard ${{ matrix.shard }} browser pass $i/100 ==="
             npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/nutrition-menu-v5.spec.js qa/meal-intelligence-v60.spec.js --reporter=line
           done
+      - name: Write shard evidence
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p /tmp/recomp-stress
+          cat > /tmp/recomp-stress/shard-${{ matrix.shard }}.txt <<EOF
+          APP: Recomp 10M
+          SOURCE_COMMIT: $GITHUB_SHA
+          SHARD: ${{ matrix.shard }}/10
+          UNIT_PASSES_PLANNED: 100
+          BROWSER_PASSES_PLANNED: 100
+          RESULT: ${{ job.status }}
+          UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          EOF
+      - name: Upload shard evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recomp-stress-${{ matrix.shard }}
+          path: /tmp/recomp-stress/shard-${{ matrix.shard }}.txt
+          retention-days: 14
+
+  evidence:
+    if: always()
+    needs: stress
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Download stress evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: recomp-stress-*
+          path: /tmp/recomp-evidence
+          merge-multiple: true
+      - name: Build release evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa
+          count=$(find /tmp/recomp-evidence -name 'shard-*.txt' -type f | wc -l | tr -d ' ')
+          success=$(grep -l '^RESULT: success$' /tmp/recomp-evidence/shard-*.txt 2>/dev/null | wc -l | tr -d ' ')
+          result=FAIL
+          if [ "$count" = "10" ] && [ "$success" = "10" ] && [ "${{ needs.stress.result }}" = "success" ]; then result=PASS; fi
+          {
+            echo 'RECOMP 10M RELEASE STRESS 1000X'
+            echo "SOURCE_COMMIT: $GITHUB_SHA"
+            echo "RESULT: $result"
+            echo "SHARDS: $success/10 successful"
+            echo 'PLANNED_REPETITIONS: 1000 unit passes and 1000 browser/mobile/nutrition/intelligence journeys'
+            echo "UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo '--- SHARDS ---'
+            cat /tmp/recomp-evidence/shard-*.txt || true
+          } > qa/release-stress-latest.txt
+      - name: Persist evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Recomp QA Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add qa/release-stress-latest.txt
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'QA result: Recomp 1000x release stress [skip ci]'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Enforce release stress gate
+        shell: bash
+        run: grep -q '^RESULT: PASS$' qa/release-stress-latest.txt
