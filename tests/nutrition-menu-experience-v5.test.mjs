@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 const require=createRequire(import.meta.url);
-const api=require('../nutrition-menu-experience-v5.js');
+const api=require('../nutrition-menu-experience-v51.js');
 
 test('daily totals and remaining macros are deterministic',()=>{
   const meals=[{date:'2026-08-22',kcal:500,p:40,c:60,f:12},{date:'2026-08-22',kcal:700,p:55,c:80,f:18},{date:'2026-08-21',kcal:999,p:99,c:99,f:99}];
