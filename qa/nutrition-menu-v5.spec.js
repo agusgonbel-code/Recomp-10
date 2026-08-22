@@ -60,3 +60,20 @@ test('planned meal opens recipe and swap keeps the day usable', async ({ page })
   await expect(page.locator('.mp-day').first()).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test('six meals selected in the unified profile are available in the advanced menu planner', async ({ page }) => {
+  const errors=[]; page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(() => {
+    const p=JSON.parse(localStorage.getItem('recomp_unified_profile_v2')||'{}');p.meals=6;localStorage.setItem('recomp_unified_profile_v2',JSON.stringify(p));
+  });
+  await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+  await page.locator('nav button').filter({hasText:'Menús'}).click();
+  await expect(page.locator('#mpMeals')).toHaveValue('6');
+  await page.locator('#mpDays').fill('2');
+  await page.locator('#mpGenerate').click();
+  await expect(page.locator('.mp-day').first()).toBeVisible({timeout:20000});
+  const firstDayMeals=page.locator('.mp-day').first().locator('.mp-meal');
+  await expect(firstDayMeals).toHaveCount(6);
+  await expect(firstDayMeals.nth(5)).toContainText(/Snack nocturno|Merienda|Desayuno|Cena/);
+  expect(errors).toEqual([]);
+});
