@@ -1,76 +1,49 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: be05019c1516eef37e871727096115eab05c54a1
+SOURCE_COMMIT: 1d4f3f88462d4289416debb292cc60b21cbca16b
 RESULT: FAIL
 EXIT_CODE: 1
-UTC: 2026-08-22T23:46:29Z
+UTC: 2026-08-23T00:08:40Z
 COVERAGE: browser + nutrition + mobile + meal intelligence + accessibility
 --- TEST OUTPUT (tail) ---
 
 Running 18 tests using 2 workers
 
-[1/18] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
-[2/18] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates nutrition and training, and persists
-[3/18] qa/browser-smoke.spec.js:4:1 › 360 check-in records progress and produces an explainable decision
-[4/18] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
-[5/18] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
-[6/18] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
-[7/18] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[8/18] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
-[9/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
-[10/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
-[11/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
-[12/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
-[13/18] qa/mobile-layout.spec.js:6:1 › Recomp menu cards keep readable meal column on iPhone width
+[1/18] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates nutrition and training, and persists
+[2/18] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
+[3/18] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
+[4/18] qa/browser-smoke.spec.js:4:1 › 360 check-in records progress and produces an explainable decision
   1) qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy 
 
-    Test timeout of 30000ms exceeded.
+    Error: expect(received).not.toBe(expected) // Object.is equality
 
-    Error: page.waitForSelector: Test ended.
-    Call log:
-      - waiting for locator('#mpGenerate') to be visible
-        62 × locator resolved to hidden <button id="mpGenerate">Generar menú</button>
+    Expected: not "anywhere"
 
-
-      34 |   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
-      35 |   const page=await context.newPage();await page.goto(BASE+'/',{waitUntil:'domcontentloaded'});await completeIntake(page);
-    > 36 |   await page.waitForSelector('#mpGenerate');await page.locator('#mpDays').fill('1');await page.locator('#mpGenerate').click();await page.waitForSelector('.mp-meal');
-         |              ^
-      37 |   const rows=await page.locator('.mp-meal').evaluateAll(nodes=>nodes.map(row=>{const link=row.querySelector('.mp-recipe-link');const s=getComputedStyle(link);return{width:link.getBoundingClientRect().width,wordBreak:s.wordBreak,overflowWrap:s.overflowWrap}}));
-      38 |   for(const row of rows){expect(row.width).toBeGreaterThan(180);expect(row.wordBreak).not.toBe('break-all');expect(row.overflowWrap).not.toBe('anywhere')}
-      39 |   await context.close();
-        at /home/runner/work/Recomp-10/Recomp-10/qa/accessibility.spec.js:36:14
+      38 |   await page.locator('#mpDays').fill('1');await page.locator('#mpGenerate').click();await page.waitForSelector('.mp-meal');
+      39 |   const rows=await page.locator('.mp-meal').evaluateAll(nodes=>nodes.map(row=>{const link=row.querySelector('.mp-recipe-link');const s=getComputedStyle(link);return{width:link.getBoundingClientRect().width,wordBreak:s.wordBreak,overflowWrap:s.overflowWrap}}));
+    > 40 |   for(const row of rows){expect(row.width).toBeGreaterThan(180);expect(row.wordBreak).not.toBe('break-all');expect(row.overflowWrap).not.toBe('anywhere')}
+         |                                                                                                                                          ^
+      41 |   await context.close();
+      42 | });
+      43 |
+        at /home/runner/work/Recomp-10/Recomp-10/qa/accessibility.spec.js:40:138
 
     Error Context: test-results/qa-accessibility-Recomp-ge-c3a23--large-text-wrapping-policy/error-context.md
 
 
-[14/18] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
-[15/18] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
-[16/18] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
-[17/18] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
-  2) qa/mobile-layout.spec.js:6:1 › Recomp menu cards keep readable meal column on iPhone width ────
-
-    Test timeout of 30000ms exceeded.
-
-    Error: page.waitForSelector: Test ended.
-    Call log:
-      - waiting for locator('#mpGenerate') to be visible
-        62 × locator resolved to hidden <button id="mpGenerate">Generar menú</button>
-
-
-      4 | for(const width of [320,375,390,430]) test(`Recomp 10 fits ${width}px without horizontal overflow`,async({browser})=>{const context=await browser.newContext({viewport:{width,height:820},isMobile:true,hasTouch:true});const page=await context.newPage();await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await noOverflow(page,'launch');await completeIntake(page);await page.waitForFunction(()=>Boolean(window.RecompQualityV53));await noOverflow(page,'home');const buttons=page.locator('nav button');const count=await buttons.count();for(let i=0;i<count;i++){const b=buttons.nth(i);if(await b.isVisible()){await b.click();await page.waitForTimeout(40);await noOverflow(page,`nav-${i}`)}}expect(await page.locator('nav .navicon svg').count()).toBeGreaterThanOrEqual(6);await context.close()});
-      5 |
-    > 6 | test('Recomp menu cards keep readable meal column on iPhone width',async({browser})=>{const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const page=await context.newPage();await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await completeIntake(page);await page.waitForSelector('#mpGenerate');await page.locator('#mpDays').fill('1');await page.locator('#mpGenerate').click();await page.waitForSelector('.mp-meal');await noOverflow(page,'menu-generated');const meal=page.locator('.mp-meal').first();const recipe=meal.locator('.mp-recipe-link');const box=await recipe.boundingBox();expect(box?.width||0,'recipe text column collapsed').toBeGreaterThan(190);const metrics=await recipe.evaluate(el=>({wordBreak:getComputedStyle(el).wordBreak,whiteSpace:getComputedStyle(el).whiteSpace,scroll:el.scrollWidth,client:el.clientWidth}));expect(metrics.wordBreak).not.toBe('break-all');expect(metrics.whiteSpace).toBe('normal');expect(metrics.scroll).toBeLessThanOrEqual(metrics.client+2);await context.close()});
-        |                                                                                                                                                                                                                                                                                                                                               ^
-      7 |
-      8 | test('Recomp 10 v53 rejects pathological calorie concentration',async({page})=>{await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>Boolean(window.RecompQualityV53));const result=await page.evaluate(()=>{const d={items:[{k:200,p:15,c:20,f:6,scale:1},{k:1776,p:100,c:220,f:55,scale:3},{k:160,p:10,c:20,f:4,scale:1},{k:264,p:20,c:25,f:8,scale:1}],totals:{k:2400,p:145,c:285,f:73}};const x=RecompQualityV53.rebalanceDay(d,{kcal:2400,protein:170,carbs:285,fat:75});return{x:x.items.map(i=>i.k),max:Math.max(...x.items.map(i=>i.k/x.totals.k)),total:x.totals.k}});expect(result.x).toEqual([528,816,336,720]);expect(result.max).toBeLessThanOrEqual(.34);expect(result.total).toBe(2400)});
-      9 |
-        at /home/runner/work/Recomp-10/Recomp-10/qa/mobile-layout.spec.js:6:335
-
-    Error Context: test-results/qa-mobile-layout-Recomp-me-5b281-meal-column-on-iPhone-width/error-context.md
-
-
+[5/18] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
+[6/18] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
+[7/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
+[8/18] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
+[9/18] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
+[10/18] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
+[11/18] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
+[12/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
+[13/18] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
+[14/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
+[15/18] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
+[16/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
+[17/18] qa/mobile-layout.spec.js:6:1 › Recomp menu cards keep readable meal column on iPhone width
 [18/18] qa/mobile-layout.spec.js:8:1 › Recomp 10 v53 rejects pathological calorie concentration
-  2 failed
+  1 failed
     qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy 
-    qa/mobile-layout.spec.js:6:1 › Recomp menu cards keep readable meal column on iPhone width ─────
-  16 passed (45.7s)
+  17 passed (20.6s)
