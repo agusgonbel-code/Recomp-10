@@ -1,8 +1,8 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: 1d4f3f88462d4289416debb292cc60b21cbca16b
-RESULT: FAIL
-EXIT_CODE: 1
-UTC: 2026-08-23T00:08:40Z
+SOURCE_COMMIT: e0b5711f456d39b615698c6ef60d67f83648071e
+RESULT: PASS
+EXIT_CODE: 0
+UTC: 2026-08-23T00:13:15Z
 COVERAGE: browser + nutrition + mobile + meal intelligence + accessibility
 --- TEST OUTPUT (tail) ---
 
@@ -12,29 +12,11 @@ Running 18 tests using 2 workers
 [2/18] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
 [3/18] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
 [4/18] qa/browser-smoke.spec.js:4:1 › 360 check-in records progress and produces an explainable decision
-  1) qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy 
-
-    Error: expect(received).not.toBe(expected) // Object.is equality
-
-    Expected: not "anywhere"
-
-      38 |   await page.locator('#mpDays').fill('1');await page.locator('#mpGenerate').click();await page.waitForSelector('.mp-meal');
-      39 |   const rows=await page.locator('.mp-meal').evaluateAll(nodes=>nodes.map(row=>{const link=row.querySelector('.mp-recipe-link');const s=getComputedStyle(link);return{width:link.getBoundingClientRect().width,wordBreak:s.wordBreak,overflowWrap:s.overflowWrap}}));
-    > 40 |   for(const row of rows){expect(row.width).toBeGreaterThan(180);expect(row.wordBreak).not.toBe('break-all');expect(row.overflowWrap).not.toBe('anywhere')}
-         |                                                                                                                                          ^
-      41 |   await context.close();
-      42 | });
-      43 |
-        at /home/runner/work/Recomp-10/Recomp-10/qa/accessibility.spec.js:40:138
-
-    Error Context: test-results/qa-accessibility-Recomp-ge-c3a23--large-text-wrapping-policy/error-context.md
-
-
 [5/18] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
 [6/18] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
-[7/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
-[8/18] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[9/18] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
+[7/18] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
+[8/18] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
+[9/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
 [10/18] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
 [11/18] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
 [12/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
@@ -44,6 +26,4 @@ Running 18 tests using 2 workers
 [16/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
 [17/18] qa/mobile-layout.spec.js:6:1 › Recomp menu cards keep readable meal column on iPhone width
 [18/18] qa/mobile-layout.spec.js:8:1 › Recomp 10 v53 rejects pathological calorie concentration
-  1 failed
-    qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy 
-  17 passed (20.6s)
+  18 passed (18.7s)
