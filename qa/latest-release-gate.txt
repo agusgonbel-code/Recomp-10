@@ -1,29 +1,31 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: e0b5711f456d39b615698c6ef60d67f83648071e
+SOURCE_COMMIT: 1ce526e7536ccd0200aa1777e82589f0a1484815
 RESULT: PASS
 EXIT_CODE: 0
-UTC: 2026-08-23T00:13:15Z
+UTC: 2026-08-23T00:42:15Z
 COVERAGE: browser + nutrition + mobile + meal intelligence + accessibility
 --- TEST OUTPUT (tail) ---
 
-Running 18 tests using 2 workers
+Running 20 tests using 2 workers
 
-[1/18] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates nutrition and training, and persists
-[2/18] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
-[3/18] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
-[4/18] qa/browser-smoke.spec.js:4:1 › 360 check-in records progress and produces an explainable decision
-[5/18] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
-[6/18] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
-[7/18] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[8/18] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
-[9/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
-[10/18] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
-[11/18] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
-[12/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
-[13/18] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
-[14/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
-[15/18] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
-[16/18] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
-[17/18] qa/mobile-layout.spec.js:6:1 › Recomp menu cards keep readable meal column on iPhone width
-[18/18] qa/mobile-layout.spec.js:8:1 › Recomp 10 v53 rejects pathological calorie concentration
-  18 passed (18.7s)
+[1/20] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates nutrition and training, and persists
+[2/20] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
+[3/20] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
+[4/20] qa/browser-smoke.spec.js:4:1 › 360 check-in records progress and produces an explainable decision
+[5/20] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
+[6/20] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
+[7/20] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
+[8/20] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
+[9/20] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
+[10/20] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
+[11/20] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
+[12/20] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
+[13/20] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
+[14/20] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
+[15/20] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
+[16/20] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
+[17/20] qa/mobile-layout.spec.js:6:1 › Recomp identity never displays FitCoach F branding
+[18/20] qa/mobile-layout.spec.js:8:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
+[19/20] qa/mobile-layout.spec.js:10:1 › Recomp menu cards keep readable meal column on iPhone width
+[20/20] qa/mobile-layout.spec.js:12:1 › Recomp 10 v53 rejects pathological calorie concentration
+  20 passed (22.4s)
