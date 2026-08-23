@@ -25,24 +25,32 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Start app
         run: python3 -m http.server 4173 >/tmp/recomp-http.log 2>&1 &
-      - name: Run user journeys, nutrition, mobile and accessibility gates
+      - name: Run unit, recipe integrity, user journey, nutrition, mobile and accessibility gates
         id: gate
         shell: bash
         run: |
           set +e
-          npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js qa/mobile-layout.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js --reporter=line > /tmp/recomp-gate.log 2>&1
-          code=$?
+          npm test > /tmp/recomp-unit.log 2>&1
+          unit_code=$?
+          npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js qa/mobile-layout.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js --reporter=line > /tmp/recomp-browser.log 2>&1
+          browser_code=$?
           set -e
+          code=0
+          if [ "$unit_code" -ne 0 ] || [ "$browser_code" -ne 0 ]; then code=1; fi
           mkdir -p qa
           {
             echo 'RECOMP 10M FAST RELEASE GATE'
             echo "SOURCE_COMMIT: $GITHUB_SHA"
             if [ "$code" -eq 0 ]; then echo 'RESULT: PASS'; else echo 'RESULT: FAIL'; fi
             echo "EXIT_CODE: $code"
+            echo "UNIT_EXIT_CODE: $unit_code"
+            echo "BROWSER_EXIT_CODE: $browser_code"
             echo "UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            echo 'COVERAGE: browser + nutrition + mobile + meal intelligence + accessibility'
-            echo '--- TEST OUTPUT (tail) ---'
-            tail -n 300 /tmp/recomp-gate.log
+            echo 'COVERAGE: unit + recipe ingredient integrity + browser + nutrition + mobile + meal intelligence + accessibility'
+            echo '--- UNIT / RECIPE INTEGRITY OUTPUT (tail) ---'
+            tail -n 200 /tmp/recomp-unit.log
+            echo '--- BROWSER OUTPUT (tail) ---'
+            tail -n 300 /tmp/recomp-browser.log
           } > qa/latest-release-gate.txt
           echo "code=$code" >> "$GITHUB_OUTPUT"
       - name: Persist gate evidence
