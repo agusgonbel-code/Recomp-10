@@ -33,22 +33,23 @@ test('generateDays respeta el número solicitado y los cuatro macros con toleran
  }
 });
 
-test('los macros se calculan desde las mismas cantidades redondeadas que ve el usuario',()=>{
+test('el plan no inventa macros por ingrediente cuando solo existen macros globales de receta',()=>{
  const plan=RecompMealPlanner.generateDays(recipes,{kcal:2217,protein:163,carbs:247,fat:69,days:2,meals:4,diet:'flexible'});
  for(const item of plan.days.flatMap(day=>day.items)){
+   assert.equal(item.nutritionBasis,'recipe-declared');
+   assert.equal(item.ingredientNutritionVerified,false);
    assert.ok(item.ingredientAmounts.length>0);
-   const calculated=item.ingredientAmounts.reduce((sum,ingredient)=>({
-     k:sum.k+ingredient.nutrients.k,p:sum.p+ingredient.nutrients.p,
-     c:sum.c+ingredient.nutrients.c,f:sum.f+ingredient.nutrients.f
-   }),{k:0,p:0,c:0,f:0});
-   assert.deepEqual(
-     {k:item.k,p:item.p,c:item.c,f:item.f},
-     {k:Math.round(calculated.k),p:Math.round(calculated.p),c:Math.round(calculated.c),f:Math.round(calculated.f)}
-   );
    for(const ingredient of item.ingredientAmounts){
+     assert.equal(ingredient.nutrients,null,'No se deben atribuir macros ficticios a un ingrediente');
+     assert.equal(ingredient.estimated,true);
      const shown=Number(ingredient.text.match(/^\d+(?:\.\d+)?/)?.[0]);
      assert.equal(shown,ingredient.qty,'La cantidad visible y la utilizada deben coincidir');
    }
+   const expected={k:Math.round(item.recipe.k*item.scale),p:Math.round(item.recipe.p*item.scale),c:Math.round(item.recipe.c*item.scale),f:Math.round(item.recipe.f*item.scale)};
+   assert.ok(Math.abs(item.k-expected.k)<=1);
+   assert.ok(Math.abs(item.p-expected.p)<=1);
+   assert.ok(Math.abs(item.c-expected.c)<=1);
+   assert.ok(Math.abs(item.f-expected.f)<=1);
  }
 });
 
