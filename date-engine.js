@@ -6,7 +6,19 @@
   function localTimestamp(value = new Date()) { const date = validDate(value); const offsetMinutes = -date.getTimezoneOffset(); const sign = offsetMinutes >= 0 ? '+' : '-'; const absolute = Math.abs(offsetMinutes); const offset = sign + pad(Math.floor(absolute / 60)) + ':' + pad(absolute % 60); return localDayKey(date) + 'T' + pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds()) + '.' + String(date.getMilliseconds()).padStart(3, '0') + offset; }
   function shiftLocalDay(day, amount) { if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new TypeError('Fecha no válida'); const parts = day.split('-').map(Number); const date = new Date(parts[0], parts[1] - 1, parts[2], 12); if (date.getFullYear() !== parts[0] || date.getMonth() !== parts[1] - 1 || date.getDate() !== parts[2]) throw new TypeError('Fecha no válida'); amount = Number(amount); if (!Number.isInteger(amount) || Math.abs(amount) > 3660) throw new TypeError('Desplazamiento no válido'); date.setDate(date.getDate() + amount); return localDayKey(date); }
   globalThis.RecompDate = { localDayKey, localTimestamp, shiftLocalDay };
+
   if (typeof document !== 'undefined') {
+    const fresh = !localStorage.getItem('recomp_unified_profile_v2') && !localStorage.getItem('profile');
+    if (fresh) localStorage.setItem('profile', JSON.stringify({ name: 'Usuario' }));
+    const sanitizeFreshUi = () => {
+      if (!fresh || localStorage.getItem('recomp_unified_profile_v2')) return;
+      const hello = document.getElementById('hello'); if (hello) hello.textContent = 'Configura tu perfil';
+      const weightCard = document.getElementById('dWeight'); if (weightCard) weightCard.textContent = '—';
+      const name = document.getElementById('profileName'); if (name) name.value = 'Usuario';
+      ['age','weight','height'].forEach(id => { const input = document.getElementById(id); if (input) input.value = ''; });
+    };
+    document.addEventListener('DOMContentLoaded', sanitizeFreshUi, { once: true });
+
     const load = src => new Promise((resolve, reject) => { if (document.querySelector(`script[data-r10-v2="${src}"]`)) return resolve(); const script = document.createElement('script'); script.src = src; script.dataset.r10V2 = src; script.onload = resolve; script.onerror = reject; document.head.append(script); });
     load('recomp-profile-v2.js').then(() => load('recomp-intake-v2.js')).then(() => load('nutrition-target-sync-v51.js')).then(() => load('meal-planner-six-v52.js')).then(() => load('quality-v53.js')).then(() => load('quality-v54.js')).then(() => load('meal-planner-profile-sync-v52.js')).then(() => load('recomp-review-v3.js')).then(() => load('recomp-trend-v3.js')).then(() => load('recomp-trend-ui-v3.js')).then(() => load('recomp-checkin-v4.js')).then(() => load('checkin-local-v55.js')).then(() => load('nutrition-menu-experience-v51.js')).catch(error => console.error('Recomp enhancement load failed', error));
   }
