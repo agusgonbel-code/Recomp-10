@@ -1,8 +1,8 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: 7bf6e94ed4745d686d4b5a22efa12cef118916d6
+SOURCE_COMMIT: 883ab3ca174994947c5c99f658da78d8883dfc53
 RESULT: PASS
 EXIT_CODE: 0
-UTC: 2026-08-23T15:47:46Z
+UTC: 2026-08-23T16:08:53Z
 COVERAGE: browser + nutrition + mobile + meal intelligence + accessibility
 --- TEST OUTPUT (tail) ---
 
@@ -32,4 +32,4 @@ Running 24 tests using 2 workers
 [22/24] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
 [23/24] qa/mobile-layout.spec.js:11:1 › Recomp menu cards keep readable meal column on iPhone width
 [24/24] qa/mobile-layout.spec.js:13:1 › Recomp 10 v53 rejects pathological calorie concentration
-  24 passed (29.7s)
+  24 passed (29.6s)
