@@ -1,279 +1,37 @@
 RECOMP USER SIMULATION
-SOURCE_COMMIT: bad9258392edd31c49529a40c412b7e67a9c97b6
-RESULT: FAIL
-EXIT_CODE: 1
+SOURCE_COMMIT: 2a02a8ed223cc8065baaeb2b6a5c09d571cebbe9
+RESULT: PASS
+EXIT_CODE: 0
 SCENARIOS: 26
-UTC: 2026-08-23T19:01:27Z
+UTC: 2026-08-23T19:04:17Z
 
-Running 26 tests using 1 worker
+Running 27 tests using 1 worker
 
-[1/26] qa/user-100-sim.spec.js:6:30 › usuario navega a Inicio
-[2/26] qa/user-100-sim.spec.js:6:30 › usuario navega a Entreno
-[3/26] qa/user-100-sim.spec.js:6:30 › usuario navega a Nutrición
-[4/26] qa/user-100-sim.spec.js:6:30 › usuario navega a Menús
-[5/26] qa/user-100-sim.spec.js:6:30 › usuario navega a Progreso
-[6/26] qa/user-100-sim.spec.js:6:30 › usuario navega a Ajustes
-[7/26] qa/user-100-sim.spec.js:7:38 › usuario usa Recomp a 320px sin desbordamiento
-[8/26] qa/user-100-sim.spec.js:7:38 › usuario usa Recomp a 375px sin desbordamiento
-[9/26] qa/user-100-sim.spec.js:7:38 › usuario usa Recomp a 390px sin desbordamiento
-[10/26] qa/user-100-sim.spec.js:7:38 › usuario usa Recomp a 430px sin desbordamiento
-[11/26] qa/user-100-sim.spec.js:8:1 › usuario fresco no ve peso personal precargado
-[12/26] qa/user-100-sim.spec.js:9:1 › usuario fresco ve perfil neutro
-[13/26] qa/user-100-sim.spec.js:10:1 › usuario introduce antropometría sin crash
-  1) qa/user-100-sim.spec.js:10:1 › usuario introduce antropometría sin crash ──────────────────────
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.fill: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for locator('#age')
-        - locator resolved to <input id="age" value="46" type="number"/>
-        - fill("40")
-      - attempting fill action
-        2 × waiting for element to be visible, enabled and editable
-          - element is not visible
-        - retrying fill action
-        - waiting 20ms
-        2 × waiting for element to be visible, enabled and editable
-          - element is not visible
-        - retrying fill action
-          - waiting 100ms
-        59 × waiting for element to be visible, enabled and editable
-           - element is not visible
-         - retrying fill action
-           - waiting 500ms
-
-
-       8 | test('usuario fresco no ve peso personal precargado',async({page})=>{await ready(page);await expect(page.locator('#dWeight')).toHaveText('—')});
-       9 | test('usuario fresco ve perfil neutro',async({page})=>{await ready(page);await page.locator('nav button').nth(5).click();await expect(page.locator('#profileName')).toHaveValue('Usuario')});
-    > 10 | test('usuario introduce antropometría sin crash',async({page})=>{const e=errs(page);await ready(page);await page.locator('nav button').nth(2).click();await page.locator('#age').fill('40');await page.locator('#weight').fill('75');await page.locator('#height').fill('178');expect(e).toEqual([])});
-         |                                                                                                                                                                                  ^
-      11 | test('usuario cambia actividad y objetivo',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();await page.locator('#activity').selectOption('1.375');await page.locator('#goal').selectOption('0');await expect(page.locator('#activity')).toHaveValue('1.375');await expect(page.locator('#goal')).toHaveValue('0')});
-      12 | test('usuario navega por día anterior y vuelve a hoy',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();const before=await page.locator('#mealJournalDate').inputValue();await page.getByRole('button',{name:'Día anterior'}).click();expect(await page.locator('#mealJournalDate').inputValue()).not.toBe(before);await page.getByRole('button',{name:'Ir a hoy'}).click();expect(await page.locator('#mealJournalDate').inputValue()).toBe(before)});
-      13 | test('usuario no puede introducir kcal negativas por control',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();expect(await page.locator('#mealKcal').getAttribute('min')).toBe('0')});
-        at /home/runner/work/Recomp-10/Recomp-10/qa/user-100-sim.spec.js:10:178
-
-    Error Context: test-results/qa-user-100-sim-usuario-introduce-antropometría-sin-crash/error-context.md
-
-
-[14/26] qa/user-100-sim.spec.js:11:1 › usuario cambia actividad y objetivo
-  2) qa/user-100-sim.spec.js:11:1 › usuario cambia actividad y objetivo ────────────────────────────
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.selectOption: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for locator('#activity')
-        - locator resolved to <select id="activity">…</select>
-      - attempting select option action
-        2 × waiting for element to be visible and enabled
-          - element is not visible
-        - retrying select option action
-        - waiting 20ms
-        2 × waiting for element to be visible and enabled
-          - element is not visible
-        - retrying select option action
-          - waiting 100ms
-        59 × waiting for element to be visible and enabled
-           - element is not visible
-         - retrying select option action
-           - waiting 500ms
-
-
-       9 | test('usuario fresco ve perfil neutro',async({page})=>{await ready(page);await page.locator('nav button').nth(5).click();await expect(page.locator('#profileName')).toHaveValue('Usuario')});
-      10 | test('usuario introduce antropometría sin crash',async({page})=>{const e=errs(page);await ready(page);await page.locator('nav button').nth(2).click();await page.locator('#age').fill('40');await page.locator('#weight').fill('75');await page.locator('#height').fill('178');expect(e).toEqual([])});
-    > 11 | test('usuario cambia actividad y objetivo',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();await page.locator('#activity').selectOption('1.375');await page.locator('#goal').selectOption('0');await expect(page.locator('#activity')).toHaveValue('1.375');await expect(page.locator('#goal')).toHaveValue('0')});
-         |                                                                                                                                                              ^
-      12 | test('usuario navega por día anterior y vuelve a hoy',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();const before=await page.locator('#mealJournalDate').inputValue();await page.getByRole('button',{name:'Día anterior'}).click();expect(await page.locator('#mealJournalDate').inputValue()).not.toBe(before);await page.getByRole('button',{name:'Ir a hoy'}).click();expect(await page.locator('#mealJournalDate').inputValue()).toBe(before)});
-      13 | test('usuario no puede introducir kcal negativas por control',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();expect(await page.locator('#mealKcal').getAttribute('min')).toBe('0')});
-      14 | test('usuario abre biblioteca de recetas sin perder menú',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await expect(page.locator('#mealPlanner30')).toBeVisible();await expect(page.locator('details')).toBeVisible()});
-        at /home/runner/work/Recomp-10/Recomp-10/qa/user-100-sim.spec.js:11:158
-
-    Error Context: test-results/qa-user-100-sim-usuario-cambia-actividad-y-objetivo/error-context.md
-
-
-[15/26] qa/user-100-sim.spec.js:12:1 › usuario navega por día anterior y vuelve a hoy
-  3) qa/user-100-sim.spec.js:12:1 › usuario navega por día anterior y vuelve a hoy ─────────────────
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.click: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for getByRole('button', { name: 'Día anterior' })
-
-
-      10 | test('usuario introduce antropometría sin crash',async({page})=>{const e=errs(page);await ready(page);await page.locator('nav button').nth(2).click();await page.locator('#age').fill('40');await page.locator('#weight').fill('75');await page.locator('#height').fill('178');expect(e).toEqual([])});
-      11 | test('usuario cambia actividad y objetivo',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();await page.locator('#activity').selectOption('1.375');await page.locator('#goal').selectOption('0');await expect(page.locator('#activity')).toHaveValue('1.375');await expect(page.locator('#goal')).toHaveValue('0')});
-    > 12 | test('usuario navega por día anterior y vuelve a hoy',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();const before=await page.locator('#mealJournalDate').inputValue();await page.getByRole('button',{name:'Día anterior'}).click();expect(await page.locator('#mealJournalDate').inputValue()).not.toBe(before);await page.getByRole('button',{name:'Ir a hoy'}).click();expect(await page.locator('#mealJournalDate').inputValue()).toBe(before)});
-         |                                                                                                                                                                                                                                                               ^
-      13 | test('usuario no puede introducir kcal negativas por control',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();expect(await page.locator('#mealKcal').getAttribute('min')).toBe('0')});
-      14 | test('usuario abre biblioteca de recetas sin perder menú',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await expect(page.locator('#mealPlanner30')).toBeVisible();await expect(page.locator('details')).toBeVisible()});
-      15 | test('usuario busca una receta',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await page.locator('#recipeSearch').fill('pollo');await expect(page.locator('#recipeSearch')).toHaveValue('pollo')});
-        at /home/runner/work/Recomp-10/Recomp-10/qa/user-100-sim.spec.js:12:255
-
-    Error Context: test-results/qa-user-100-sim-usuario-na-448cc-día-anterior-y-vuelve-a-hoy/error-context.md
-
-
-[16/26] qa/user-100-sim.spec.js:13:1 › usuario no puede introducir kcal negativas por control
-[17/26] qa/user-100-sim.spec.js:14:1 › usuario abre biblioteca de recetas sin perder menú
-  4) qa/user-100-sim.spec.js:14:1 › usuario abre biblioteca de recetas sin perder menú ─────────────
-
-    Error: expect(locator).toBeVisible() failed
-
-    Locator: locator('details')
-    Expected: visible
-    Error: strict mode violation: locator('details') resolved to 3 elements:
-        1) <details>…</details> aka getByText('Registrar esta semanaAdherencia dieta %Adherencia entrenamiento %Rendimiento -')
-        2) <details open="" class="rn-calculator">…</details> aka locator('details').filter({ hasText: 'Calculadora de kcal y' })
-        3) <details class="card">…</details> aka getByText('Explorar biblioteca de recetas · buscar y filtrarTodas las')
-
-    Call log:
-      - Expect "toBeVisible" with timeout 5000ms
-      - waiting for locator('details')
-
-
-      12 | test('usuario navega por día anterior y vuelve a hoy',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();const before=await page.locator('#mealJournalDate').inputValue();await page.getByRole('button',{name:'Día anterior'}).click();expect(await page.locator('#mealJournalDate').inputValue()).not.toBe(before);await page.getByRole('button',{name:'Ir a hoy'}).click();expect(await page.locator('#mealJournalDate').inputValue()).toBe(before)});
-      13 | test('usuario no puede introducir kcal negativas por control',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();expect(await page.locator('#mealKcal').getAttribute('min')).toBe('0')});
-    > 14 | test('usuario abre biblioteca de recetas sin perder menú',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await expect(page.locator('#mealPlanner30')).toBeVisible();await expect(page.locator('details')).toBeVisible()});
-         |                                                                                                                                                                                                                                              ^
-      15 | test('usuario busca una receta',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await page.locator('#recipeSearch').fill('pollo');await expect(page.locator('#recipeSearch')).toHaveValue('pollo')});
-      16 | test('usuario filtra recetas por proteína',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await page.locator('#recipeProteinFilter').selectOption('30');await expect(page.locator('#recipeProteinFilter')).toHaveValue('30')});
-      17 | test('usuario ve botones táctiles de navegación >=44px',async({page})=>{await ready(page);const n=await page.locator('nav button').evaluateAll(ns=>ns.filter(x=>x.getBoundingClientRect().height<44).length);expect(n).toBe(0)});
-        at /home/runner/work/Recomp-10/Recomp-10/qa/user-100-sim.spec.js:14:238
-
-    Error Context: test-results/qa-user-100-sim-usuario-ab-b3fc7--de-recetas-sin-perder-menú/error-context.md
-
-
-[18/26] qa/user-100-sim.spec.js:15:1 › usuario busca una receta
-  5) qa/user-100-sim.spec.js:15:1 › usuario busca una receta ───────────────────────────────────────
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.fill: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for locator('#recipeSearch')
-        - locator resolved to <input id="recipeSearch" oninput="renderRecipes()" placeholder="Buscar por nombre o ingrediente..."/>
-        - fill("pollo")
-      - attempting fill action
-        2 × waiting for element to be visible, enabled and editable
-          - element is not visible
-        - retrying fill action
-        - waiting 20ms
-        2 × waiting for element to be visible, enabled and editable
-          - element is not visible
-        - retrying fill action
-          - waiting 100ms
-        59 × waiting for element to be visible, enabled and editable
-           - element is not visible
-         - retrying fill action
-           - waiting 500ms
-
-
-      13 | test('usuario no puede introducir kcal negativas por control',async({page})=>{await ready(page);await page.locator('nav button').nth(2).click();expect(await page.locator('#mealKcal').getAttribute('min')).toBe('0')});
-      14 | test('usuario abre biblioteca de recetas sin perder menú',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await expect(page.locator('#mealPlanner30')).toBeVisible();await expect(page.locator('details')).toBeVisible()});
-    > 15 | test('usuario busca una receta',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await page.locator('#recipeSearch').fill('pollo');await expect(page.locator('#recipeSearch')).toHaveValue('pollo')});
-         |                                                                                                                                                       ^
-      16 | test('usuario filtra recetas por proteína',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await page.locator('#recipeProteinFilter').selectOption('30');await expect(page.locator('#recipeProteinFilter')).toHaveValue('30')});
-      17 | test('usuario ve botones táctiles de navegación >=44px',async({page})=>{await ready(page);const n=await page.locator('nav button').evaluateAll(ns=>ns.filter(x=>x.getBoundingClientRect().height<44).length);expect(n).toBe(0)});
-      18 | test('usuario con reducir movimiento mantiene navegación',async({page})=>{await page.emulateMedia({reducedMotion:'reduce'});await ready(page);await page.locator('nav button').nth(1).click();await expect(page.locator('#entreno')).toBeVisible()});
-        at /home/runner/work/Recomp-10/Recomp-10/qa/user-100-sim.spec.js:15:151
-
-    Error Context: test-results/qa-user-100-sim-usuario-busca-una-receta/error-context.md
-
-
-[19/26] qa/user-100-sim.spec.js:16:1 › usuario filtra recetas por proteína
-  6) qa/user-100-sim.spec.js:16:1 › usuario filtra recetas por proteína ────────────────────────────
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.selectOption: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for locator('#recipeProteinFilter')
-        - locator resolved to <select id="recipeProteinFilter" onchange="renderRecipes()">…</select>
-      - attempting select option action
-        2 × waiting for element to be visible and enabled
-          - element is not visible
-        - retrying select option action
-        - waiting 20ms
-        2 × waiting for element to be visible and enabled
-          - element is not visible
-        - retrying select option action
-          - waiting 100ms
-        59 × waiting for element to be visible and enabled
-           - element is not visible
-         - retrying select option action
-           - waiting 500ms
-
-
-      14 | test('usuario abre biblioteca de recetas sin perder menú',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await expect(page.locator('#mealPlanner30')).toBeVisible();await expect(page.locator('details')).toBeVisible()});
-      15 | test('usuario busca una receta',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await page.locator('#recipeSearch').fill('pollo');await expect(page.locator('#recipeSearch')).toHaveValue('pollo')});
-    > 16 | test('usuario filtra recetas por proteína',async({page})=>{await ready(page);await page.locator('nav button').nth(3).click();await page.locator('#recipeProteinFilter').selectOption('30');await expect(page.locator('#recipeProteinFilter')).toHaveValue('30')});
-         |                                                                                                                                                                         ^
-      17 | test('usuario ve botones táctiles de navegación >=44px',async({page})=>{await ready(page);const n=await page.locator('nav button').evaluateAll(ns=>ns.filter(x=>x.getBoundingClientRect().height<44).length);expect(n).toBe(0)});
-      18 | test('usuario con reducir movimiento mantiene navegación',async({page})=>{await page.emulateMedia({reducedMotion:'reduce'});await ready(page);await page.locator('nav button').nth(1).click();await expect(page.locator('#entreno')).toBeVisible()});
-      19 | test('usuario recarga sin perder datos locales básicos',async({page})=>{await ready(page);await page.evaluate(()=>localStorage.setItem('qa-user-marker','ok'));await page.reload({waitUntil:'domcontentloaded'});expect(await page.evaluate(()=>localStorage.getItem('qa-user-marker'))).toBe('ok')});
-        at /home/runner/work/Recomp-10/Recomp-10/qa/user-100-sim.spec.js:16:169
-
-    Error Context: test-results/qa-user-100-sim-usuario-filtra-recetas-por-proteína/error-context.md
-
-
-[20/26] qa/user-100-sim.spec.js:17:1 › usuario ve botones táctiles de navegación >=44px
-[21/26] qa/user-100-sim.spec.js:18:1 › usuario con reducir movimiento mantiene navegación
-[22/26] qa/user-100-sim.spec.js:19:1 › usuario recarga sin perder datos locales básicos
-[23/26] qa/user-100-sim.spec.js:20:1 › usuario recorre toda la app sin pageerror
-  7) qa/user-100-sim.spec.js:20:1 › usuario recorre toda la app sin pageerror ──────────────────────
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.click: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for locator('nav button').nth(3)
-        - locator resolved to <button onclick="showTab('recetas',this)">…</button>
-      - attempting click action
-        2 × waiting for element to be visible, enabled and stable
-          - element is visible, enabled and stable
-          - scrolling into view if needed
-          - done scrolling
-          - <div class="r10Modal" id="r10IntakeModal">…</div> intercepts pointer events
-        - retrying click action
-        - waiting 20ms
-        2 × waiting for element to be visible, enabled and stable
-          - element is visible, enabled and stable
-          - scrolling into view if needed
-          - done scrolling
-          - <div class="r10Modal" id="r10IntakeModal">…</div> intercepts pointer events
-        - retrying click action
-          - waiting 100ms
-        57 × waiting for element to be visible, enabled and stable
-           - element is visible, enabled and stable
-           - scrolling into view if needed
-           - done scrolling
-           - <div class="r10Modal" id="r10IntakeModal">…</div> intercepts pointer events
-         - retrying click action
-           - waiting 500ms
-
-
-      18 | test('usuario con reducir movimiento mantiene navegación',async({page})=>{await page.emulateMedia({reducedMotion:'reduce'});await ready(page);await page.locator('nav button').nth(1).click();await expect(page.locator('#entreno')).toBeVisible()});
-      19 | test('usuario recarga sin perder datos locales básicos',async({page})=>{await ready(page);await page.evaluate(()=>localStorage.setItem('qa-user-marker','ok'));await page.reload({waitUntil:'domcontentloaded'});expect(await page.evaluate(()=>localStorage.getItem('qa-user-marker'))).toBe('ok')});
-    > 20 | test('usuario recorre toda la app sin pageerror',async({page})=>{const e=errs(page);await ready(page);for(let i=0;i<6;i++)await page.locator('nav button').nth(i).click();expect(e).toEqual([])});
-         |                                                                                                                                                                   ^
-      21 | test('usuario en iPhone landscape no desborda',async({page})=>{await page.setViewportSize({width:844,height:390});await ready(page);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+2)).toBeTruthy()});
-      22 | test('usuario en iPad portrait conserva navegación',async({page})=>{await page.setViewportSize({width:768,height:1024});await ready(page);await expect(page.locator('nav')).toBeVisible()});
-      23 | test('usuario puede enfocar controles con teclado',async({page})=>{await ready(page);await page.keyboard.press('Tab');expect(await page.evaluate(()=>document.activeElement!==document.body)).toBeTruthy()});
-        at /home/runner/work/Recomp-10/Recomp-10/qa/user-100-sim.spec.js:20:163
-
-    Error Context: test-results/qa-user-100-sim-usuario-recorre-toda-la-app-sin-pageerror/error-context.md
-
-
-[24/26] qa/user-100-sim.spec.js:21:1 › usuario en iPhone landscape no desborda
-[25/26] qa/user-100-sim.spec.js:22:1 › usuario en iPad portrait conserva navegación
-[26/26] qa/user-100-sim.spec.js:23:1 › usuario puede enfocar controles con teclado
-  7 failed
-    qa/user-100-sim.spec.js:10:1 › usuario introduce antropometría sin crash ───────────────────────
-    qa/user-100-sim.spec.js:11:1 › usuario cambia actividad y objetivo ─────────────────────────────
-    qa/user-100-sim.spec.js:12:1 › usuario navega por día anterior y vuelve a hoy ──────────────────
-    qa/user-100-sim.spec.js:14:1 › usuario abre biblioteca de recetas sin perder menú ──────────────
-    qa/user-100-sim.spec.js:15:1 › usuario busca una receta ────────────────────────────────────────
-    qa/user-100-sim.spec.js:16:1 › usuario filtra recetas por proteína ─────────────────────────────
-    qa/user-100-sim.spec.js:20:1 › usuario recorre toda la app sin pageerror ───────────────────────
-  19 passed (3.2m)
+[1/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Inicio
+[2/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Entreno
+[3/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Nutrición
+[4/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Menús
+[5/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Progreso
+[6/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Ajustes
+[7/27] qa/user-100-sim.spec.js:22:38 › usuario usa Recomp a 320px sin desbordamiento
+[8/27] qa/user-100-sim.spec.js:22:38 › usuario usa Recomp a 375px sin desbordamiento
+[9/27] qa/user-100-sim.spec.js:22:38 › usuario usa Recomp a 390px sin desbordamiento
+[10/27] qa/user-100-sim.spec.js:22:38 › usuario usa Recomp a 430px sin desbordamiento
+[11/27] qa/user-100-sim.spec.js:23:1 › usuario puede cerrar el perfil inicial y explorar
+[12/27] qa/user-100-sim.spec.js:24:1 › usuario fresco no ve peso personal precargado
+[13/27] qa/user-100-sim.spec.js:25:1 › usuario fresco ve perfil neutro
+[14/27] qa/user-100-sim.spec.js:26:1 › usuario introduce antropometría sin crash
+[15/27] qa/user-100-sim.spec.js:27:1 › usuario cambia actividad y objetivo
+[16/27] qa/user-100-sim.spec.js:28:1 › usuario navega por día anterior y vuelve a hoy
+[17/27] qa/user-100-sim.spec.js:29:1 › usuario no puede introducir kcal negativas por control
+[18/27] qa/user-100-sim.spec.js:30:1 › usuario abre biblioteca de recetas sin perder menú
+[19/27] qa/user-100-sim.spec.js:31:1 › usuario busca una receta
+[20/27] qa/user-100-sim.spec.js:32:1 › usuario filtra recetas por proteína
+[21/27] qa/user-100-sim.spec.js:33:1 › usuario ve botones táctiles de navegación >=44px
+[22/27] qa/user-100-sim.spec.js:34:1 › usuario con reducir movimiento mantiene navegación
+[23/27] qa/user-100-sim.spec.js:35:1 › usuario recarga sin perder datos locales básicos
+[24/27] qa/user-100-sim.spec.js:36:1 › usuario recorre toda la app sin pageerror
+[25/27] qa/user-100-sim.spec.js:37:1 › usuario en iPhone landscape no desborda
+[26/27] qa/user-100-sim.spec.js:38:1 › usuario en iPad portrait conserva navegación
+[27/27] qa/user-100-sim.spec.js:39:1 › usuario puede enfocar controles con teclado
+  27 passed (22.6s)
