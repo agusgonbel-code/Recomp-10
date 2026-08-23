@@ -1,0 +1,38 @@
+name: Recomp User Simulation
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: recomp-user-sim-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  users:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm install --no-save @playwright/test && npx playwright install --with-deps chromium
+      - run: python3 -m http.server 4173 >/tmp/http.log 2>&1 &
+      - id: test
+        shell: bash
+        run: |
+          set +e
+          npx playwright test qa/user-100-sim.spec.js --reporter=line > /tmp/user-sim.log 2>&1
+          code=$?
+          set -e
+          { echo 'RECOMP USER SIMULATION'; echo "SOURCE_COMMIT: $GITHUB_SHA"; [ "$code" -eq 0 ] && echo 'RESULT: PASS' || echo 'RESULT: FAIL'; echo "EXIT_CODE: $code"; echo 'SCENARIOS: 26'; echo "UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"; cat /tmp/user-sim.log; } > qa/latest-user-sim.txt
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+      - if: always()
+        run: |
+          git config user.name 'Recomp User QA Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add qa/latest-user-sim.txt
+          if ! git diff --cached --quiet; then git commit -m 'QA result: Recomp user simulation [skip ci]' && git pull --rebase origin main && git push origin HEAD:main; fi
+      - if: always()
+        run: test "${{ steps.test.outputs.code }}" = "0"
