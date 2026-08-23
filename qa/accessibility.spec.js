@@ -33,7 +33,9 @@ test('Recomp mobile controls remain labelled, unique and touchable',async({brows
 test('Recomp generated menu remains readable with large text wrapping policy',async({browser})=>{
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   const page=await context.newPage();await page.goto(BASE+'/',{waitUntil:'domcontentloaded'});await completeIntake(page);
-  await page.waitForSelector('#mpGenerate');await page.locator('#mpDays').fill('1');await page.locator('#mpGenerate').click();await page.waitForSelector('.mp-meal');
+  await page.locator('nav button').filter({hasText:'Menús'}).click();
+  await expect(page.locator('#mpGenerate')).toBeVisible();
+  await page.locator('#mpDays').fill('1');await page.locator('#mpGenerate').click();await page.waitForSelector('.mp-meal');
   const rows=await page.locator('.mp-meal').evaluateAll(nodes=>nodes.map(row=>{const link=row.querySelector('.mp-recipe-link');const s=getComputedStyle(link);return{width:link.getBoundingClientRect().width,wordBreak:s.wordBreak,overflowWrap:s.overflowWrap}}));
   for(const row of rows){expect(row.width).toBeGreaterThan(180);expect(row.wordBreak).not.toBe('break-all');expect(row.overflowWrap).not.toBe('anywhere')}
   await context.close();
