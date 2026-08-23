@@ -13,7 +13,7 @@ jobs:
   smoke:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,14 +25,14 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Start app
         run: python3 -m http.server 4173 >/tmp/recomp-http.log 2>&1 &
-      - name: Run unit, recipe integrity, user journey, nutrition, mobile and accessibility gates
+      - name: Run unit, recipe integrity, user journey, nutrition, mobile, accessibility and user-behavior gates
         id: gate
         shell: bash
         run: |
           set +e
           npm test > /tmp/recomp-unit.log 2>&1
           unit_code=$?
-          npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js qa/mobile-layout.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js --reporter=line > /tmp/recomp-browser.log 2>&1
+          npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js qa/mobile-layout.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js qa/user-100-sim.spec.js --reporter=line > /tmp/recomp-browser.log 2>&1
           browser_code=$?
           set -e
           code=0
@@ -46,11 +46,11 @@ jobs:
             echo "UNIT_EXIT_CODE: $unit_code"
             echo "BROWSER_EXIT_CODE: $browser_code"
             echo "UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            echo 'COVERAGE: unit + recipe ingredient integrity + browser + nutrition + mobile + meal intelligence + accessibility'
+            echo 'COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intelligence + accessibility + 26 user-behavior scenarios'
             echo '--- UNIT / RECIPE INTEGRITY OUTPUT (tail) ---'
             tail -n 200 /tmp/recomp-unit.log
             echo '--- BROWSER OUTPUT (tail) ---'
-            tail -n 300 /tmp/recomp-browser.log
+            tail -n 420 /tmp/recomp-browser.log
           } > qa/latest-release-gate.txt
           echo "code=$code" >> "$GITHUB_OUTPUT"
       - name: Persist gate evidence
