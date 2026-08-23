@@ -1,8 +1,8 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: 848b073a3a927c320cc23f0b0e9c7f759464903e
+SOURCE_COMMIT: 5d5e66e7aa527e3c30afa24010a68bbc40d1a93f
 RESULT: PASS
 EXIT_CODE: 0
-UTC: 2026-08-23T03:13:12Z
+UTC: 2026-08-23T06:10:54Z
 COVERAGE: browser + nutrition + mobile + meal intelligence + accessibility
 --- TEST OUTPUT (tail) ---
 
@@ -10,13 +10,13 @@ Running 23 tests using 2 workers
 
 [1/23] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
 [2/23] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates nutrition and training, and persists
-[3/23] qa/browser-smoke.spec.js:4:1 › 360 check-in records progress and produces an explainable decision
-[4/23] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
+[3/23] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
+[4/23] qa/browser-smoke.spec.js:4:1 › 360 check-in records progress and produces an explainable decision
 [5/23] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
 [6/23] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
 [7/23] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[8/23] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
-[9/23] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
+[8/23] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
+[9/23] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
 [10/23] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
 [11/23] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
 [12/23] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
@@ -31,4 +31,4 @@ Running 23 tests using 2 workers
 [21/23] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
 [22/23] qa/mobile-layout.spec.js:11:1 › Recomp menu cards keep readable meal column on iPhone width
 [23/23] qa/mobile-layout.spec.js:13:1 › Recomp 10 v53 rejects pathological calorie concentration
-  23 passed (27.5s)
+  23 passed (26.3s)
