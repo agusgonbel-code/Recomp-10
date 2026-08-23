@@ -1,5 +1,13 @@
 (function () {
   'use strict';
+  const ensureProfessionalStyle = () => {
+    if (typeof document === 'undefined' || document.querySelector('link[data-r10-professional="v61"]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'professional-v61.css?v=6.1.0';
+    link.dataset.r10Professional = 'v61';
+    document.head.appendChild(link);
+  };
   const pad = value => String(value).padStart(2, '0');
   function validDate(value) { const date = value instanceof Date ? value : new Date(value); if (Number.isNaN(date.getTime())) throw new TypeError('Fecha no válida'); return date; }
   function localDayKey(value = new Date()) { const date = validDate(value); return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()); }
@@ -8,6 +16,7 @@
   globalThis.RecompDate = { localDayKey, localTimestamp, shiftLocalDay };
 
   if (typeof document !== 'undefined') {
+    ensureProfessionalStyle();
     const fresh = !localStorage.getItem('recomp_unified_profile_v2') && !localStorage.getItem('profile');
     if (fresh) localStorage.setItem('profile', JSON.stringify({ name: 'Usuario' }));
     const sanitizeFreshUi = () => {
