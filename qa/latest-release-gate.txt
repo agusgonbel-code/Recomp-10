@@ -1,10 +1,10 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: d92d9714dafbccccd2e7a4d15462bf62f6f8683a
+SOURCE_COMMIT: 6cb90e6502c54bb6934b660726864479761d1f57
 RESULT: FAIL
 EXIT_CODE: 1
 UNIT_EXIT_CODE: 1
 BROWSER_EXIT_CODE: 0
-UTC: 2026-08-23T17:07:27Z
+UTC: 2026-08-23T18:46:40Z
 COVERAGE: unit + recipe ingredient integrity + browser + nutrition + mobile + meal intelligence + accessibility
 --- UNIT / RECIPE INTEGRITY OUTPUT (tail) ---
     5: 'Tortitas de arroz con pavo: 5 tortitas de arroz'
@@ -38,164 +38,164 @@ COVERAGE: unit + recipe ingredient integrity + browser + nutrition + mobile + me
 # Subtest: kcal declaradas son coherentes con los macros declarados
 ok 55 - kcal declaradas son coherentes con los macros declarados
   ---
-  duration_ms: 2.424813
+  duration_ms: 1.06068
   type: 'test'
   ...
 # Subtest: normalizes and keeps a bounded check-in history
 ok 56 - normalizes and keeps a bounded check-in history
   ---
-  duration_ms: 16.847767
+  duration_ms: 10.298292
   type: 'test'
   ...
 # Subtest: 360 review combines dated trend, waist, adherence and performance
 ok 57 - 360 review combines dated trend, waist, adherence and performance
   ---
-  duration_ms: 2.518838
+  duration_ms: 1.584546
   type: 'test'
   ...
 # Subtest: multiple check-ins on the same date do not create fake weeks of evidence
 ok 58 - multiple check-ins on the same date do not create fake weeks of evidence
   ---
-  duration_ms: 0.518957
+  duration_ms: 0.353432
   type: 'test'
   ...
 # Subtest: decision history is auditable
 ok 59 - decision history is auditable
   ---
-  duration_ms: 0.394745
+  duration_ms: 0.289401
   type: 'test'
   ...
 # Subtest: meal shares sum to one for 3-6 meals
 ok 60 - meal shares sum to one for 3-6 meals
   ---
-  duration_ms: 1.329505
+  duration_ms: 0.915882
   type: 'test'
   ...
 # Subtest: balanced meal shares match the production planner policy
 ok 61 - balanced meal shares match the production planner policy
   ---
-  duration_ms: 1.878416
+  duration_ms: 2.833051
   type: 'test'
   ...
 # Subtest: priority patterns remain bounded and actually prioritize the selected meal
 ok 62 - priority patterns remain bounded and actually prioritize the selected meal
   ---
-  duration_ms: 0.355832
+  duration_ms: 0.217784
   type: 'test'
   ...
 # Subtest: meal targets reconcile exactly
 ok 63 - meal targets reconcile exactly
   ---
-  duration_ms: 0.395476
+  duration_ms: 0.199084
   type: 'test'
   ...
 # Subtest: macro energy reconciles after nutrition calculation
 ok 64 - macro energy reconciles after nutrition calculation
   ---
-  duration_ms: 0.532571
+  duration_ms: 0.26057
   type: 'test'
   ...
 # Subtest: training respects days
 ok 65 - training respects days
   ---
-  duration_ms: 0.820046
+  duration_ms: 0.400424
   type: 'test'
   ...
 # Subtest: recognizes positive recomp with stable weight and falling waist
 ok 66 - recognizes positive recomp with stable weight and falling waist
   ---
-  duration_ms: 2.289692
+  duration_ms: 1.264505
   type: 'test'
   ...
 # Subtest: does not adjust plan when adherence is poor
 ok 67 - does not adjust plan when adherence is poor
   ---
-  duration_ms: 1.412899
+  duration_ms: 1.220971
   type: 'test'
   ...
 # Subtest: raises calories when dated weekly loss is too aggressive and performance falls
 ok 68 - raises calories when dated weekly loss is too aggressive and performance falls
   ---
-  duration_ms: 0.40883
+  duration_ms: 0.275716
   type: 'test'
   ...
 # Subtest: four observations on one day are not treated as a usable trend
 ok 69 - four observations on one day are not treated as a usable trend
   ---
-  duration_ms: 0.25229
+  duration_ms: 0.143155
   type: 'test'
   ...
 # Subtest: undated observations default to weekly spacing rather than one-day spacing
 ok 70 - undated observations default to weekly spacing rather than one-day spacing
   ---
-  duration_ms: 0.513725
+  duration_ms: 0.34419
   type: 'test'
   ...
 # Subtest: applied targets reconcile macro energy closely
 ok 71 - applied targets reconcile macro energy closely
   ---
-  duration_ms: 0.289889
+  duration_ms: 0.174428
   type: 'test'
   ...
 # Subtest: favorable recomp keeps calories stable
 ok 72 - favorable recomp keeps calories stable
   ---
-  duration_ms: 1.105608
+  duration_ms: 1.421138
   type: 'test'
   ...
 # Subtest: low adherence blocks calorie changes
 ok 73 - low adherence blocks calorie changes
   ---
-  duration_ms: 0.182309
+  duration_ms: 0.179327
   type: 'test'
   ...
 # Subtest: weight and waist rising together reduce energy modestly
 ok 74 - weight and waist rising together reduce energy modestly
   ---
-  duration_ms: 0.321358
+  duration_ms: 0.20368
   type: 'test'
   ...
 # Subtest: release: privacidad y soporte existen y no contienen marcadores provisionales
 ok 75 - release: privacidad y soporte existen y no contienen marcadores provisionales
   ---
-  duration_ms: 3.766892
+  duration_ms: 1.070984
   type: 'test'
   ...
 # Subtest: release: privacidad y soporte son accesibles desde la app y offline
 ok 76 - release: privacidad y soporte son accesibles desde la app y offline
   ---
-  duration_ms: 3.029809
+  duration_ms: 0.907142
   type: 'test'
   ...
 # Subtest: release: manifiesto e iconos mínimos son válidos
 ok 77 - release: manifiesto e iconos mínimos son válidos
   ---
-  duration_ms: 0.538211
+  duration_ms: 0.342107
   type: 'test'
   ...
 # Subtest: release: no hay dependencias remotas evidentes en el runtime principal
 ok 78 - release: no hay dependencias remotas evidentes en el runtime principal
   ---
-  duration_ms: 0.932275
+  duration_ms: 0.441302
   type: 'test'
   ...
 # Subtest: los scripts usan red primero para no mezclar versiones en iPhone
 ok 79 - los scripts usan red primero para no mezclar versiones en iPhone
   ---
-  duration_ms: 1.19792
+  duration_ms: 1.038233
   type: 'test'
   ...
 # Subtest: el formulario usa objetivos editables persistentes y soporta planes de 1 a 30 días
 ok 80 - el formulario usa objetivos editables persistentes y soporta planes de 1 a 30 días
   ---
-  duration_ms: 0.439959
+  duration_ms: 0.427997
   type: 'test'
   ...
 # Training engine tests passed
 # Subtest: tests/training-engine.test.mjs
 ok 26 - tests/training-engine.test.mjs
   ---
-  duration_ms: 50.14754
+  duration_ms: 24.212973
   type: 'test'
   ...
 1..81
@@ -206,13 +206,13 @@ ok 26 - tests/training-engine.test.mjs
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 2806.250821
+# duration_ms 1607.088873
 --- BROWSER OUTPUT (tail) ---
 
 Running 24 tests using 2 workers
 
-[1/24] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
-[2/24] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
+[1/24] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
+[2/24] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
 [3/24] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
 [4/24] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
 [5/24] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
@@ -235,4 +235,4 @@ Running 24 tests using 2 workers
 [22/24] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
 [23/24] qa/mobile-layout.spec.js:11:1 › Recomp menu cards keep readable meal column on iPhone width
 [24/24] qa/mobile-layout.spec.js:13:1 › Recomp 10 v53 rejects pathological calorie concentration
-  24 passed (31.1s)
+  24 passed (27.8s)
