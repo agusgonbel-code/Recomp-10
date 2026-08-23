@@ -1,15 +1,15 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: 0885fcd7ad6032263ee3b55404500af5e783aa6e
+SOURCE_COMMIT: 7bf6e94ed4745d686d4b5a22efa12cef118916d6
 RESULT: PASS
 EXIT_CODE: 0
-UTC: 2026-08-23T15:45:31Z
+UTC: 2026-08-23T15:47:46Z
 COVERAGE: browser + nutrition + mobile + meal intelligence + accessibility
 --- TEST OUTPUT (tail) ---
 
 Running 24 tests using 2 workers
 
-[1/24] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
-[2/24] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
+[1/24] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
+[2/24] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
 [3/24] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
 [4/24] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
 [5/24] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
@@ -23,8 +23,8 @@ Running 24 tests using 2 workers
 [13/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
 [14/24] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
 [15/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
-[16/24] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
-[17/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
+[16/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
+[17/24] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
 [18/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
 [19/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
 [20/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
@@ -32,4 +32,4 @@ Running 24 tests using 2 workers
 [22/24] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
 [23/24] qa/mobile-layout.spec.js:11:1 › Recomp menu cards keep readable meal column on iPhone width
 [24/24] qa/mobile-layout.spec.js:13:1 › Recomp 10 v53 rejects pathological calorie concentration
-  24 passed (29.5s)
+  24 passed (29.7s)
