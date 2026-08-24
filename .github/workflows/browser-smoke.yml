@@ -54,7 +54,7 @@ jobs:
           } > qa/latest-release-gate.txt
           echo "code=$code" >> "$GITHUB_OUTPUT"
       - name: Persist gate evidence
-        if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
         shell: bash
         run: |
           set -euo pipefail
