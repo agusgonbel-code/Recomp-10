@@ -1,9 +1,9 @@
 RECOMP USER SIMULATION
-SOURCE_COMMIT: bf28f3a5af1db87c2034268f34b0ba30132e6ae3
+SOURCE_COMMIT: 2f318aab3b1ae49698bce660824632699bd0521b
 RESULT: PASS
 EXIT_CODE: 0
 SCENARIOS: 26
-UTC: 2026-08-24T04:10:40Z
+UTC: 2026-08-24T07:45:02Z
 
 Running 28 tests using 1 worker
 
@@ -35,4 +35,4 @@ Running 28 tests using 1 worker
 [26/28] qa/user-100-sim.spec.js:44:1 › usuario en iPhone landscape no desborda
 [27/28] qa/user-100-sim.spec.js:45:1 › usuario en iPad portrait conserva navegación
 [28/28] qa/user-100-sim.spec.js:46:1 › usuario puede enfocar controles con teclado
-  28 passed (33.0s)
+  28 passed (32.4s)
