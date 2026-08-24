@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   fix:
@@ -64,9 +65,11 @@ jobs:
           NODE
           node --check /tmp/recomp-app.js
       - name: Commit verified correction
+        id: commit
         run: |
           if git diff --quiet -- index.html; then
             echo 'No product change required.'
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name 'recomp-qa-bot'
@@ -74,3 +77,12 @@ jobs:
           git add index.html
           git commit -m 'Fix neutral fresh-install starter state'
           git push
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+      - name: Re-run release gate on exact main bundle
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Commits made with GITHUB_TOKEN do not recursively trigger push workflows.
+          # workflow_dispatch is explicitly allowed, so force certification of the
+          # exact resulting main bundle whether or not this run changed index.html.
+          gh workflow run browser-smoke.yml --ref main
