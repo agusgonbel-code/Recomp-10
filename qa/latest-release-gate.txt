@@ -1,10 +1,10 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: 2e598c3a67ad668377e03d612acc7fb27644f2fd
+SOURCE_COMMIT: ad005478ce7c0057377f2509715ab36ff72e1e57
 RESULT: FAIL
 EXIT_CODE: 1
 UNIT_EXIT_CODE: 1
 BROWSER_EXIT_CODE: 0
-UTC: 2026-08-24T18:09:32Z
+UTC: 2026-08-24T23:26:17Z
 COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intelligence + accessibility + 26 user-behavior scenarios
 --- UNIT / RECIPE INTEGRITY OUTPUT (tail) ---
       '    return t;\n' +
@@ -193,20 +193,20 @@ COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intellig
   ...
 # Training engine tests passed
 # Subtest: tests/training-engine.test.mjs
-ok 32 - tests/training-engine.test.mjs
+ok 33 - tests/training-engine.test.mjs
   ---
-  duration_ms: 47.822023
+  duration_ms: 49.684569
   type: 'test'
   ...
-1..92
-# tests 92
+1..93
+# tests 93
 # suites 0
-# pass 85
+# pass 86
 # fail 7
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 2753.950114
+# duration_ms 3109.410744
 --- BROWSER OUTPUT (tail) ---
 
 Running 52 tests using 2 workers
@@ -218,36 +218,36 @@ Running 52 tests using 2 workers
 [5/52] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
 [6/52] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
 [7/52] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
-[8/52] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[9/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
+[8/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
+[9/52] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
 [10/52] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
 [11/52] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
-[12/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
-[13/52] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
-[14/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
-[15/52] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
+[12/52] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
+[13/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
+[14/52] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
+[15/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
 [16/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
-[17/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
-[18/52] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
-[19/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
-[20/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Inicio
+[17/52] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
+[18/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
+[19/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Inicio
+[20/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
 [21/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Entreno
 [22/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Nutrición
-[23/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
-[24/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Menús
-[25/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Progreso
+[23/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Menús
+[24/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Progreso
+[25/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
 [26/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Ajustes
 [27/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 320px sin desbordamiento
-[28/52] qa/mobile-layout.spec.js:7:1 › Recomp identity never displays FitCoach F branding
-[29/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 375px sin desbordamiento
-[30/52] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
-[31/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 390px sin desbordamiento
-[32/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 430px sin desbordamiento
+[28/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 375px sin desbordamiento
+[29/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 390px sin desbordamiento
+[30/52] qa/mobile-layout.spec.js:7:1 › Recomp identity never displays FitCoach F branding
+[31/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 430px sin desbordamiento
+[32/52] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
 [33/52] qa/user-100-sim.spec.js:29:1 › usuario puede cerrar el perfil inicial y explorar
-[34/52] qa/mobile-layout.spec.js:11:1 › Recomp menu cards keep readable meal column on iPhone width
-[35/52] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
-[36/52] qa/user-100-sim.spec.js:31:1 › usuario fresco ve perfil neutro
-[37/52] qa/user-100-sim.spec.js:32:1 › usuario introduce antropometría sin crash
+[34/52] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
+[35/52] qa/user-100-sim.spec.js:31:1 › usuario fresco ve perfil neutro
+[36/52] qa/user-100-sim.spec.js:32:1 › usuario introduce antropometría sin crash
+[37/52] qa/mobile-layout.spec.js:11:1 › Recomp menu cards keep readable meal column on iPhone width
 [38/52] qa/user-100-sim.spec.js:33:1 › usuario cambia actividad y objetivo
 [39/52] qa/mobile-layout.spec.js:13:1 › Recomp 10 v53 rejects pathological calorie concentration
 [40/52] qa/user-100-sim.spec.js:34:1 › usuario cierra el onboarding y Nutrición sigue siendo interactiva
@@ -263,4 +263,4 @@ Running 52 tests using 2 workers
 [50/52] qa/user-100-sim.spec.js:44:1 › usuario en iPhone landscape no desborda
 [51/52] qa/user-100-sim.spec.js:45:1 › usuario en iPad portrait conserva navegación
 [52/52] qa/user-100-sim.spec.js:46:1 › usuario puede enfocar controles con teclado
-  52 passed (51.8s)
+  52 passed (50.9s)
