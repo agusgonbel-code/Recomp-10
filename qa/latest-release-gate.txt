@@ -1,10 +1,10 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: f2b6e79950fdda9a5d0f59f97382db7bcdfcd639
+SOURCE_COMMIT: f1713b61cdbb3beb8adf75d8bd0eaee3c232d31e
 RESULT: FAIL
 EXIT_CODE: 1
 UNIT_EXIT_CODE: 1
 BROWSER_EXIT_CODE: 0
-UTC: 2026-08-24T14:32:59Z
+UTC: 2026-08-24T15:21:20Z
 COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intelligence + accessibility + 26 user-behavior scenarios
 --- UNIT / RECIPE INTEGRITY OUTPUT (tail) ---
       "    pantry:$('mpPantry').value,maxTime:$('mpTime').value,budget:$('mpBudget').value,variety:$('mpVariety').value\n" +
@@ -37,7 +37,7 @@ COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intellig
       '    const verified=meal.ingredientNutritionVerified===true;\n' +
       `    const nutritionNote=verified?'<div class="good">Macros verificados ingrediente a ingrediente para las cantidades mostradas.</div>':'<div class="notice"><b>Macros de receta, no verificados ingrediente a ingrediente.</b> Los totales se escalan desde la ficha nutricional declarada de la receta. Las cantidades sirven para preparar y ajustar la porción, pero no certifican todavía una suma nutricional reconstruida alimento por alimento.</div>';\n` +
       "    const ingredientHeading=verified?'Ingredientes y aporte nutricional':'Ingredientes';\n" +
-      `    const ingredientNote=verified?'<p class="small">El aporte mostrado para cada ingrediente forma parte del cálculo verificado de esta ración.</p>':'<p class="small">No se muestra un reparto de macros por ingrediente porque la bibliotec`... 7473 more characters
+      `    const ingredientNote=verified?'<p class="small">El aporte mostrado para cada ingrediente forma parte del cálculo verificado de esta ración.</p>':'<p class="small">No se muestra un reparto de macros por ingrediente porque la bibliotec`... 7557 more characters
     
   code: 'ERR_ASSERTION'
   name: 'AssertionError'
@@ -162,7 +162,7 @@ COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intellig
         const tabs=Array.from({length:weeks},(_,i)=>'<button class="'+(i===visibleWeek?'active':'')+'" data-week="'+i+'">S'+(i+1)+'</button>').join('');
         const target=plan.preferences;
         const days=plan.days.slice(start,end).map((d,di)=>'<details class="mp-day" '+(di===0?'open':'')+'><summary><span><b>Día '+d.day+'</b><small>'+d.totals.k+' kcal · P '+d.totals.p+' · C '+d.totals.c+' · G '+d.totals.f+'</small></span><span>›</span></summary>'+d.items.map((x,ii)=>{const day=start+di,logged=loggedToday(sourceKey(day,ii));return '<div class="mp-meal"><button class="mp-recipe-link" data-recipe="'+day+','+ii+'"><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · C '+x.c+' · G '+x.f+' · Ver receta</span></button><button class="secondary mp-log" data-log="'+day+','+ii+'" '+(logged?'disabled':'')+' aria-label="'+(logged?'Comida registrada':'Registrar comida')+'">'+(logged?'✓':'+')+'</button><button class="secondary" data-swap="'+day+','+ii+'" aria-label="Cambiar receta">↻</button></div>'}).join('')+'</details>').join('');
-        const shop=RecompMealPlanner.shoppingByWeek(plan,visibleWeek).map(x=>'<label class="mp-check"><input type="checkbox"> <span>'+esc(x.name)+'</span><small>×'+x.count+'</small></label>').join('');
+        const shop=RecompMealPlanner.shoppingByWeek(plan,visibleWeek).map(x=>{const quantity=x.amount!=null&&x.unit?x.amount+' '+x.unit:'×'+x.count;return '<label class="mp-check"><input type="checkbox"> <span>'+esc(x.name)+'</span><small>'+esc(quantity)+'</small></label>'}).join('');
         $('mpStatus').innerHTML='<div class="good"><b>'+totalDays+' días · objetivos usados:</b> '+target.kcal+' kcal · P '+target.protein+' g · C '+target.carbs+' g · G '+target.fat+' g. Todos los días se mantienen en la misma banda nutricional; si una combinación variada no cuadra, se reutiliza una combinación válida antes que entregar macros incorrectos.</div>';
         $('mpResult').innerHTML='<div class="mp-tabs">'+tabs+'</div>'+days+'<div class="card mp-shop"><h3>Compra · semana '+(visibleWeek+1)+'</h3>'+shop+'</div>';
         document.querySelectorAll('[data-recipe]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.recipe.split(',').map(Number);showRecipe(d,i)});
@@ -193,20 +193,20 @@ COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intellig
   ...
 # Training engine tests passed
 # Subtest: tests/training-engine.test.mjs
-ok 29 - tests/training-engine.test.mjs
+ok 30 - tests/training-engine.test.mjs
   ---
-  duration_ms: 57.571136
+  duration_ms: 36.419843
   type: 'test'
   ...
-1..86
-# tests 86
+1..88
+# tests 88
 # suites 0
-# pass 79
+# pass 81
 # fail 7
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 3060.859194
+# duration_ms 2907.389284
 --- BROWSER OUTPUT (tail) ---
 
 Running 52 tests using 2 workers
@@ -241,8 +241,8 @@ Running 52 tests using 2 workers
 [28/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 390px sin desbordamiento
 [29/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 430px sin desbordamiento
 [30/52] qa/user-100-sim.spec.js:29:1 › usuario puede cerrar el perfil inicial y explorar
-[31/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
-[32/52] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
+[31/52] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
+[32/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
 [33/52] qa/user-100-sim.spec.js:31:1 › usuario fresco ve perfil neutro
 [34/52] qa/user-100-sim.spec.js:32:1 › usuario introduce antropometría sin crash
 [35/52] qa/mobile-layout.spec.js:7:1 › Recomp identity never displays FitCoach F branding
@@ -263,4 +263,4 @@ Running 52 tests using 2 workers
 [50/52] qa/user-100-sim.spec.js:44:1 › usuario en iPhone landscape no desborda
 [51/52] qa/user-100-sim.spec.js:45:1 › usuario en iPad portrait conserva navegación
 [52/52] qa/user-100-sim.spec.js:46:1 › usuario puede enfocar controles con teclado
-  52 passed (49.5s)
+  52 passed (46.9s)
