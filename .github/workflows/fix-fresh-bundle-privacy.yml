@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/fix-fresh-bundle-privacy.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -51,6 +52,8 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const h=fs.readFileSync('index.html','utf8');
+          const forbidden=[/Hola,\s*Agust[ií]n/i,/id=['"]dWeight['"]>\s*81\s*kg/i,/id=['"]age['"][^>]*value=['"]46['"]/i,/id=['"]weight['"][^>]*value=['"]81['"]/i,/id=['"]height['"][^>]*value=['"]181['"]/i];
+          if(forbidden.some(r=>r.test(h))) throw new Error('Personal starter data remains in production HTML');
           const scripts=[...h.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(s=>s.trim());
           if(scripts.length!==1) throw new Error('Expected one inline application script');
           fs.writeFileSync('/tmp/recomp-app.js',scripts[0]);
