@@ -1,37 +1,38 @@
 RECOMP USER SIMULATION
-SOURCE_COMMIT: 06810cf97f9574cff53a28063762f3494b84f1cc
+SOURCE_COMMIT: c43730f5c9343016d084b8b44bb84a4116bf19e5
 RESULT: PASS
 EXIT_CODE: 0
 SCENARIOS: 26
-UTC: 2026-08-23T23:17:40Z
+UTC: 2026-08-24T00:14:16Z
 
-Running 27 tests using 1 worker
+Running 28 tests using 1 worker
 
-[1/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Inicio
-[2/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Entreno
-[3/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Nutrición
-[4/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Menús
-[5/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Progreso
-[6/27] qa/user-100-sim.spec.js:21:30 › usuario navega a Ajustes
-[7/27] qa/user-100-sim.spec.js:22:38 › usuario usa Recomp a 320px sin desbordamiento
-[8/27] qa/user-100-sim.spec.js:22:38 › usuario usa Recomp a 375px sin desbordamiento
-[9/27] qa/user-100-sim.spec.js:22:38 › usuario usa Recomp a 390px sin desbordamiento
-[10/27] qa/user-100-sim.spec.js:22:38 › usuario usa Recomp a 430px sin desbordamiento
-[11/27] qa/user-100-sim.spec.js:23:1 › usuario puede cerrar el perfil inicial y explorar
-[12/27] qa/user-100-sim.spec.js:24:1 › usuario fresco no ve peso personal precargado
-[13/27] qa/user-100-sim.spec.js:25:1 › usuario fresco ve perfil neutro
-[14/27] qa/user-100-sim.spec.js:26:1 › usuario introduce antropometría sin crash
-[15/27] qa/user-100-sim.spec.js:27:1 › usuario cambia actividad y objetivo
-[16/27] qa/user-100-sim.spec.js:28:1 › usuario navega por día anterior y vuelve a hoy
-[17/27] qa/user-100-sim.spec.js:29:1 › usuario no puede introducir kcal negativas por control
-[18/27] qa/user-100-sim.spec.js:30:1 › usuario abre biblioteca de recetas sin perder menú
-[19/27] qa/user-100-sim.spec.js:31:1 › usuario busca una receta
-[20/27] qa/user-100-sim.spec.js:32:1 › usuario filtra recetas por proteína
-[21/27] qa/user-100-sim.spec.js:33:1 › usuario ve botones táctiles de navegación >=44px
-[22/27] qa/user-100-sim.spec.js:34:1 › usuario con reducir movimiento mantiene navegación
-[23/27] qa/user-100-sim.spec.js:35:1 › usuario recarga sin perder datos locales básicos
-[24/27] qa/user-100-sim.spec.js:36:1 › usuario recorre toda la app sin pageerror
-[25/27] qa/user-100-sim.spec.js:37:1 › usuario en iPhone landscape no desborda
-[26/27] qa/user-100-sim.spec.js:38:1 › usuario en iPad portrait conserva navegación
-[27/27] qa/user-100-sim.spec.js:39:1 › usuario puede enfocar controles con teclado
-  27 passed (21.9s)
+[1/28] qa/user-100-sim.spec.js:27:30 › usuario navega a Inicio
+[2/28] qa/user-100-sim.spec.js:27:30 › usuario navega a Entreno
+[3/28] qa/user-100-sim.spec.js:27:30 › usuario navega a Nutrición
+[4/28] qa/user-100-sim.spec.js:27:30 › usuario navega a Menús
+[5/28] qa/user-100-sim.spec.js:27:30 › usuario navega a Progreso
+[6/28] qa/user-100-sim.spec.js:27:30 › usuario navega a Ajustes
+[7/28] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 320px sin desbordamiento
+[8/28] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 375px sin desbordamiento
+[9/28] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 390px sin desbordamiento
+[10/28] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 430px sin desbordamiento
+[11/28] qa/user-100-sim.spec.js:29:1 › usuario puede cerrar el perfil inicial y explorar
+[12/28] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
+[13/28] qa/user-100-sim.spec.js:31:1 › usuario fresco ve perfil neutro
+[14/28] qa/user-100-sim.spec.js:32:1 › usuario introduce antropometría sin crash
+[15/28] qa/user-100-sim.spec.js:33:1 › usuario cambia actividad y objetivo
+[16/28] qa/user-100-sim.spec.js:34:1 › usuario cierra el onboarding y Nutrición sigue siendo interactiva
+[17/28] qa/user-100-sim.spec.js:35:1 › usuario navega por día anterior y vuelve a hoy
+[18/28] qa/user-100-sim.spec.js:36:1 › usuario no puede introducir kcal negativas por control
+[19/28] qa/user-100-sim.spec.js:37:1 › usuario abre biblioteca de recetas sin perder menú
+[20/28] qa/user-100-sim.spec.js:38:1 › usuario busca una receta
+[21/28] qa/user-100-sim.spec.js:39:1 › usuario filtra recetas por proteína
+[22/28] qa/user-100-sim.spec.js:40:1 › usuario ve botones táctiles de navegación >=44px
+[23/28] qa/user-100-sim.spec.js:41:1 › usuario con reducir movimiento mantiene navegación
+[24/28] qa/user-100-sim.spec.js:42:1 › usuario recarga sin perder datos locales básicos
+[25/28] qa/user-100-sim.spec.js:43:1 › usuario recorre toda la app sin pageerror
+[26/28] qa/user-100-sim.spec.js:44:1 › usuario en iPhone landscape no desborda
+[27/28] qa/user-100-sim.spec.js:45:1 › usuario en iPad portrait conserva navegación
+[28/28] qa/user-100-sim.spec.js:46:1 › usuario puede enfocar controles con teclado
+  28 passed (31.8s)
