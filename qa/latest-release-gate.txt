@@ -1,18 +1,12 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: d3fa2aa235dabdb50631a5338b8360ec99cc5966
+SOURCE_COMMIT: 900ef1b9ff9108d4ac1618377d539faeecb2a590
 RESULT: FAIL
 EXIT_CODE: 1
 UNIT_EXIT_CODE: 1
 BROWSER_EXIT_CODE: 0
-UTC: 2026-08-24T16:18:14Z
+UTC: 2026-08-24T17:12:46Z
 COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intelligence + accessibility + 26 user-behavior scenarios
 --- UNIT / RECIPE INTEGRITY OUTPUT (tail) ---
-      "    pantry:$('mpPantry').value,maxTime:$('mpTime').value,budget:$('mpBudget').value,variety:$('mpVariety').value\n" +
-      '  }}\n' +
-      '  function applyMacroTargets(input=savedTargets(),notify=false){\n' +
-      '    const t=RecompMealPlanner.macroTargets(input);\n' +
-      "    [['mpKcal','kcal'],['mpProtein','protein'],['mpCarbs','carbs'],['mpFat','fat']].forEach(([id,k])=>{if($(id))$(id).value=t[k]});\n" +
-      `    if(notify&&$('mpStatus'))$('mpStatus').innerHTML='<div class="good">Macros sincronizados desde la calculadora: '+t.kcal+' kcal · P '+t.protein+' g · C '+t.carbs+' g · G '+t.fat+' g.</div>';\n` +
       '    return t;\n' +
       '  }\n' +
       '  function useCalculatorTargets(){localStorage.removeItem(manualKey);applyMacroTargets(savedTargets(),true)}\n' +
@@ -29,7 +23,10 @@ COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intellig
       '  function swap(day,item){try{RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render();showRecipe(day,item)}catch(e){alert(e.message)}}\n' +
       '  function showRecipe(day,item){\n' +
       '    const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;\n' +
-      "    const ingredients=RecompMealPlanner.ingredientDetailsFor(meal).map(ingredient=>'<li><b>'+esc(ingredient.text)+'</b>'+(ingredient.nutrients?'<small> · '+Math.round(ingredient.nutrients.k)+' kcal · P '+ingredient.nutrients.p.toFixed(1)+' · C '+ingredient.nutrients.c.toFixed(1)+' · G '+ingredient.nutrients.f.toFixed(1)+'</small>':'')+'</li>').join('');\n" +
+      '    const ingredients=RecompMealPlanner.ingredientDetailsFor(meal).map(ingredient=>{\n' +
+      '      const estimated=ingredient.quantityEstimated===true;\n' +
+      "      return '<li><b>'+esc(ingredient.text)+'</b>'+(estimated?'<small> · cantidad estimada/no verificada</small>':'')+(ingredient.nutrients?'<small> · '+Math.round(ingredient.nutrients.k)+' kcal · P '+ingredient.nutrients.p.toFixed(1)+' · C '+ingredient.nutrients.c.toFixed(1)+' · G '+ingredient.nutrients.f.toFixed(1)+'</small>':'')+'</li>';\n" +
+      "    }).join('');\n" +
       '    const matched=recipeSource().find(r=>r.id===meal.recipe.id||r.n===meal.recipe.n);\n' +
       "    const steps=(meal.recipe.s?.length?meal.recipe.s:(matched?.s||[])).map(value=>'<li>'+esc(value)+'</li>').join('');\n" +
       `    const preparation=steps?'<h3>Cómo prepararla</h3><ol>'+steps+'</ol>':'<div class="notice">Esta receta no tiene todavía pasos de elaboración en la biblioteca. Cámbiala por otra receta completa.</div>';\n` +
@@ -37,7 +34,7 @@ COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intellig
       '    const verified=meal.ingredientNutritionVerified===true;\n' +
       `    const nutritionNote=verified?'<div class="good">Macros verificados ingrediente a ingrediente para las cantidades mostradas.</div>':'<div class="notice"><b>Macros de receta, no verificados ingrediente a ingrediente.</b> Los totales se escalan desde la ficha nutricional declarada de la receta. Las cantidades sirven para preparar y ajustar la porción, pero no certifican todavía una suma nutricional reconstruida alimento por alimento.</div>';\n` +
       "    const ingredientHeading=verified?'Ingredientes y aporte nutricional':'Ingredientes';\n" +
-      `    const ingredientNote=verified?'<p class="small">El aporte mostrado para cada ingrediente forma parte del cálculo verificado de esta ración.</p>':'<p class="small">No se muestra un reparto de macros por ingrediente porque la bibliotec`... 7557 more characters
+      `    const ingredientNote=verified?'<p class="small">El aporte mostrado para cada ingredie`... 7859 more characters
     
   code: 'ERR_ASSERTION'
   name: 'AssertionError'
@@ -141,7 +138,10 @@ COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intellig
       function swap(day,item){try{RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render();showRecipe(day,item)}catch(e){alert(e.message)}}
       function showRecipe(day,item){
         const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;
-        const ingredients=RecompMealPlanner.ingredientDetailsFor(meal).map(ingredient=>'<li><b>'+esc(ingredient.text)+'</b>'+(ingredient.nutrients?'<small> · '+Math.round(ingredient.nutrients.k)+' kcal · P '+ingredient.nutrients.p.toFixed(1)+' · C '+ingredient.nutrients.c.toFixed(1)+' · G '+ingredient.nutrients.f.toFixed(1)+'</small>':'')+'</li>').join('');
+        const ingredients=RecompMealPlanner.ingredientDetailsFor(meal).map(ingredient=>{
+          const estimated=ingredient.quantityEstimated===true;
+          return '<li><b>'+esc(ingredient.text)+'</b>'+(estimated?'<small> · cantidad estimada/no verificada</small>':'')+(ingredient.nutrients?'<small> · '+Math.round(ingredient.nutrients.k)+' kcal · P '+ingredient.nutrients.p.toFixed(1)+' · C '+ingredient.nutrients.c.toFixed(1)+' · G '+ingredient.nutrients.f.toFixed(1)+'</small>':'')+'</li>';
+        }).join('');
         const matched=recipeSource().find(r=>r.id===meal.recipe.id||r.n===meal.recipe.n);
         const steps=(meal.recipe.s?.length?meal.recipe.s:(matched?.s||[])).map(value=>'<li>'+esc(value)+'</li>').join('');
         const preparation=steps?'<h3>Cómo prepararla</h3><ol>'+steps+'</ol>':'<div class="notice">Esta receta no tiene todavía pasos de elaboración en la biblioteca. Cámbiala por otra receta completa.</div>';
@@ -149,7 +149,7 @@ COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intellig
         const verified=meal.ingredientNutritionVerified===true;
         const nutritionNote=verified?'<div class="good">Macros verificados ingrediente a ingrediente para las cantidades mostradas.</div>':'<div class="notice"><b>Macros de receta, no verificados ingrediente a ingrediente.</b> Los totales se escalan desde la ficha nutricional declarada de la receta. Las cantidades sirven para preparar y ajustar la porción, pero no certifican todavía una suma nutricional reconstruida alimento por alimento.</div>';
         const ingredientHeading=verified?'Ingredientes y aporte nutricional':'Ingredientes';
-        const ingredientNote=verified?'<p class="small">El aporte mostrado para cada ingrediente forma parte del cálculo verificado de esta ración.</p>':'<p class="small">No se muestra un reparto de macros por ingrediente porque la biblioteca aún no dispone de composición nutricional verificable para todos ellos. Evitamos atribuir nutrientes estimados como si fueran exactos.</p>';
+        const ingredientNote=verified?'<p class="small">El aporte mostrado para cada ingrediente forma parte del cálculo verificado de esta ración.</p>':'<p class="small">No se muestra un reparto de macros por ingrediente porque la biblioteca aún no dispone de composición nutricional verificable para todos ellos. Las cantidades marcadas como estimadas/no verificadas han sido inferidas para poder escalar la receta y no proceden de una cantidad original certificada. Evitamos atribuir nutrientes estimados como si fueran exactos.</p>';
         $('mpRecipeDetail').innerHTML='<div class="card mp-recipe-detail"><button class="secondary mp-recipe-close">Cerrar</button><span class="pill">'+esc(meal.slot||meal.recipe.m)+'</span><h2>'+esc(meal.recipe.n)+'</h2><div class="kcal">'+meal.k+' kcal</div><p class="small">P '+meal.p+' g · C '+meal.c+' g · G '+meal.f+' g'+(meta?' · '+meta:'')+'</p>'+nutritionNote+'<button class="mp-log-detail '+(logged?'secondary':'')+'" '+(logged?'disabled':'')+'>'+(logged?'✓ Registrada hoy':'Añadir al diario de hoy')+'</button><h3>'+ingredientHeading+'</h3><ul>'+ingredients+'</ul>'+ingredientNote+preparation+'</div>';
         $('mpRecipeDetail').querySelector('.mp-recipe-close').onclick=()=>{$('mpRecipeDetail').innerHTML=''};
         const logButton=$('mpRecipeDetail').querySelector('.mp-log-detail');if(!logged)logButton.onclick=()=>logMeal(day,item);
@@ -195,24 +195,24 @@ COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intellig
 # Subtest: tests/training-engine.test.mjs
 ok 31 - tests/training-engine.test.mjs
   ---
-  duration_ms: 34.472518
+  duration_ms: 42.000444
   type: 'test'
   ...
 1..89
 # tests 89
 # suites 0
-# pass 81
-# fail 8
+# pass 82
+# fail 7
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 1571.961219
+# duration_ms 2213.331435
 --- BROWSER OUTPUT (tail) ---
 
 Running 52 tests using 2 workers
 
-[1/52] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
-[2/52] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
+[1/52] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
+[2/52] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
 [3/52] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
 [4/52] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
 [5/52] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
@@ -226,8 +226,8 @@ Running 52 tests using 2 workers
 [13/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
 [14/52] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
 [15/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
-[16/52] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
-[17/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
+[16/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
+[17/52] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
 [18/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Inicio
 [19/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Entreno
 [20/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Nutrición
@@ -242,8 +242,8 @@ Running 52 tests using 2 workers
 [29/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 430px sin desbordamiento
 [30/52] qa/user-100-sim.spec.js:29:1 › usuario puede cerrar el perfil inicial y explorar
 [31/52] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
-[32/52] qa/user-100-sim.spec.js:31:1 › usuario fresco ve perfil neutro
-[33/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
+[32/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
+[33/52] qa/user-100-sim.spec.js:31:1 › usuario fresco ve perfil neutro
 [34/52] qa/user-100-sim.spec.js:32:1 › usuario introduce antropometría sin crash
 [35/52] qa/mobile-layout.spec.js:7:1 › Recomp identity never displays FitCoach F branding
 [36/52] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
