@@ -1,0 +1,61 @@
+name: Fix fresh bundle privacy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-fresh-bundle-privacy.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Neutralize development starter data
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          replacements = {
+              "<h1 id='hello'>Hola, Agustín</h1>": "<h1 id='hello'>Hola</h1>",
+              "<div class='stat' id='dWeight'>81 kg</div>": "<div class='stat' id='dWeight'>—</div>",
+              "<input id='age' type='number' value='46'>": "<input id='age' type='number' inputmode='numeric' min='13' max='100' placeholder='Edad'>",
+              "<input id='weight' type='number' value='81'>": "<input id='weight' type='number' inputmode='decimal' min='30' max='300' step='0.1' placeholder='kg'>",
+              "<input id='height' type='number' value='181'>": "<input id='height' type='number' inputmode='numeric' min='120' max='230' placeholder='cm'>",
+              "<input id='profileName' value='Agustín'>": "<input id='profileName' autocomplete='name' placeholder='Tu nombre'>",
+          }
+          for old, new in replacements.items():
+              s = s.replace(old, new)
+          # Elimina únicamente el fallback de objetivos personales de desarrollo si aún existe.
+          s = re.sub(
+              r"S\.g\(['\"]targets['\"],\s*\{\s*kcal\s*:\s*3014\s*,\s*protein\s*:\s*156\s*,\s*carbs\s*:\s*422\s*,\s*fat\s*:\s*78\s*\}\)\s*;?",
+              "",
+              s,
+          )
+          p.write_text(s, encoding='utf-8')
+      - name: Run privacy regression and full unit gate
+        run: |
+          node --test tests/fresh-bundle-privacy-v64.test.mjs
+          npm test
+      - name: Commit verified correction
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No product change required.'
+            exit 0
+          fi
+          git config user.name 'recomp-qa-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Fix neutral fresh-install starter state'
+          git push
