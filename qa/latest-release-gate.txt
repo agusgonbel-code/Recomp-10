@@ -1,10 +1,10 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: 01fa4e52809b167b1434fbd3b53a9225722cff9d
+SOURCE_COMMIT: f2b6e79950fdda9a5d0f59f97382db7bcdfcd639
 RESULT: FAIL
 EXIT_CODE: 1
 UNIT_EXIT_CODE: 1
 BROWSER_EXIT_CODE: 0
-UTC: 2026-08-24T12:14:41Z
+UTC: 2026-08-24T14:32:59Z
 COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intelligence + accessibility + 26 user-behavior scenarios
 --- UNIT / RECIPE INTEGRITY OUTPUT (tail) ---
       "    pantry:$('mpPantry').value,maxTime:$('mpTime').value,budget:$('mpBudget').value,variety:$('mpVariety').value\n" +
@@ -195,18 +195,18 @@ COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intellig
 # Subtest: tests/training-engine.test.mjs
 ok 29 - tests/training-engine.test.mjs
   ---
-  duration_ms: 39.453305
+  duration_ms: 57.571136
   type: 'test'
   ...
 1..86
 # tests 86
 # suites 0
-# pass 77
-# fail 9
+# pass 79
+# fail 7
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 2686.501028
+# duration_ms 3060.859194
 --- BROWSER OUTPUT (tail) ---
 
 Running 52 tests using 2 workers
@@ -214,13 +214,13 @@ Running 52 tests using 2 workers
 [1/52] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
 [2/52] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
 [3/52] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
-[4/52] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
-[5/52] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
+[4/52] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
+[5/52] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
 [6/52] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
 [7/52] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
 [8/52] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[9/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
-[10/52] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
+[9/52] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
+[10/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
 [11/52] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
 [12/52] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
 [13/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
@@ -231,18 +231,18 @@ Running 52 tests using 2 workers
 [18/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Inicio
 [19/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Entreno
 [20/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Nutrición
-[21/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Menús
-[22/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
+[21/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
+[22/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Menús
 [23/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Progreso
 [24/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Ajustes
 [25/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 320px sin desbordamiento
-[26/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 375px sin desbordamiento
-[27/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
+[26/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
+[27/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 375px sin desbordamiento
 [28/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 390px sin desbordamiento
 [29/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 430px sin desbordamiento
 [30/52] qa/user-100-sim.spec.js:29:1 › usuario puede cerrar el perfil inicial y explorar
-[31/52] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
-[32/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
+[31/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
+[32/52] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
 [33/52] qa/user-100-sim.spec.js:31:1 › usuario fresco ve perfil neutro
 [34/52] qa/user-100-sim.spec.js:32:1 › usuario introduce antropometría sin crash
 [35/52] qa/mobile-layout.spec.js:7:1 › Recomp identity never displays FitCoach F branding
@@ -263,4 +263,4 @@ Running 52 tests using 2 workers
 [50/52] qa/user-100-sim.spec.js:44:1 › usuario en iPhone landscape no desborda
 [51/52] qa/user-100-sim.spec.js:45:1 › usuario en iPad portrait conserva navegación
 [52/52] qa/user-100-sim.spec.js:46:1 › usuario puede enfocar controles con teclado
-  52 passed (48.2s)
+  52 passed (49.5s)
