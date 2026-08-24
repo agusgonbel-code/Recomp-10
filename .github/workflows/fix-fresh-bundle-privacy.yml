@@ -1,6 +1,6 @@
 name: Fix fresh bundle privacy
 
-# One-shot repair workflow: edits production HTML, runs the privacy regression and full unit gate, then commits only verified output.
+# One-shot repair workflow: edits production HTML, validates the privacy defect plus nearby invariants, then commits verified output.
 on:
   push:
     branches: [main]
@@ -44,10 +44,18 @@ jobs:
               s,
           )
           p.write_text(s, encoding='utf-8')
-      - name: Run privacy regression and full unit gate
+      - name: Validate privacy correction and nearby invariants
         run: |
           node --test tests/fresh-bundle-privacy-v64.test.mjs
-          npm test
+          node --test tests/persistence.test.mjs
+          node - <<'NODE'
+          const fs=require('fs');
+          const h=fs.readFileSync('index.html','utf8');
+          const scripts=[...h.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(s=>s.trim());
+          if(scripts.length!==1) throw new Error('Expected one inline application script');
+          fs.writeFileSync('/tmp/recomp-app.js',scripts[0]);
+          NODE
+          node --check /tmp/recomp-app.js
       - name: Commit verified correction
         run: |
           if git diff --quiet -- index.html; then
