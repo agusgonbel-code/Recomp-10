@@ -1,16 +1,22 @@
 const {test,expect}=require('@playwright/test');
 const URL='http://127.0.0.1:4173/';
+async function closeIntakeModal(page){
+  const modal=page.locator('#r10IntakeModal');
+  await modal.waitFor({state:'visible',timeout:1800}).catch(()=>{});
+  if(await modal.isVisible().catch(()=>false)) await page.locator('#rClose').click();
+  await expect(modal).toBeHidden();
+}
 async function ready(page){
   await page.goto(URL,{waitUntil:'domcontentloaded'});
   await expect(page.locator('#inicio')).toBeVisible();
-  const modal=page.locator('#r10IntakeModal');
-  await modal.waitFor({state:'visible',timeout:1200}).catch(()=>{});
-  if(await modal.isVisible().catch(()=>false)) await page.locator('#rClose').click();
-  await expect(modal).toBeHidden();
+  await closeIntakeModal(page);
 }
 async function nutrition(page,panel='today'){
   await ready(page);await page.locator('nav button').nth(2).click();await expect(page.locator('#nutricion')).toBeVisible();
   await page.locator('#nutricion .rn-tabs').waitFor({state:'visible',timeout:4000});
+  // Under CI load the first-run intake can finish mounting after navigation. Dismiss it again
+  // before interacting so this flow models a user who explicitly closes onboarding and continues.
+  await closeIntakeModal(page);
   if(panel!=='today') await page.locator(`#nutricion .rn-tabs [data-panel="${panel}"]`).click();
   await expect(page.locator(`#nutricion .rn-panel[data-panel="${panel}"]`)).toHaveClass(/active/);
 }
@@ -25,6 +31,7 @@ test('usuario fresco no ve peso personal precargado',async({page})=>{await ready
 test('usuario fresco ve perfil neutro',async({page})=>{await ready(page);await page.locator('nav button').nth(5).click();await expect(page.locator('#profileName')).toHaveValue('Usuario')});
 test('usuario introduce antropometría sin crash',async({page})=>{const e=errs(page);await nutrition(page,'targets');await page.locator('#age').fill('40');await page.locator('#weight').fill('75');await page.locator('#height').fill('178');expect(e).toEqual([])});
 test('usuario cambia actividad y objetivo',async({page})=>{await nutrition(page,'targets');await page.locator('#activity').selectOption('1.375');await page.locator('#goal').selectOption('0');await expect(page.locator('#activity')).toHaveValue('1.375');await expect(page.locator('#goal')).toHaveValue('0')});
+test('usuario cierra el onboarding y Nutrición sigue siendo interactiva',async({page})=>{await nutrition(page,'targets');await expect(page.locator('#r10IntakeModal')).toBeHidden();await page.locator('#activity').selectOption('1.2');await expect(page.locator('#activity')).toHaveValue('1.2')});
 test('usuario navega por día anterior y vuelve a hoy',async({page})=>{await nutrition(page,'diary');const before=await page.locator('#mealJournalDate').inputValue();await page.getByRole('button',{name:'Día anterior'}).click();expect(await page.locator('#mealJournalDate').inputValue()).not.toBe(before);await page.getByRole('button',{name:'Ir a hoy'}).click();expect(await page.locator('#mealJournalDate').inputValue()).toBe(before)});
 test('usuario no puede introducir kcal negativas por control',async({page})=>{await nutrition(page,'diary');expect(await page.locator('#mealKcal').getAttribute('min')).toBe('0')});
 test('usuario abre biblioteca de recetas sin perder menú',async({page})=>{await openLibrary(page);await expect(page.locator('#mealPlanner30')).toBeVisible();await expect(page.locator('#recipeSearch')).toBeVisible()});
