@@ -1,5 +1,6 @@
 name: Fix fresh bundle privacy
 
+# One-shot repair workflow: edits production HTML, runs the privacy regression and full unit gate, then commits only verified output.
 on:
   push:
     branches: [main]
@@ -37,7 +38,6 @@ jobs:
           }
           for old, new in replacements.items():
               s = s.replace(old, new)
-          # Elimina únicamente el fallback de objetivos personales de desarrollo si aún existe.
           s = re.sub(
               r"S\.g\(['\"]targets['\"],\s*\{\s*kcal\s*:\s*3014\s*,\s*protein\s*:\s*156\s*,\s*carbs\s*:\s*422\s*,\s*fat\s*:\s*78\s*\}\)\s*;?",
               "",
