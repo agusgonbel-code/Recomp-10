@@ -1,189 +1,15 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: ad005478ce7c0057377f2509715ab36ff72e1e57
+SOURCE_COMMIT: 3ff96214a3d5f3f37ea2be580661e49e2c846f6b
 RESULT: FAIL
 EXIT_CODE: 1
 UNIT_EXIT_CODE: 1
 BROWSER_EXIT_CODE: 0
-UTC: 2026-08-24T23:26:17Z
+UTC: 2026-08-25T00:18:38Z
 COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intelligence + accessibility + 26 user-behavior scenarios
 --- UNIT / RECIPE INTEGRITY OUTPUT (tail) ---
-      '    return t;\n' +
-      '  }\n' +
-      '  function useCalculatorTargets(){localStorage.removeItem(manualKey);applyMacroTargets(savedTargets(),true)}\n' +
-      '  function generate(){\n' +
-      "    const button=$('mpGenerate');\n" +
-      '    try{\n' +
-      "      if(button){button.disabled=true;button.textContent='Calculando menú…'}\n" +
-      '      persistManualTargets(false);\n' +
-      "      const catalog=recipeSource();if(!catalog.length)throw new Error('La biblioteca de recetas todavía no está lista.');\n" +
-      "      plan=RecompMealPlanner.generateDays(catalog,formValues());visibleWeek=0;save();render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'});\n" +
-      `    }catch(e){$('mpStatus').innerHTML='<div class="notice"><b>No se pudo crear el menú.</b><br>'+esc(e.message)+'</div>'}\n` +
-      "    finally{if(button){button.disabled=false;button.textContent='Generar menú'}}\n" +
-      '  }\n' +
-      '  function swap(day,item){try{RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render();showRecipe(day,item)}catch(e){alert(e.message)}}\n' +
-      '  function showRecipe(day,item){\n' +
-      '    const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;\n' +
-      '    const ingredients=RecompMealPlanner.ingredientDetailsFor(meal).map(ingredient=>{\n' +
-      '      const estimated=ingredient.quantityEstimated===true;\n' +
-      "      return '<li><b>'+esc(ingredient.text)+'</b>'+(estimated?'<small> · cantidad estimada/no verificada</small>':'')+(ingredient.nutrients?'<small> · '+Math.round(ingredient.nutrients.k)+' kcal · P '+ingredient.nutrients.p.toFixed(1)+' · C '+ingredient.nutrients.c.toFixed(1)+' · G '+ingredient.nutrients.f.toFixed(1)+'</small>':'')+'</li>';\n" +
-      "    }).join('');\n" +
-      '    const matched=recipeSource().find(r=>r.id===meal.recipe.id||r.n===meal.recipe.n);\n' +
-      "    const steps=(meal.recipe.s?.length?meal.recipe.s:(matched?.s||[])).map(value=>'<li>'+esc(value)+'</li>').join('');\n" +
-      `    const preparation=steps?'<h3>Cómo prepararla</h3><ol>'+steps+'</ol>':'<div class="notice">Esta receta no tiene todavía pasos de elaboración en la biblioteca. Cámbiala por otra receta completa.</div>';\n` +
-      "    const meta=[meal.recipe.time&&meal.recipe.time+' min',meal.recipe.difficulty].filter(Boolean).map(esc).join(' · '),logged=loggedToday(sourceKey(day,item));\n" +
-      '    const verified=meal.ingredientNutritionVerified===true;\n' +
-      `    const nutritionNote=verified?'<div class="good">Macros verificados ingrediente a ingrediente para las cantidades mostradas.</div>':'<div class="notice"><b>Macros de receta, no verificados ingrediente a ingrediente.</b> Los totales se escalan desde la ficha nutricional declarada de la receta. Las cantidades sirven para preparar y ajustar la porción, pero no certifican todavía una suma nutricional reconstruida alimento por alimento.</div>';\n` +
-      "    const ingredientHeading=verified?'Ingredientes y aporte nutricional':'Ingredientes';\n" +
-      `    const ingredientNote=verified?'<p class="small">El aporte mostrado para cada ingredie`... 7859 more characters
-    
-  code: 'ERR_ASSERTION'
-  name: 'AssertionError'
-  expected:
-  actual: |-
-    (() => {
-      'use strict';
-      const key='recomp10.mealPlan30',manualKey='recomp10.manualTargets';
-      const $=id=>document.getElementById(id);
-      const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-      let plan=null,visibleWeek=0;
-      const recipeSource=()=>RecompMealPlanner.normalizeRecipeCatalog(
-        typeof ALL_RECIPES!=='undefined'&&Array.isArray(ALL_RECIPES)?ALL_RECIPES:
-          (typeof recipes!=='undefined'?recipes:(globalThis.recipes||[]))
-      );
-      const savedTargets=()=>{try{return JSON.parse(localStorage.getItem('targets')||'null')||{}}catch{return {}}};
-      const savedManualTargets=()=>{try{return JSON.parse(localStorage.getItem(manualKey)||'null')}catch{return null}};
-      const sourceKey=(day,item)=>'mealPlan:'+String(plan?.createdAt||'unknown')+':'+day+':'+item;
-      const loggedToday=source=>{try{return (JSON.parse(localStorage.getItem('meals')||'[]')||[]).some(meal=>meal?.date===RecompDate.localDayKey()&&meal?.sourceKey===source)}catch{return false}};
-    
-      function installProfessionalMobile(){
-        if(document.getElementById('recompProfessionalMobile'))return;
-        const style=document.createElement('style');style.id='recompProfessionalMobile';style.textContent=`
-          html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%}
-          main,.section,.hero,.card,.row,.grid,.mp-day,.mp-meal,.mp-recipe-link,#mealPlanner30,#mpResult{min-width:0;max-width:100%}
-          img,canvas,svg{max-width:100%}button,input,select,textarea{min-width:0;max-width:100%}
-          .navicon{height:22px;display:grid;place-items:center;margin:0 auto 3px;font-size:0}.navicon svg{width:21px;height:21px;display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-          @media(max-width:600px){
-            main{width:100%;padding:14px 12px calc(112px + env(safe-area-inset-bottom))}
-            .hero{padding:20px;border-radius:24px}.hero h1{font-size:32px;line-height:1.04}
-            .row{flex-wrap:wrap}.row>*{flex:1 1 min(100%,240px);min-width:0}
-            .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.card{min-width:0}
-            .mp-day{width:100%}.mp-day summary{gap:10px;align-items:flex-start;min-width:0}.mp-day summary span:first-child{min-width:0;flex:1}
-            .mp-meal{display:grid;grid-template-columns:minmax(0,1fr) 46px 46px;gap:8px;align-items:center;padding:12px;min-width:0}
-            .mp-meal>div,.mp-recipe-link{min-width:0;width:100%;max-width:100%}.mp-recipe-link{padding:8px 4px;overflow-wrap:normal;word-break:normal;white-space:normal}
-            .mp-recipe-link small,.mp-recipe-link b,.mp-recipe-link span{display:block;max-width:100%;overflow-wrap:normal;word-break:normal;white-space:normal}
-            .mp-meal button:not(.mp-recipe-link){width:46px;min-width:46px;max-width:46px;height:46px;min-height:46px;padding:0;display:grid;place-items:center}
-            .setrow{grid-template-columns:32px repeat(3,minmax(0,1fr));gap:6px}.setrow input{padding:10px 8px}
-            nav{grid-template-columns:repeat(6,minmax(0,1fr));padding:7px max(4px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left));gap:2px}
-            nav button{min-width:0;padding:7px 1px;font-size:9px;line-height:1.15;overflow:hidden;text-overflow:ellipsis}
-            .mp-tabs{max-width:100%;overscroll-behavior-inline:contain}.mp-form .row button{min-height:46px}
-          }
-          @media(max-width:360px){main{padding-left:10px;padding-right:10px}.mp-meal{grid-template-columns:minmax(0,1fr) 44px 44px;padding:10px;gap:6px}.mp-meal button:not(.mp-recipe-link){width:44px;min-width:44px;max-width:44px;height:44px}.hero h1{font-size:29px}}
-        `;document.head.appendChild(style);
-      }
-      function upgradeNavIcons(){
-        const icons=[
-          '<svg viewBox="0 0 24 24"><path d="m3 11 9-7 9 7v9H6v-9"/><path d="M10 20v-6h4v6"/></svg>',
-          '<svg viewBox="0 0 24 24"><path d="M4 15h3l2-6 3 10 3-8 2 4h3"/><path d="M4 5v14M20 5v14"/></svg>',
-          '<svg viewBox="0 0 24 24"><path d="M5 19c0-7 3-12 7-14 4 2 7 7 7 14"/><path d="M8 11h8M7 15h10"/></svg>',
-          '<svg viewBox="0 0 24 24"><path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>',
-          '<svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="m7 15 4-4 3 2 5-6"/></svg>',
-          '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9 7 7m10 10 2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg>'
-        ];document.querySelectorAll('nav .navicon').forEach((el,i)=>{if(icons[i])el.innerHTML=icons[i]});
-      }
-    
-      function ensureLegalLinks(){
-        if($('recompLegalLinks')||!document.body)return;
-        const footer=document.createElement('footer');footer.id='recompLegalLinks';footer.setAttribute('aria-label','Información legal y soporte');
-        footer.style.cssText='padding:18px 16px 90px;text-align:center;font-size:13px;opacity:.82';
-        footer.innerHTML='<a href="./privacy.html">Privacidad</a> · <a href="./support.html">Soporte</a>';
-        document.body.appendChild(footer);
-      }
-      function moveIntoNutrition(){
-        const nutrition=$('nutricion'),root=$('mealPlanner30');
-        if(!nutrition||!root)return;
-        let heading=$('mealPlannerHeading');
-        if(!heading){heading=document.createElement('h2');heading.id='mealPlannerHeading';heading.textContent='Generador de menús';}
-        const macroResult=$('macroResult');
-        if(macroResult){macroResult.insertAdjacentElement('afterend',heading);heading.insertAdjacentElement('afterend',root)}
-        const oldButton=[...nutrition.querySelectorAll('button')].find(b=>/Crear menú de 30 días/i.test(b.textContent||''));if(oldButton)oldButton.style.display='none';
-      }
-      function logMeal(day,item){
-        const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;const source=sourceKey(day,item);if(loggedToday(source))return;
-        document.dispatchEvent(new CustomEvent('recomp:log-planned-meal',{detail:{item:meal,sourceKey:source}}));
-      }
-      function save(){localStorage.setItem(key,JSON.stringify(plan));}
-      function macroForm(){return {kcal:$('mpKcal')?.value,protein:$('mpProtein')?.value,carbs:$('mpCarbs')?.value,fat:$('mpFat')?.value}}
-      function persistManualTargets(notify=false){const t=RecompMealPlanner.macroTargets(macroForm());localStorage.setItem(manualKey,JSON.stringify(t));if(notify&&$('mpStatus'))$('mpStatus').innerHTML='<div class="good"><b>Objetivos manuales guardados.</b> El próximo menú usará '+t.kcal+' kcal · P '+t.protein+' g · C '+t.carbs+' g · G '+t.fat+' g.</div>';return t}
-      function formValues(){return {
-        ...macroForm(),days:$('mpDays').value,meals:$('mpMeals').value,diet:$('mpDiet').value,excluded:$('mpExcluded').value,
-        pantry:$('mpPantry').value,maxTime:$('mpTime').value,budget:$('mpBudget').value,variety:$('mpVariety').value
-      }}
-      function applyMacroTargets(input=savedTargets(),notify=false){
-        const t=RecompMealPlanner.macroTargets(input);
-        [['mpKcal','kcal'],['mpProtein','protein'],['mpCarbs','carbs'],['mpFat','fat']].forEach(([id,k])=>{if($(id))$(id).value=t[k]});
-        if(notify&&$('mpStatus'))$('mpStatus').innerHTML='<div class="good">Macros sincronizados desde la calculadora: '+t.kcal+' kcal · P '+t.protein+' g · C '+t.carbs+' g · G '+t.fat+' g.</div>';
-        return t;
-      }
-      function useCalculatorTargets(){localStorage.removeItem(manualKey);applyMacroTargets(savedTargets(),true)}
-      function generate(){
-        const button=$('mpGenerate');
-        try{
-          if(button){button.disabled=true;button.textContent='Calculando menú…'}
-          persistManualTargets(false);
-          const catalog=recipeSource();if(!catalog.length)throw new Error('La biblioteca de recetas todavía no está lista.');
-          plan=RecompMealPlanner.generateDays(catalog,formValues());visibleWeek=0;save();render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'});
-        }catch(e){$('mpStatus').innerHTML='<div class="notice"><b>No se pudo crear el menú.</b><br>'+esc(e.message)+'</div>'}
-        finally{if(button){button.disabled=false;button.textContent='Generar menú'}}
-      }
-      function swap(day,item){try{RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render();showRecipe(day,item)}catch(e){alert(e.message)}}
-      function showRecipe(day,item){
-        const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;
-        const ingredients=RecompMealPlanner.ingredientDetailsFor(meal).map(ingredient=>{
-          const estimated=ingredient.quantityEstimated===true;
-          return '<li><b>'+esc(ingredient.text)+'</b>'+(estimated?'<small> · cantidad estimada/no verificada</small>':'')+(ingredient.nutrients?'<small> · '+Math.round(ingredient.nutrients.k)+' kcal · P '+ingredient.nutrients.p.toFixed(1)+' · C '+ingredient.nutrients.c.toFixed(1)+' · G '+ingredient.nutrients.f.toFixed(1)+'</small>':'')+'</li>';
-        }).join('');
-        const matched=recipeSource().find(r=>r.id===meal.recipe.id||r.n===meal.recipe.n);
-        const steps=(meal.recipe.s?.length?meal.recipe.s:(matched?.s||[])).map(value=>'<li>'+esc(value)+'</li>').join('');
-        const preparation=steps?'<h3>Cómo prepararla</h3><ol>'+steps+'</ol>':'<div class="notice">Esta receta no tiene todavía pasos de elaboración en la biblioteca. Cámbiala por otra receta completa.</div>';
-        const meta=[meal.recipe.time&&meal.recipe.time+' min',meal.recipe.difficulty].filter(Boolean).map(esc).join(' · '),logged=loggedToday(sourceKey(day,item));
-        const verified=meal.ingredientNutritionVerified===true;
-        const nutritionNote=verified?'<div class="good">Macros verificados ingrediente a ingrediente para las cantidades mostradas.</div>':'<div class="notice"><b>Macros de receta, no verificados ingrediente a ingrediente.</b> Los totales se escalan desde la ficha nutricional declarada de la receta. Las cantidades sirven para preparar y ajustar la porción, pero no certifican todavía una suma nutricional reconstruida alimento por alimento.</div>';
-        const ingredientHeading=verified?'Ingredientes y aporte nutricional':'Ingredientes';
-        const ingredientNote=verified?'<p class="small">El aporte mostrado para cada ingrediente forma parte del cálculo verificado de esta ración.</p>':'<p class="small">No se muestra un reparto de macros por ingrediente porque la biblioteca aún no dispone de composición nutricional verificable para todos ellos. Las cantidades marcadas como estimadas/no verificadas han sido inferidas para poder escalar la receta y no proceden de una cantidad original certificada. Evitamos atribuir nutrientes estimados como si fueran exactos.</p>';
-        $('mpRecipeDetail').innerHTML='<div class="card mp-recipe-detail"><button class="secondary mp-recipe-close">Cerrar</button><span class="pill">'+esc(meal.slot||meal.recipe.m)+'</span><h2>'+esc(meal.recipe.n)+'</h2><div class="kcal">'+meal.k+' kcal</div><p class="small">P '+meal.p+' g · C '+meal.c+' g · G '+meal.f+' g'+(meta?' · '+meta:'')+'</p>'+nutritionNote+'<button class="mp-log-detail '+(logged?'secondary':'')+'" '+(logged?'disabled':'')+'>'+(logged?'✓ Registrada hoy':'Añadir al diario de hoy')+'</button><h3>'+ingredientHeading+'</h3><ul>'+ingredients+'</ul>'+ingredientNote+preparation+'</div>';
-        $('mpRecipeDetail').querySelector('.mp-recipe-close').onclick=()=>{$('mpRecipeDetail').innerHTML=''};
-        const logButton=$('mpRecipeDetail').querySelector('.mp-log-detail');if(!logged)logButton.onclick=()=>logMeal(day,item);
-        $('mpRecipeDetail').scrollIntoView({behavior:'smooth',block:'start'});
-      }
-      function render(){
-        if(!plan){$('mpResult').innerHTML='<div class="empty">Calcula o ajusta tus macros, elige cuántos días quieres y genera el menú.</div>';return}
-        const totalDays=plan.days.length,weeks=Math.ceil(totalDays/7),start=visibleWeek*7,end=Math.min(start+7,totalDays);
-        if(visibleWeek>=weeks)visibleWeek=Math.max(0,weeks-1);
-        const tabs=Array.from({length:weeks},(_,i)=>'<button class="'+(i===visibleWeek?'active':'')+'" data-week="'+i+'">S'+(i+1)+'</button>').join('');
-        const target=plan.preferences;
-        const days=plan.days.slice(start,end).map((d,di)=>'<details class="mp-day" '+(di===0?'open':'')+'><summary><span><b>Día '+d.day+'</b><small>'+d.totals.k+' kcal · P '+d.totals.p+' · C '+d.totals.c+' · G '+d.totals.f+'</small></span><span>›</span></summary>'+d.items.map((x,ii)=>{const day=start+di,logged=loggedToday(sourceKey(day,ii));return '<div class="mp-meal"><button class="mp-recipe-link" data-recipe="'+day+','+ii+'"><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · C '+x.c+' · G '+x.f+' · Ver receta</span></button><button class="secondary mp-log" data-log="'+day+','+ii+'" '+(logged?'disabled':'')+' aria-label="'+(logged?'Comida registrada':'Registrar comida')+'">'+(logged?'✓':'+')+'</button><button class="secondary" data-swap="'+day+','+ii+'" aria-label="Cambiar receta">↻</button></div>'}).join('')+'</details>').join('');
-        const shop=RecompMealPlanner.shoppingByWeek(plan,visibleWeek).map(x=>{const quantity=x.amount!=null&&x.unit?x.amount+' '+x.unit:'×'+x.count;return '<label class="mp-check"><input type="checkbox"> <span>'+esc(x.name)+'</span><small>'+esc(quantity)+'</small></label>'}).join('');
-        $('mpStatus').innerHTML='<div class="good"><b>'+totalDays+' días · objetivos usados:</b> '+target.kcal+' kcal · P '+target.protein+' g · C '+target.carbs+' g · G '+target.fat+' g. Todos los días se mantienen en la misma banda nutricional; si una combinación variada no cuadra, se reutiliza una combinación válida antes que entregar macros incorrectos.</div>';
-        $('mpResult').innerHTML='<div class="mp-tabs">'+tabs+'</div>'+days+'<div class="card mp-shop"><h3>Compra · semana '+(visibleWeek+1)+'</h3>'+shop+'</div>';
-        document.querySelectorAll('[data-recipe]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.recipe.split(',').map(Number);showRecipe(d,i)});
-        document.querySelectorAll('[data-week]').forEach(b=>b.onclick=()=>{visibleWeek=+b.dataset.week;render()});
-        document.querySelectorAll('[data-swap]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.swap.split(',').map(Number);swap(d,i)});
-        document.querySelectorAll('[data-log]').forEach(b=>b.onclick=()=>{const [d,i]=b.dataset.log.split(',').map(Number);logMeal(d,i)});
-      }
-      function init(){
-        installProfessionalMobile();upgradeNavIcons();ensureLegalLinks();moveIntoNutrition();const root=$('mealPlanner30');if(!root)return;const manual=savedManualTargets(),t=RecompMealPlanner.macroTargets(manual||savedTargets());
-        root.innerHTML='<div class="mp-intro"><span class="pill">NUTRICIÓN</span><h2>Menú ajustado a tus macros</h2><p>La calculadora propone unos objetivos, pero tú mandas: puedes editar los cuatro valores antes de generar y la app recordará tus ajustes.</p></div><div class="card mp-form"><h3>1 · Objetivos diarios editables</h3><div class="good">Puedes cambiar estos valores después de calcularlos. El menú se genera con lo que aparezca aquí, no con valores ocultos.</div><div class="row"><div><label>Calorías</label><input id="mpKcal" type="number" value="'+esc(t.kcal)+'"></div><div><label>Proteína (g)</label><input id="mpProtein" type="number" value="'+esc(t.protein)+'"></div></div><div class="row"><div><label>Carbohidratos (g)</label><input id="mpCarbs" type="number" value="'+esc(t.carbs)+'"></div><div><label>Grasas (g)</label><input id="mpFat" type="number" value="'+esc(t.fat)+'"></div></div><div class="row"><button id="mpSaveTargets" class="secondary">Usar y guardar estos objetivos</button><button id="mpCalculatorTargets" class="secondary">Recuperar calculadora</button></div><div class="row"><div><label>Días</label><input id="mpDays" type="number" min="1" max="30" value="7"></div><div><label>Comidas / día</label><select id="mpMeals"><option>3</option><option selected>4</option><option>5</option></select></div></div><h3>2 · Preferencias</h3><label>Estilo</label><select id="mpDiet"><option value="flexible">Flexible</option><option value="vegetariana">Vegetariano</option><option value="vegana">Vegano</option><option value="pescetariana">Pescetariano</option><option value="sin-lactosa">Sin lactosa</option><option value="sin-gluten">Sin gluten</option></select><label>Alergias o alimentos excluidos</label><input id="mpExcluded" placeholder="Ej. cacahuete, marisco, cebolla"><label>Ingredientes que ya tienes o prefieres</label><input id="mpPantry" placeholder="Ej. arroz, huevos, pollo"><div class="row"><div><label>Tiempo máximo</label><select id="mpTime"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">60 min</option></select></div><div><label>Presupuesto</label><select id="mpBudget"><option value="bajo">Ajustado</option><option value="medio" selected>Medio</option><option value="alto">Flexible</option></select></div></div><label>Variedad</label><select id="mpVariety"><option value="alta" selected>Alta</option><option value="media">Media</option><option value="baja">Baja</option></select><button id="mpGenerate" style="width:100%;margin-top:14px">Generar menú</button></div><div id="mpRecipeDetail"></div><div id="mpStatus"></div><div id="mpResult"></div>';
-        $('mpGenerate').onclick=generate;$('mpSaveTargets').onclick=()=>persistManualTargets(true);$('mpCalculatorTargets').onclick=useCalculatorTargets;
-        ['mpKcal','mpProtein','mpCarbs','mpFat'].forEach(id=>$(id).addEventListener('change',()=>persistManualTargets(false)));
-        document.addEventListener('recomp:targets-updated',event=>{localStorage.removeItem(manualKey);applyMacroTargets(event.detail,true)});document.addEventListener('recomp:planned-meal-logged',()=>render());document.addEventListener('recomp:meal-log-changed',render);window.addEventListener('pageshow',()=>applyMacroTargets(savedManualTargets()||savedTargets()));
-        try{plan=JSON.parse(localStorage.getItem(key)||'null')}catch{plan=null}render();
-      }
-      if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-    })();
-    
-  operator: 'match'
+  operator: 'deepStrictEqual'
   stack: |-
-    TestContext.<anonymous> (file:///home/runner/work/Recomp-10/Recomp-10/tests/sw-update.test.mjs:26:10)
+    TestContext.<anonymous> (file:///home/runner/work/Recomp-10/Recomp-10/tests/recipe-ingredient-integrity-v61.test.mjs:36:10)
     Test.runInAsyncScope (node:async_hooks:214:14)
     Test.run (node:internal/test_runner/test:1047:25)
     Test.processPendingSubtests (node:internal/test_runner/test:744:18)
@@ -191,35 +17,209 @@ COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intellig
     Test.run (node:internal/test_runner/test:1101:12)
     async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
   ...
+# Subtest: kcal declaradas son coherentes con los macros declarados
+ok 64 - kcal declaradas son coherentes con los macros declarados
+  ---
+  duration_ms: 1.949565
+  type: 'test'
+  ...
+# Subtest: normalizes and keeps a bounded check-in history
+ok 65 - normalizes and keeps a bounded check-in history
+  ---
+  duration_ms: 11.665043
+  type: 'test'
+  ...
+# Subtest: 360 review combines dated trend, waist, adherence and performance
+ok 66 - 360 review combines dated trend, waist, adherence and performance
+  ---
+  duration_ms: 1.86673
+  type: 'test'
+  ...
+# Subtest: multiple check-ins on the same date do not create fake weeks of evidence
+ok 67 - multiple check-ins on the same date do not create fake weeks of evidence
+  ---
+  duration_ms: 0.362876
+  type: 'test'
+  ...
+# Subtest: decision history is auditable
+ok 68 - decision history is auditable
+  ---
+  duration_ms: 0.311579
+  type: 'test'
+  ...
+# Subtest: meal shares sum to one for 3-6 meals
+ok 69 - meal shares sum to one for 3-6 meals
+  ---
+  duration_ms: 1.24816
+  type: 'test'
+  ...
+# Subtest: balanced meal shares match the production planner policy
+ok 70 - balanced meal shares match the production planner policy
+  ---
+  duration_ms: 1.743725
+  type: 'test'
+  ...
+# Subtest: priority patterns remain bounded and actually prioritize the selected meal
+ok 71 - priority patterns remain bounded and actually prioritize the selected meal
+  ---
+  duration_ms: 0.300914
+  type: 'test'
+  ...
+# Subtest: meal targets reconcile exactly
+ok 72 - meal targets reconcile exactly
+  ---
+  duration_ms: 0.308325
+  type: 'test'
+  ...
+# Subtest: macro energy reconciles after nutrition calculation
+ok 73 - macro energy reconciles after nutrition calculation
+  ---
+  duration_ms: 0.45803
+  type: 'test'
+  ...
+# Subtest: training respects days
+ok 74 - training respects days
+  ---
+  duration_ms: 0.64446
+  type: 'test'
+  ...
+# Subtest: recognizes positive recomp with stable weight and falling waist
+ok 75 - recognizes positive recomp with stable weight and falling waist
+  ---
+  duration_ms: 1.191133
+  type: 'test'
+  ...
+# Subtest: does not adjust plan when adherence is poor
+ok 76 - does not adjust plan when adherence is poor
+  ---
+  duration_ms: 0.992955
+  type: 'test'
+  ...
+# Subtest: raises calories when dated weekly loss is too aggressive and performance falls
+ok 77 - raises calories when dated weekly loss is too aggressive and performance falls
+  ---
+  duration_ms: 0.246491
+  type: 'test'
+  ...
+# Subtest: four observations on one day are not treated as a usable trend
+ok 78 - four observations on one day are not treated as a usable trend
+  ---
+  duration_ms: 0.129115
+  type: 'test'
+  ...
+# Subtest: undated observations default to weekly spacing rather than one-day spacing
+ok 79 - undated observations default to weekly spacing rather than one-day spacing
+  ---
+  duration_ms: 0.271318
+  type: 'test'
+  ...
+# Subtest: applied targets reconcile macro energy closely
+ok 80 - applied targets reconcile macro energy closely
+  ---
+  duration_ms: 0.15942
+  type: 'test'
+  ...
+# Subtest: favorable recomp keeps calories stable
+ok 81 - favorable recomp keeps calories stable
+  ---
+  duration_ms: 1.177683
+  type: 'test'
+  ...
+# Subtest: low adherence blocks calorie changes
+ok 82 - low adherence blocks calorie changes
+  ---
+  duration_ms: 0.187752
+  type: 'test'
+  ...
+# Subtest: weight and waist rising together reduce energy modestly
+ok 83 - weight and waist rising together reduce energy modestly
+  ---
+  duration_ms: 0.235765
+  type: 'test'
+  ...
+# Subtest: release: privacidad y soporte existen y no contienen marcadores provisionales
+ok 84 - release: privacidad y soporte existen y no contienen marcadores provisionales
+  ---
+  duration_ms: 1.320959
+  type: 'test'
+  ...
+# Subtest: release: privacidad y soporte son accesibles desde la app y offline
+ok 85 - release: privacidad y soporte son accesibles desde la app y offline
+  ---
+  duration_ms: 1.038764
+  type: 'test'
+  ...
+# Subtest: release: manifiesto e iconos mínimos son válidos
+ok 86 - release: manifiesto e iconos mínimos son válidos
+  ---
+  duration_ms: 0.315715
+  type: 'test'
+  ...
+# Subtest: release: no hay dependencias remotas evidentes en el runtime principal
+ok 87 - release: no hay dependencias remotas evidentes en el runtime principal
+  ---
+  duration_ms: 0.552592
+  type: 'test'
+  ...
+# Subtest: la compra semanal no puede perder cantidades cuando se repite un ingrediente
+ok 88 - la compra semanal no puede perder cantidades cuando se repite un ingrediente
+  ---
+  duration_ms: 2.518011
+  type: 'test'
+  ...
+# Subtest: la lista de compra muestra la cantidad total agregada cuando está disponible
+ok 89 - la lista de compra muestra la cantidad total agregada cuando está disponible
+  ---
+  duration_ms: 0.955669
+  type: 'test'
+  ...
+# Subtest: la lista de compra conserva un fallback explícito para ingredientes no cuantificables
+ok 90 - la lista de compra conserva un fallback explícito para ingredientes no cuantificables
+  ---
+  duration_ms: 0.183596
+  type: 'test'
+  ...
+# Subtest: los scripts usan red primero para no mezclar versiones en iPhone
+ok 91 - los scripts usan red primero para no mezclar versiones en iPhone
+  ---
+  duration_ms: 1.178525
+  type: 'test'
+  ...
+# Subtest: el formulario usa objetivos editables persistentes, planes de 1 a 30 días y comunica la precisión nutricional real
+ok 92 - el formulario usa objetivos editables persistentes, planes de 1 a 30 días y comunica la precisión nutricional real
+  ---
+  duration_ms: 0.483458
+  type: 'test'
+  ...
 # Training engine tests passed
 # Subtest: tests/training-engine.test.mjs
 ok 33 - tests/training-engine.test.mjs
   ---
-  duration_ms: 49.684569
+  duration_ms: 31.112705
   type: 'test'
   ...
 1..93
 # tests 93
 # suites 0
-# pass 86
-# fail 7
+# pass 89
+# fail 4
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 3109.410744
+# duration_ms 2258.640708
 --- BROWSER OUTPUT (tail) ---
 
 Running 52 tests using 2 workers
 
-[1/52] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
-[2/52] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
+[1/52] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
+[2/52] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
 [3/52] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
 [4/52] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
 [5/52] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
 [6/52] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
 [7/52] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
-[8/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
-[9/52] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
+[8/52] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
+[9/52] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
 [10/52] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
 [11/52] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
 [12/52] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
@@ -230,20 +230,20 @@ Running 52 tests using 2 workers
 [17/52] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
 [18/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
 [19/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Inicio
-[20/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
-[21/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Entreno
+[20/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Entreno
+[21/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
 [22/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Nutrición
 [23/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Menús
 [24/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Progreso
-[25/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
-[26/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Ajustes
+[25/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Ajustes
+[26/52] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
 [27/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 320px sin desbordamiento
 [28/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 375px sin desbordamiento
 [29/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 390px sin desbordamiento
-[30/52] qa/mobile-layout.spec.js:7:1 › Recomp identity never displays FitCoach F branding
-[31/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 430px sin desbordamiento
-[32/52] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
-[33/52] qa/user-100-sim.spec.js:29:1 › usuario puede cerrar el perfil inicial y explorar
+[30/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 430px sin desbordamiento
+[31/52] qa/user-100-sim.spec.js:29:1 › usuario puede cerrar el perfil inicial y explorar
+[32/52] qa/mobile-layout.spec.js:7:1 › Recomp identity never displays FitCoach F branding
+[33/52] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
 [34/52] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
 [35/52] qa/user-100-sim.spec.js:31:1 › usuario fresco ve perfil neutro
 [36/52] qa/user-100-sim.spec.js:32:1 › usuario introduce antropometría sin crash
@@ -263,4 +263,4 @@ Running 52 tests using 2 workers
 [50/52] qa/user-100-sim.spec.js:44:1 › usuario en iPhone landscape no desborda
 [51/52] qa/user-100-sim.spec.js:45:1 › usuario en iPad portrait conserva navegación
 [52/52] qa/user-100-sim.spec.js:46:1 › usuario puede enfocar controles con teclado
-  52 passed (50.9s)
+  52 passed (48.1s)
