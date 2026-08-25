@@ -7,3 +7,5 @@ nav{backdrop-filter:blur(24px) saturate(1.25);box-shadow:0 -12px 30px rgba(0,0,0
 @media(max-width:560px){main{padding-inline:11px}.hero{padding:20px;border-radius:24px}.card{padding:15px;border-radius:19px}.row{gap:8px;flex-wrap:wrap}.row>*{flex:1 1 140px}.setrow{grid-template-columns:34px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}.mp-meal{align-items:flex-start}.mp-meal button{min-width:44px}.photoGrid{grid-template-columns:1fr 1fr}nav{grid-template-columns:repeat(6,minmax(0,1fr));padding-inline:4px}nav button{padding-inline:1px;font-size:9px}.navicon{font-size:18px}}
 @media(max-width:360px){header{padding-inline:10px}.brand{font-size:19px}.badge{font-size:9px}.hero{padding:17px}.grid{gap:8px}.card{padding:13px}.row>*{flex-basis:100%}.setrow{grid-template-columns:30px repeat(3,minmax(0,1fr));gap:5px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;transition-duration:.001ms!important}}
+#expertCoaches{display:none!important}
+
