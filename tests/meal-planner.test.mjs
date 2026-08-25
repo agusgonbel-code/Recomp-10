@@ -56,3 +56,15 @@ test('conecta el catálogo completo y conserva la receta paso a paso',()=>{
    i:['180 g pollo','100 g arroz'],s:['Cocina el arroz.','Dora el pollo y sirve.'],time:25,difficulty:'Fácil'
  });
 });
+
+test('bizcocho y batido conservan macros declarados y el resto se calcula sin cifras forzadas',()=>{
+ const plan=RecompMealPlanner.generateDays(recipes,{kcal:2200,protein:160,carbs:250,fat:70,meals:4,days:7,trainingDays:4,trainingTime:'06:00',includeBreakfastCake:true,includePostWorkoutShake:true});
+ assert.ok(plan.days.every(day=>day.withinTarget===RecompMealPlanner.withinTargets(day.totals,plan.preferences,{k:.03,p:.05,c:.06,f:.08})));
+ assert.ok(plan.days.slice(0,4).every(day=>day.items.some(item=>item.recipe.id==='fixed-post-workout-shake')));
+ assert.ok(plan.days.slice(4).every(day=>!day.items.some(item=>item.recipe.id==='fixed-post-workout-shake')));
+ assert.ok(plan.days.every(day=>day.items.some(item=>item.recipe.id==='fixed-breakfast-cake')));
+ assert.ok(plan.days.flatMap(day=>day.items).every(item=>item.macroAdjusted!==true));
+ assert.deepEqual(plan.days[0].items.find(item=>item.recipe.id==='fixed-breakfast-cake').k,448);
+ assert.deepEqual(plan.days[0].items.find(item=>item.recipe.id==='fixed-post-workout-shake').p,23);
+});
+
