@@ -50,12 +50,15 @@ test('planned meal opens recipe and swap keeps the day usable', async ({ page })
   await page.locator('#mpDays').fill('7');
   await page.locator('#mpGenerate').click();
   await expect(page.locator('.mp-day').first()).toBeVisible({timeout:15000});
-  await page.locator('[data-recipe]').first().click();
+  const swapButton=page.locator('[data-swap]').first();
+  const coordinates=await swapButton.getAttribute('data-swap');
+  const recipeButton=page.locator('[data-recipe="'+coordinates+'"]');
+  await recipeButton.click();
   await expect(page.locator('#mpRecipeDetail')).toContainText('Ingredientes');
-  const original=await page.locator('[data-recipe]').first().textContent();
-  await page.locator('[data-swap]').first().click();
+  const original=await recipeButton.textContent();
+  await swapButton.click();
   await page.waitForTimeout(250);
-  const changed=await page.locator('[data-recipe]').first().textContent();
+  const changed=await page.locator('[data-recipe="'+coordinates+'"]').textContent();
   expect(changed).not.toBe(original);
   await expect(page.locator('.mp-day').first()).toBeVisible();
   expect(errors).toEqual([]);
@@ -77,3 +80,4 @@ test('six meals selected in the unified profile are available in the advanced me
   await expect(firstDayMeals.nth(5)).toContainText(/Snack nocturno|Merienda|Desayuno|Cena/);
   expect(errors).toEqual([]);
 });
+
