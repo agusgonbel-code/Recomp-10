@@ -27,7 +27,39 @@ function totals(items){return items.reduce((a,x)=>({k:a.k+x.k,p:a.p+x.p,c:a.c+x.
 function macroDeviation(t,prefs){return {k:Math.abs(t.k-prefs.kcal)/Math.max(1,prefs.kcal),p:Math.abs(t.p-prefs.protein)/Math.max(1,prefs.protein),c:Math.abs(t.c-prefs.carbs)/Math.max(1,prefs.carbs),f:Math.abs(t.f-prefs.fat)/Math.max(1,prefs.fat)};}
 function macroError(t,prefs){const d=macroDeviation(t,prefs);return d.k+d.p+d.c+d.f;}
 function withinTargets(t,prefs,tolerance={k:.03,p:.04,c:.045,f:.055}){const d=macroDeviation(t,prefs);return d.k<=tolerance.k&&d.p<=tolerance.p&&d.c<=tolerance.c&&d.f<=tolerance.f;}
-function optimizeIngredients(chosen,prefs,slots){const work=makeItems(chosen,prefs,slots),target=[prefs.kcal,prefs.protein,prefs.carbs,prefs.fat],weights=target.map(x=>Math.max(1,x));for(let pass=0;pass<28;pass++){const rendered=calcItems(work),t=totals(rendered),current=[t.k,t.p,t.c,t.f],residual=target.map((x,j)=>(x-current[j])/weights[j]);if(withinTargets(t,prefs,{k:.005,p:.008,c:.01,f:.012}))break;const derivatives=work.map(item=>[item.recipe.k/weights[0],item.recipe.p/weights[1],item.recipe.c/weights[2],item.recipe.f/weights[3]]),gram=Array.from({length:4},(_,r)=>Array.from({length:4},(_,c)=>derivatives.reduce((s,d)=>s+d[r]*d[c],0)+(r===c?2e-4:0))),y=solveLinear(gram,residual);if(!y)break;work.forEach((item,i)=>{let delta=0;for(let j=0;j<4;j++)delta+=derivatives[i][j]*y[j];item.scale=clamp(item.scale+delta,.18,5)});}let best=calcItems(work),bestErr=macroError(totals(best),prefs);for(const step of [.12,.06,.03,.015])work.forEach(item=>{const original=item.scale;let localBest=original,localErr=bestErr;for(const candidate of [original-step,original+step]){item.scale=clamp(candidate,.18,5);const rendered=calcItems(work),err=macroError(totals(rendered),prefs);if(err<localErr){localErr=err;localBest=item.scale;best=rendered;}}item.scale=localBest;bestErr=localErr;});return best;}
+function optimizeIngredients(chosen,prefs,slots){
+  const work=makeItems(chosen,prefs,slots),target=[prefs.kcal,prefs.protein,prefs.carbs,prefs.fat],weights=target.map(x=>Math.max(1,x));
+  for(let pass=0;pass<28;pass++){
+    const rendered=calcItems(work),t=totals(rendered),current=[t.k,t.p,t.c,t.f],residual=target.map((x,j)=>(x-current[j])/weights[j]);
+    if(withinTargets(t,prefs,{k:.005,p:.008,c:.01,f:.012}))break;
+    const derivatives=work.map(item=>[item.recipe.k/weights[0],item.recipe.p/weights[1],item.recipe.c/weights[2],item.recipe.f/weights[3]]),gram=Array.from({length:4},(_,r)=>Array.from({length:4},(_,c)=>derivatives.reduce((sum,d)=>sum+d[r]*d[c],0)+(r===c?2e-4:0))),y=solveLinear(gram,residual);
+    if(!y)break;
+    work.forEach((item,i)=>{let delta=0;for(let j=0;j<4;j++)delta+=derivatives[i][j]*y[j];item.scale=clamp(item.scale+delta,.18,5)});
+  }
+  let best=calcItems(work),bestErr=macroError(totals(best),prefs);
+  // Repeated projected coordinate descent. The old implementation visited each
+  // coordinate only once per step size, which could stop at a poor local point
+  // after a meal swap even when a valid macro solution existed.
+  for(const step of [.24,.12,.06,.03,.015,.0075]){
+    let improved=true,round=0;
+    while(improved&&round++<10){
+      improved=false;
+      for(const item of work){
+        const original=item.scale;
+        let localBest=original,localErr=bestErr,localRendered=best;
+        for(const candidate of [original-step,original+step]){
+          item.scale=clamp(candidate,.18,5);
+          const rendered=calcItems(work),err=macroError(totals(rendered),prefs);
+          if(err+1e-12<localErr){localErr=err;localBest=item.scale;localRendered=rendered;}
+        }
+        item.scale=localBest;
+        if(localErr+1e-12<bestErr){bestErr=localErr;best=localRendered;improved=true;}
+      }
+      if(withinTargets(totals(best),prefs,{k:.005,p:.008,c:.01,f:.012}))break;
+    }
+  }
+  return best;
+}
 function buildDay(pool,prefs,usage,day,forced={},limits={primary:50,secondary:50}){const slots=slotsFor(prefs.meals);let best=null;const attemptBuild=(activeUsage,attempts,offset=0)=>{for(let attempt=0;attempt<attempts;attempt++){const chosen=slots.map(([slot,share],i)=>forced[i]||pickRecipe(pool,slot,share,prefs,activeUsage,day*137+(attempt+offset)*29+i*13,forced.avoid)),items=optimizeIngredients(chosen,prefs,slots),t=totals(items),err=macroError(t,prefs);if(!best||err<best.err)best={items,t,err};if(withinTargets(t,prefs))break;}};attemptBuild(usage,limits.primary);if(!best||!withinTargets(best.t,prefs))attemptBuild(new Map(),limits.secondary,limits.primary);best.items.forEach(x=>usage.set(x.recipe.n,(usage.get(x.recipe.n)||0)+1));return {day:day+1,items:best.items,totals:best.t,error:best.err,withinTarget:withinTargets(best.t,prefs)};}
 function sameMacroBand(t,reference){const limits={k:.015,p:.02,c:.025,f:.03};return ['k','p','c','f'].every(key=>Math.abs(t[key]-reference[key])/Math.max(1,reference[key])<=limits[key]);}
 function generateDays(recipes,input){const prefs=validatePreferences(input),pool=allowedRecipes(recipes,prefs);if(pool.length<4)throw new Error('Las restricciones dejan muy pocas recetas. Revisa las exclusiones.');const usage=new Map(),reference=buildDay(pool,prefs,new Map(),0,{}, {primary:120,secondary:160}),days=[reference],slots=slotsFor(prefs.meals);for(let day=1;day<prefs.days;day++){let built=buildDay(pool,prefs,usage,day,{}, {primary:24,secondary:24});if(!withinTargets(built.totals,prefs)||!sameMacroBand(built.totals,reference.totals)){const items=optimizeIngredients(reference.items.map(x=>x.recipe),prefs,slots),t=totals(items);built={day:day+1,items,totals:t,error:macroError(t,prefs),withinTarget:withinTargets(t,prefs),fallback:true};}days.push(built);}return {createdAt:new Date().toISOString(),preferences:prefs,days};}
