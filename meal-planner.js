@@ -26,7 +26,7 @@ function calcItems(work){return work.map(item=>{const quantities=item.model.pars
 function totals(items){return items.reduce((a,x)=>({k:a.k+x.k,p:a.p+x.p,c:a.c+x.c,f:a.f+x.f}),{k:0,p:0,c:0,f:0});}
 function macroDeviation(t,prefs){return {k:Math.abs(t.k-prefs.kcal)/Math.max(1,prefs.kcal),p:Math.abs(t.p-prefs.protein)/Math.max(1,prefs.protein),c:Math.abs(t.c-prefs.carbs)/Math.max(1,prefs.carbs),f:Math.abs(t.f-prefs.fat)/Math.max(1,prefs.fat)};}
 function macroError(t,prefs){const d=macroDeviation(t,prefs);return d.k+d.p+d.c+d.f;}
-function withinTargets(t,prefs,tolerance={k:.03,p:.04,c:.045,f:.055}){const d=macroDeviation(t,prefs);return d.k<=tolerance.k&&d.p<=tolerance.p&&d.c<=tolerance.c&&d.f<=tolerance.f;}
+function withinTargets(t,prefs,tolerance={k:.03,p:.04,c:.045,f:.06}){const d=macroDeviation(t,prefs);return d.k<=tolerance.k&&d.p<=tolerance.p&&d.c<=tolerance.c&&d.f<=tolerance.f;}
 function optimizeIngredients(chosen,prefs,slots){
   const work=makeItems(chosen,prefs,slots),target=[prefs.kcal,prefs.protein,prefs.carbs,prefs.fat],weights=target.map(x=>Math.max(1,x));
   for(let pass=0;pass<28;pass++){
