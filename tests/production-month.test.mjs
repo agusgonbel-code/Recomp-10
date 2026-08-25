@@ -43,15 +43,24 @@ function validateFullMonth(targets){
       const exact=globalThis.RecompMealPlanner.ingredientsFor(item);
       assert.equal(exact.length,item.recipe.i.length);
       assert.ok(exact.every(x=>/^\d/.test(x)),`${item.recipe.n}: cantidad no exacta: ${exact.join(' | ')}`);
-      const calculated=item.ingredientAmounts.reduce((sum,ingredient)=>({
-        k:sum.k+ingredient.nutrients.k,p:sum.p+ingredient.nutrients.p,
-        c:sum.c+ingredient.nutrients.c,f:sum.f+ingredient.nutrients.f
-      }),{k:0,p:0,c:0,f:0});
-      assert.deepEqual(
-        {k:item.k,p:item.p,c:item.c,f:item.f},
-        {k:Math.round(calculated.k),p:Math.round(calculated.p),c:Math.round(calculated.c),f:Math.round(calculated.f)},
-        `${item.recipe.n}: los macros no proceden de las cantidades mostradas`
-      );
+
+      if(item.ingredientNutritionVerified===true){
+        assert.ok(item.ingredientAmounts.every(ingredient=>ingredient.nutrients),`${item.recipe.n}: receta marcada como verificada con nutrientes de ingrediente ausentes`);
+        const calculated=item.ingredientAmounts.reduce((sum,ingredient)=>({
+          k:sum.k+ingredient.nutrients.k,p:sum.p+ingredient.nutrients.p,
+          c:sum.c+ingredient.nutrients.c,f:sum.f+ingredient.nutrients.f
+        }),{k:0,p:0,c:0,f:0});
+        assert.deepEqual(
+          {k:item.k,p:item.p,c:item.c,f:item.f},
+          {k:Math.round(calculated.k),p:Math.round(calculated.p),c:Math.round(calculated.c),f:Math.round(calculated.f)},
+          `${item.recipe.n}: los macros verificados no proceden de las cantidades mostradas`
+        );
+      }else{
+        assert.equal(item.nutritionBasis,'recipe-declared',`${item.recipe.n}: una receta no verificada debe identificar el origen de sus macros`);
+        assert.ok(item.ingredientAmounts.every(ingredient=>ingredient.nutrients===null),`${item.recipe.n}: se atribuyeron macros a ingredientes sin verificación nutricional`);
+        assert.ok([item.k,item.p,item.c,item.f].every(Number.isFinite),`${item.recipe.n}: macros de receta no finitos`);
+        assert.ok([item.k,item.p,item.c,item.f].every(value=>value>=0),`${item.recipe.n}: macros de receta negativos`);
+      }
     }
   }
   for(const dayIndex of [0,7,14,21,29]){
