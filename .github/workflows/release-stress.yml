@@ -32,9 +32,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          rm -f /tmp/recomp-stress-failure.txt
           for i in $(seq 1 100); do
             echo "=== Recomp shard ${{ matrix.shard }} unit pass $i/100 ==="
-            npm test >/tmp/recomp-unit.log 2>&1 || { cat /tmp/recomp-unit.log; exit 1; }
+            if ! npm test >/tmp/recomp-unit.log 2>&1; then
+              {
+                echo 'FAILURE_PHASE: unit'
+                echo "FAILURE_ITERATION: $i"
+                echo '--- FAILURE_LOG_TAIL ---'
+                tail -n 120 /tmp/recomp-unit.log || true
+              } > /tmp/recomp-stress-failure.txt
+              cat /tmp/recomp-unit.log
+              exit 1
+            fi
           done
       - name: Install Chromium for repeated user journeys
         run: |
@@ -48,22 +58,39 @@ jobs:
           set -euo pipefail
           for i in $(seq 1 100); do
             echo "=== Recomp shard ${{ matrix.shard }} browser pass $i/100 ==="
-            npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/nutrition-menu-v5.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js --reporter=line
+            if ! npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/nutrition-menu-v5.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js --reporter=line >/tmp/recomp-browser.log 2>&1; then
+              {
+                echo 'FAILURE_PHASE: browser'
+                echo "FAILURE_ITERATION: $i"
+                echo '--- FAILURE_LOG_TAIL ---'
+                tail -n 160 /tmp/recomp-browser.log || true
+                echo '--- HTTP_LOG_TAIL ---'
+                tail -n 80 /tmp/recomp-http.log || true
+              } > /tmp/recomp-stress-failure.txt
+              cat /tmp/recomp-browser.log
+              exit 1
+            fi
           done
       - name: Write shard evidence
         if: always()
         shell: bash
         run: |
           mkdir -p /tmp/recomp-stress
-          cat > /tmp/recomp-stress/shard-${{ matrix.shard }}.txt <<EOF
-          APP: Recomp 10M
-          SOURCE_COMMIT: $GITHUB_SHA
-          SHARD: ${{ matrix.shard }}/10
-          UNIT_PASSES_PLANNED: 100
-          BROWSER_PASSES_PLANNED: 100
-          RESULT: ${{ job.status }}
-          UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          EOF
+          {
+            echo 'APP: Recomp 10M'
+            echo "SOURCE_COMMIT: $GITHUB_SHA"
+            echo 'SHARD: ${{ matrix.shard }}/10'
+            echo 'UNIT_PASSES_PLANNED: 100'
+            echo 'BROWSER_PASSES_PLANNED: 100'
+            echo 'RESULT: ${{ job.status }}'
+            if [ -f /tmp/recomp-stress-failure.txt ]; then
+              cat /tmp/recomp-stress-failure.txt
+            else
+              echo 'FAILURE_PHASE: none'
+              echo 'FAILURE_ITERATION: none'
+            fi
+            echo "UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          } > /tmp/recomp-stress/shard-${{ matrix.shard }}.txt
       - name: Upload shard evidence
         if: always()
         uses: actions/upload-artifact@v4
