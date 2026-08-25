@@ -1,621 +1,97 @@
 RECOMP 10M RELEASE STRESS 1000X
-SOURCE_COMMIT: 92c946c6d368aead5e90b4043b3921803f82cdd8
-RESULT: FAIL
-SHARDS: 6/10 successful
+SOURCE_COMMIT: 0566302c02e5de461c1d311aa8f5eeff7e247753
+RESULT: PASS
+SHARDS: 10/10 successful
 PLANNED_REPETITIONS: 1000 unit passes and 1000 browser/mobile/nutrition/intelligence/accessibility journeys
-UTC: 2026-08-25T12:36:33Z
+UTC: 2026-08-25T13:43:44Z
 --- SHARDS ---
 APP: Recomp 10M
-SOURCE_COMMIT: 92c946c6d368aead5e90b4043b3921803f82cdd8
+SOURCE_COMMIT: 0566302c02e5de461c1d311aa8f5eeff7e247753
 SHARD: 1/10
 UNIT_PASSES_PLANNED: 100
 BROWSER_PASSES_PLANNED: 100
 RESULT: success
 FAILURE_PHASE: none
 FAILURE_ITERATION: none
-UTC: 2026-08-25T12:36:01Z
+UTC: 2026-08-25T13:38:51Z
 APP: Recomp 10M
-SOURCE_COMMIT: 92c946c6d368aead5e90b4043b3921803f82cdd8
+SOURCE_COMMIT: 0566302c02e5de461c1d311aa8f5eeff7e247753
 SHARD: 10/10
 UNIT_PASSES_PLANNED: 100
 BROWSER_PASSES_PLANNED: 100
 RESULT: success
 FAILURE_PHASE: none
 FAILURE_ITERATION: none
-UTC: 2026-08-25T12:29:51Z
+UTC: 2026-08-25T13:41:01Z
 APP: Recomp 10M
-SOURCE_COMMIT: 92c946c6d368aead5e90b4043b3921803f82cdd8
+SOURCE_COMMIT: 0566302c02e5de461c1d311aa8f5eeff7e247753
 SHARD: 2/10
 UNIT_PASSES_PLANNED: 100
 BROWSER_PASSES_PLANNED: 100
-RESULT: failure
-FAILURE_PHASE: browser
-FAILURE_ITERATION: 21
---- FAILURE_LOG_TAIL ---
-
-Running 24 tests using 2 workers
-
-[1/24] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
-[2/24] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
-[3/24] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
-[4/24] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
-[5/24] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
-[6/24] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
-[7/24] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
-[8/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
-[9/24] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[10/24] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
-[11/24] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
-[12/24] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
-  1) qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow ──────────────
-
-    Error: expect(received).toBeGreaterThanOrEqual(expected)
-
-    Expected: >= 6
-    Received:    0
-
-      2 | async function noOverflow(page,label=''){const d=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));expect(d.scroll,`${label} ${JSON.stringify(d)}`).toBeLessThanOrEqual(d.client+2)}
-      3 | async function completeIntake(page){for(let i=0;i<3;i++){await noOverflow(page,`intake-${i}`);await page.locator('#rNext').click()}await noOverflow(page,'intake-generate');await page.locator('#rGenerate').click();await page.waitForFunction(()=>localStorage.getItem('recomp_unified_profile_v2')!==null)}
-    > 4 | for(const width of [320,375,390,430]) test(`Recomp 10 fits ${width}px without horizontal overflow`,async({browser})=>{const context=await browser.newContext({viewport:{width,height:820},isMobile:true,hasTouch:true});const page=await context.newPage();await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await noOverflow(page,'launch');await completeIntake(page);await page.waitForFunction(()=>Boolean(window.RecompQualityV53));await noOverflow(page,'home');const buttons=page.locator('nav button');const count=await buttons.count();for(let i=0;i<count;i++){const b=buttons.nth(i);if(await b.isVisible()){await b.click();await page.waitForTimeout(40);await noOverflow(page,`nav-${i}`)}}expect(await page.locator('nav .navicon svg').count()).toBeGreaterThanOrEqual(6);await context.close()});
-        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ^
-      5 | for(const [name,width,height] of [['iPhone landscape',844,390],['iPad portrait',768,1024],['iPad landscape',1024,768]])test(`Recomp 10 ${name} stays usable without horizontal overflow`,async({browser})=>{const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true});const page=await context.newPage();await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await completeIntake(page);await page.waitForFunction(()=>Boolean(window.RecompQualityV53));const buttons=page.locator('nav button');const count=await buttons.count();for(let i=0;i<count;i++){const b=buttons.nth(i);if(await b.isVisible()){await b.click();await page.waitForTimeout(35);await noOverflow(page,`${name}-nav-${i}`)}}expect(await page.locator('nav button:visible').count()).toBeGreaterThanOrEqual(6);await context.close()});
-      6 |
-      7 | test('Recomp identity never displays FitCoach F branding',async({page})=>{await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.getElementById('r10IntakeStyle'));const content=await page.locator('.brand>div').evaluate(el=>getComputedStyle(el,'::before').content);expect(content).not.toBe('"F"');expect(content).toBe('"R"')});
-        at /home/runner/work/Recomp-10/Recomp-10/qa/mobile-layout.spec.js:4:762
-
-    Error Context: test-results/qa-mobile-layout-Recomp-10-7768a-without-horizontal-overflow/error-context.md
-
-
-[13/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
-[14/24] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
-[15/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
-[16/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
-[17/24] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
-[18/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
-[19/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
-[20/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
-[21/24] qa/mobile-layout.spec.js:7:1 › Recomp identity never displays FitCoach F branding
-[22/24] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
-[23/24] qa/mobile-layout.spec.js:11:1 › Recomp menu cards keep readable meal column on iPhone width
-[24/24] qa/mobile-layout.spec.js:13:1 › Recomp 10 v53 rejects pathological calorie concentration
-  1 failed
-    qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow ───────────────
-  23 passed (33.1s)
---- HTTP_LOG_TAIL ---
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /privacy.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /support.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /manifest.webmanifest HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /icon-192.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /icon-512.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:16] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /persistence.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /date-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /training-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /nutrition-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /meal-planner.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /meal-planner-ui.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /coach-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /photo-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /expert-coaches-v1.js?v=1 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /professional-v61.css?v=6.1.0 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /recomp-profile-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:18] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /sw.js HTTP/1.1" 304 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /date-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /persistence.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /training-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /nutrition-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /meal-planner-ui.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /meal-planner.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /coach-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /photo-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /expert-coaches-v1.js?v=1 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /professional-v61.css?v=6.1.0 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /recomp-profile-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /sw.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /privacy.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /support.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /manifest.webmanifest HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /icon-192.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /icon-512.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:52:20] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-UTC: 2026-08-25T11:52:20Z
+RESULT: success
+FAILURE_PHASE: none
+FAILURE_ITERATION: none
+UTC: 2026-08-25T13:42:34Z
 APP: Recomp 10M
-SOURCE_COMMIT: 92c946c6d368aead5e90b4043b3921803f82cdd8
+SOURCE_COMMIT: 0566302c02e5de461c1d311aa8f5eeff7e247753
 SHARD: 3/10
 UNIT_PASSES_PLANNED: 100
 BROWSER_PASSES_PLANNED: 100
-RESULT: failure
-FAILURE_PHASE: browser
-FAILURE_ITERATION: 69
---- FAILURE_LOG_TAIL ---
-
-Running 24 tests using 2 workers
-
-[1/24] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
-[2/24] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
-[3/24] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
-[4/24] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
-[5/24] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
-[6/24] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
-[7/24] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
-[8/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
-[9/24] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[10/24] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
-[11/24] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
-[12/24] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
-  1) qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow ──────────────
-
-    Error: expect(received).toBeGreaterThanOrEqual(expected)
-
-    Expected: >= 6
-    Received:    0
-
-      2 | async function noOverflow(page,label=''){const d=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));expect(d.scroll,`${label} ${JSON.stringify(d)}`).toBeLessThanOrEqual(d.client+2)}
-      3 | async function completeIntake(page){for(let i=0;i<3;i++){await noOverflow(page,`intake-${i}`);await page.locator('#rNext').click()}await noOverflow(page,'intake-generate');await page.locator('#rGenerate').click();await page.waitForFunction(()=>localStorage.getItem('recomp_unified_profile_v2')!==null)}
-    > 4 | for(const width of [320,375,390,430]) test(`Recomp 10 fits ${width}px without horizontal overflow`,async({browser})=>{const context=await browser.newContext({viewport:{width,height:820},isMobile:true,hasTouch:true});const page=await context.newPage();await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await noOverflow(page,'launch');await completeIntake(page);await page.waitForFunction(()=>Boolean(window.RecompQualityV53));await noOverflow(page,'home');const buttons=page.locator('nav button');const count=await buttons.count();for(let i=0;i<count;i++){const b=buttons.nth(i);if(await b.isVisible()){await b.click();await page.waitForTimeout(40);await noOverflow(page,`nav-${i}`)}}expect(await page.locator('nav .navicon svg').count()).toBeGreaterThanOrEqual(6);await context.close()});
-        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ^
-      5 | for(const [name,width,height] of [['iPhone landscape',844,390],['iPad portrait',768,1024],['iPad landscape',1024,768]])test(`Recomp 10 ${name} stays usable without horizontal overflow`,async({browser})=>{const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true});const page=await context.newPage();await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await completeIntake(page);await page.waitForFunction(()=>Boolean(window.RecompQualityV53));const buttons=page.locator('nav button');const count=await buttons.count();for(let i=0;i<count;i++){const b=buttons.nth(i);if(await b.isVisible()){await b.click();await page.waitForTimeout(35);await noOverflow(page,`${name}-nav-${i}`)}}expect(await page.locator('nav button:visible').count()).toBeGreaterThanOrEqual(6);await context.close()});
-      6 |
-      7 | test('Recomp identity never displays FitCoach F branding',async({page})=>{await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.getElementById('r10IntakeStyle'));const content=await page.locator('.brand>div').evaluate(el=>getComputedStyle(el,'::before').content);expect(content).not.toBe('"F"');expect(content).toBe('"R"')});
-        at /home/runner/work/Recomp-10/Recomp-10/qa/mobile-layout.spec.js:4:762
-
-    Error Context: test-results/qa-mobile-layout-Recomp-10-7768a-without-horizontal-overflow/error-context.md
-
-
-[13/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
-[14/24] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
-[15/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
-[16/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
-[17/24] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
-[18/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
-[19/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
-[20/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
-[21/24] qa/mobile-layout.spec.js:7:1 › Recomp identity never displays FitCoach F branding
-[22/24] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
-[23/24] qa/mobile-layout.spec.js:11:1 › Recomp menu cards keep readable meal column on iPhone width
-[24/24] qa/mobile-layout.spec.js:13:1 › Recomp 10 v53 rejects pathological calorie concentration
-  1 failed
-    qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow ───────────────
-  23 passed (33.9s)
---- HTTP_LOG_TAIL ---
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /professional-v61.css?v=6.1.0 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /recomp-profile-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /sw.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /privacy.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /support.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /manifest.webmanifest HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /icon-192.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /icon-512.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:25] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:26] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /persistence.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /meal-planner.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /date-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /meal-planner-ui.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /nutrition-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /training-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /coach-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /photo-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /expert-coaches-v1.js?v=1 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /professional-v61.css?v=6.1.0 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /recomp-profile-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:27] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:28] "GET /sw.js HTTP/1.1" 304 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /training-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /persistence.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /meal-planner.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /meal-planner-ui.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /nutrition-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /date-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /photo-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /coach-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /expert-coaches-v1.js?v=1 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /professional-v61.css?v=6.1.0 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /recomp-profile-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /sw.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /privacy.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /support.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /manifest.webmanifest HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /icon-192.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:19:29] "GET /icon-512.png HTTP/1.1" 200 -
-UTC: 2026-08-25T12:19:29Z
+RESULT: success
+FAILURE_PHASE: none
+FAILURE_ITERATION: none
+UTC: 2026-08-25T13:40:55Z
 APP: Recomp 10M
-SOURCE_COMMIT: 92c946c6d368aead5e90b4043b3921803f82cdd8
+SOURCE_COMMIT: 0566302c02e5de461c1d311aa8f5eeff7e247753
 SHARD: 4/10
 UNIT_PASSES_PLANNED: 100
 BROWSER_PASSES_PLANNED: 100
 RESULT: success
 FAILURE_PHASE: none
 FAILURE_ITERATION: none
-UTC: 2026-08-25T12:35:48Z
+UTC: 2026-08-25T13:43:32Z
 APP: Recomp 10M
-SOURCE_COMMIT: 92c946c6d368aead5e90b4043b3921803f82cdd8
+SOURCE_COMMIT: 0566302c02e5de461c1d311aa8f5eeff7e247753
 SHARD: 5/10
 UNIT_PASSES_PLANNED: 100
 BROWSER_PASSES_PLANNED: 100
-RESULT: failure
-FAILURE_PHASE: browser
-FAILURE_ITERATION: 87
---- FAILURE_LOG_TAIL ---
-
-Running 24 tests using 2 workers
-
-[1/24] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
-[2/24] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
-[3/24] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
-[4/24] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
-[5/24] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
-[6/24] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
-[7/24] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
-[8/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
-[9/24] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[10/24] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
-[11/24] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
-[12/24] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
-  1) qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow ──────────────
-
-    Error: expect(received).toBeGreaterThanOrEqual(expected)
-
-    Expected: >= 6
-    Received:    0
-
-      2 | async function noOverflow(page,label=''){const d=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));expect(d.scroll,`${label} ${JSON.stringify(d)}`).toBeLessThanOrEqual(d.client+2)}
-      3 | async function completeIntake(page){for(let i=0;i<3;i++){await noOverflow(page,`intake-${i}`);await page.locator('#rNext').click()}await noOverflow(page,'intake-generate');await page.locator('#rGenerate').click();await page.waitForFunction(()=>localStorage.getItem('recomp_unified_profile_v2')!==null)}
-    > 4 | for(const width of [320,375,390,430]) test(`Recomp 10 fits ${width}px without horizontal overflow`,async({browser})=>{const context=await browser.newContext({viewport:{width,height:820},isMobile:true,hasTouch:true});const page=await context.newPage();await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await noOverflow(page,'launch');await completeIntake(page);await page.waitForFunction(()=>Boolean(window.RecompQualityV53));await noOverflow(page,'home');const buttons=page.locator('nav button');const count=await buttons.count();for(let i=0;i<count;i++){const b=buttons.nth(i);if(await b.isVisible()){await b.click();await page.waitForTimeout(40);await noOverflow(page,`nav-${i}`)}}expect(await page.locator('nav .navicon svg').count()).toBeGreaterThanOrEqual(6);await context.close()});
-        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ^
-      5 | for(const [name,width,height] of [['iPhone landscape',844,390],['iPad portrait',768,1024],['iPad landscape',1024,768]])test(`Recomp 10 ${name} stays usable without horizontal overflow`,async({browser})=>{const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true});const page=await context.newPage();await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await completeIntake(page);await page.waitForFunction(()=>Boolean(window.RecompQualityV53));const buttons=page.locator('nav button');const count=await buttons.count();for(let i=0;i<count;i++){const b=buttons.nth(i);if(await b.isVisible()){await b.click();await page.waitForTimeout(35);await noOverflow(page,`${name}-nav-${i}`)}}expect(await page.locator('nav button:visible').count()).toBeGreaterThanOrEqual(6);await context.close()});
-      6 |
-      7 | test('Recomp identity never displays FitCoach F branding',async({page})=>{await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.getElementById('r10IntakeStyle'));const content=await page.locator('.brand>div').evaluate(el=>getComputedStyle(el,'::before').content);expect(content).not.toBe('"F"');expect(content).toBe('"R"')});
-        at /home/runner/work/Recomp-10/Recomp-10/qa/mobile-layout.spec.js:4:762
-
-    Error Context: test-results/qa-mobile-layout-Recomp-10-7768a-without-horizontal-overflow/error-context.md
-
-
-[13/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
-[14/24] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
-[15/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
-[16/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
-[17/24] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
-[18/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
-[19/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
-[20/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
-[21/24] qa/mobile-layout.spec.js:7:1 › Recomp identity never displays FitCoach F branding
-[22/24] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
-[23/24] qa/mobile-layout.spec.js:11:1 › Recomp menu cards keep readable meal column on iPhone width
-[24/24] qa/mobile-layout.spec.js:13:1 › Recomp 10 v53 rejects pathological calorie concentration
-  1 failed
-    qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow ───────────────
-  23 passed (33.4s)
---- HTTP_LOG_TAIL ---
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /professional-v61.css?v=6.1.0 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /recomp-profile-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /sw.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /privacy.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /support.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /manifest.webmanifest HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /icon-192.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /icon-512.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:29] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /persistence.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /meal-planner.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /nutrition-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /training-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /coach-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /date-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /expert-coaches-v1.js?v=1 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /meal-planner-ui.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /photo-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /professional-v61.css?v=6.1.0 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /recomp-profile-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:31] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:32] "GET /sw.js HTTP/1.1" 304 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /training-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /meal-planner-ui.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /meal-planner.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /persistence.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /nutrition-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /coach-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /expert-coaches-v1.js?v=1 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /photo-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /date-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /professional-v61.css?v=6.1.0 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /recomp-profile-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /sw.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /privacy.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /support.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /manifest.webmanifest HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /icon-192.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 12:29:33] "GET /icon-512.png HTTP/1.1" 200 -
-UTC: 2026-08-25T12:29:33Z
+RESULT: success
+FAILURE_PHASE: none
+FAILURE_ITERATION: none
+UTC: 2026-08-25T13:41:39Z
 APP: Recomp 10M
-SOURCE_COMMIT: 92c946c6d368aead5e90b4043b3921803f82cdd8
+SOURCE_COMMIT: 0566302c02e5de461c1d311aa8f5eeff7e247753
 SHARD: 6/10
 UNIT_PASSES_PLANNED: 100
 BROWSER_PASSES_PLANNED: 100
 RESULT: success
 FAILURE_PHASE: none
 FAILURE_ITERATION: none
-UTC: 2026-08-25T12:35:27Z
+UTC: 2026-08-25T13:41:36Z
 APP: Recomp 10M
-SOURCE_COMMIT: 92c946c6d368aead5e90b4043b3921803f82cdd8
+SOURCE_COMMIT: 0566302c02e5de461c1d311aa8f5eeff7e247753
 SHARD: 7/10
 UNIT_PASSES_PLANNED: 100
 BROWSER_PASSES_PLANNED: 100
-RESULT: failure
-FAILURE_PHASE: browser
-FAILURE_ITERATION: 32
---- FAILURE_LOG_TAIL ---
-
-Running 24 tests using 2 workers
-
-[1/24] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
-[2/24] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
-[3/24] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
-[4/24] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
-[5/24] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
-[6/24] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
-[7/24] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
-[8/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow
-[9/24] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[10/24] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
-[11/24] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
-[12/24] qa/nutrition-menu-v5.spec.js:28:1 › menu is a single planning studio without duplicate quick generators
-  1) qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow ──────────────
-
-    Error: expect(received).toBeGreaterThanOrEqual(expected)
-
-    Expected: >= 6
-    Received:    0
-
-      2 | async function noOverflow(page,label=''){const d=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));expect(d.scroll,`${label} ${JSON.stringify(d)}`).toBeLessThanOrEqual(d.client+2)}
-      3 | async function completeIntake(page){for(let i=0;i<3;i++){await noOverflow(page,`intake-${i}`);await page.locator('#rNext').click()}await noOverflow(page,'intake-generate');await page.locator('#rGenerate').click();await page.waitForFunction(()=>localStorage.getItem('recomp_unified_profile_v2')!==null)}
-    > 4 | for(const width of [320,375,390,430]) test(`Recomp 10 fits ${width}px without horizontal overflow`,async({browser})=>{const context=await browser.newContext({viewport:{width,height:820},isMobile:true,hasTouch:true});const page=await context.newPage();await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await noOverflow(page,'launch');await completeIntake(page);await page.waitForFunction(()=>Boolean(window.RecompQualityV53));await noOverflow(page,'home');const buttons=page.locator('nav button');const count=await buttons.count();for(let i=0;i<count;i++){const b=buttons.nth(i);if(await b.isVisible()){await b.click();await page.waitForTimeout(40);await noOverflow(page,`nav-${i}`)}}expect(await page.locator('nav .navicon svg').count()).toBeGreaterThanOrEqual(6);await context.close()});
-        |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ^
-      5 | for(const [name,width,height] of [['iPhone landscape',844,390],['iPad portrait',768,1024],['iPad landscape',1024,768]])test(`Recomp 10 ${name} stays usable without horizontal overflow`,async({browser})=>{const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true});const page=await context.newPage();await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await completeIntake(page);await page.waitForFunction(()=>Boolean(window.RecompQualityV53));const buttons=page.locator('nav button');const count=await buttons.count();for(let i=0;i<count;i++){const b=buttons.nth(i);if(await b.isVisible()){await b.click();await page.waitForTimeout(35);await noOverflow(page,`${name}-nav-${i}`)}}expect(await page.locator('nav button:visible').count()).toBeGreaterThanOrEqual(6);await context.close()});
-      6 |
-      7 | test('Recomp identity never displays FitCoach F branding',async({page})=>{await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.getElementById('r10IntakeStyle'));const content=await page.locator('.brand>div').evaluate(el=>getComputedStyle(el,'::before').content);expect(content).not.toBe('"F"');expect(content).toBe('"R"')});
-        at /home/runner/work/Recomp-10/Recomp-10/qa/mobile-layout.spec.js:4:762
-
-    Error Context: test-results/qa-mobile-layout-Recomp-10-7768a-without-horizontal-overflow/error-context.md
-
-
-[13/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 375px without horizontal overflow
-[14/24] qa/nutrition-menu-v5.spec.js:46:1 › planned meal opens recipe and swap keeps the day usable
-[15/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 390px without horizontal overflow
-[16/24] qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 430px without horizontal overflow
-[17/24] qa/nutrition-menu-v5.spec.js:64:1 › six meals selected in the unified profile are available in the advanced menu planner
-[18/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
-[19/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
-[20/24] qa/mobile-layout.spec.js:5:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
-[21/24] qa/mobile-layout.spec.js:7:1 › Recomp identity never displays FitCoach F branding
-[22/24] qa/mobile-layout.spec.js:9:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
-[23/24] qa/mobile-layout.spec.js:11:1 › Recomp menu cards keep readable meal column on iPhone width
-[24/24] qa/mobile-layout.spec.js:13:1 › Recomp 10 v53 rejects pathological calorie concentration
-  1 failed
-    qa/mobile-layout.spec.js:4:39 › Recomp 10 fits 320px without horizontal overflow ───────────────
-  23 passed (33.4s)
---- HTTP_LOG_TAIL ---
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /professional-v61.css?v=6.1.0 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /recomp-profile-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /sw.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /privacy.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /support.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /manifest.webmanifest HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /icon-192.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /icon-512.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:10] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /persistence.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /date-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /training-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /nutrition-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /coach-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /meal-planner.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /meal-planner-ui.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /photo-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /expert-coaches-v1.js?v=1 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /professional-v61.css?v=6.1.0 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /recomp-profile-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:11] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:12] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:12] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:12] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:12] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:12] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:12] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:12] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:12] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:12] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:13] "GET /sw.js HTTP/1.1" 304 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /persistence.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /nutrition-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /meal-planner.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /date-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /training-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /meal-planner-ui.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /expert-coaches-v1.js?v=1 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /photo-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /coach-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /professional-v61.css?v=6.1.0 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /recomp-profile-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /sw.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /privacy.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /support.html HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /meal-planner-six-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /quality-v53.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /quality-v54.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /meal-planner-profile-sync-v52.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /meal-intelligence-v60.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /recomp-intake-v2.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /nutrition-target-sync-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /recomp-review-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /recomp-trend-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /recomp-trend-ui-v3.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /recomp-checkin-v4.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /checkin-local-v55.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /nutrition-menu-experience-v51.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /icon-192.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /manifest.webmanifest HTTP/1.1" 200 -
-127.0.0.1 - - [25/Aug/2026 11:58:14] "GET /icon-512.png HTTP/1.1" 200 -
-UTC: 2026-08-25T11:58:14Z
+RESULT: success
+FAILURE_PHASE: none
+FAILURE_ITERATION: none
+UTC: 2026-08-25T13:40:47Z
 APP: Recomp 10M
-SOURCE_COMMIT: 92c946c6d368aead5e90b4043b3921803f82cdd8
+SOURCE_COMMIT: 0566302c02e5de461c1d311aa8f5eeff7e247753
 SHARD: 8/10
 UNIT_PASSES_PLANNED: 100
 BROWSER_PASSES_PLANNED: 100
 RESULT: success
 FAILURE_PHASE: none
 FAILURE_ITERATION: none
-UTC: 2026-08-25T12:36:04Z
+UTC: 2026-08-25T13:36:22Z
 APP: Recomp 10M
-SOURCE_COMMIT: 92c946c6d368aead5e90b4043b3921803f82cdd8
+SOURCE_COMMIT: 0566302c02e5de461c1d311aa8f5eeff7e247753
 SHARD: 9/10
 UNIT_PASSES_PLANNED: 100
 BROWSER_PASSES_PLANNED: 100
 RESULT: success
 FAILURE_PHASE: none
 FAILURE_ITERATION: none
-UTC: 2026-08-25T12:36:26Z
+UTC: 2026-08-25T13:41:37Z
