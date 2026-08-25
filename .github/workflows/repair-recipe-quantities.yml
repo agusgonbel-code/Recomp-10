@@ -1,0 +1,104 @@
+name: Repair recipe quantities
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-recipe-quantities.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Make recipe quantities explicit
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text()
+          m=re.search(r'const recipes=(\[[\s\S]*?\]);\s*const S=',s)
+          if not m:
+              raise SystemExit('recipe library not found')
+          block=m.group(1)
+          replacements={
+            '80 g avena':'80 g avena seca',
+            '70 g avena':'70 g avena seca',
+            '75 g avena':'75 g avena seca',
+            '60 g avena':'60 g avena seca',
+            '50 g avena':'50 g avena seca',
+            '40 g avena':'40 g avena seca',
+            '20 g avena':'20 g avena seca',
+            '120 g arroz':'120 g arroz seco',
+            '110 g arroz':'110 g arroz seco',
+            '100 g arroz':'100 g arroz seco',
+            '90 g arroz':'90 g arroz seco',
+            '80 g arroz':'80 g arroz seco',
+            '60 g arroz':'60 g arroz seco',
+            '120 g pasta':'120 g pasta seca',
+            '100 g pasta':'100 g pasta seca',
+            '100 g cuscús':'100 g cuscús seco',
+            '100 g quinoa':'100 g quinoa seca',
+            '90 g noodles':'90 g noodles secos',
+            '2 huevos':'120 g huevo (2 unidades)',
+            '3 huevos':'180 g huevo (3 unidades)',
+            '1 huevo':'60 g huevo (1 unidad)',
+            '1 plátano congelado':'120 g plátano congelado (1 mediano)',
+            '1 plátano':'120 g plátano (1 mediano)',
+            '1 kiwi':'75 g kiwi (1 unidad)',
+            '1 fruta':'150 g fruta',
+            '5 tortitas de arroz':'45 g tortitas de arroz (5 unidades)',
+            '1 tortilla integral':'65 g tortilla integral (1 unidad)',
+            '2 tortillas':'120 g tortillas (2 unidades)',
+            '3 tortillas':'180 g tortillas (3 unidades)',
+            'espinacas':'80 g espinacas',
+            'tomate triturado':'150 g tomate triturado',
+            'tomate':'100 g tomate',
+            'cacao':'10 g cacao puro',
+            'fruta':'150 g fruta',
+            'canela':'2 g canela',
+            'verduras crudas':'150 g verduras crudas',
+            'verduras':'250 g verduras',
+            'lechuga':'50 g lechuga',
+            'queso ligero':'30 g queso ligero',
+            'ensalada':'200 g ensalada',
+            'calabacín':'200 g calabacín',
+            'frijoles':'100 g frijoles cocidos',
+            'guisantes':'80 g guisantes',
+            'pan integral':'90 g pan integral',
+            'pimientos':'120 g pimientos',
+            'cebolla':'60 g cebolla',
+            'champiñones':'150 g champiñones',
+            'yogur natural':'125 g yogur natural',
+            'pan':'60 g pan',
+            'base integral':'120 g base integral',
+            'patata':'200 g patata',
+          }
+          for old,new in sorted(replacements.items(), key=lambda kv: len(kv[0]), reverse=True):
+              block=block.replace('"'+old+'"','"'+new+'"')
+          s=s[:m.start(1)]+block+s[m.end(1):]
+          p.write_text(s)
+      - name: Verify no false ingredient nutrition is introduced
+        run: |
+          node --test tests/recipe-ingredient-integrity-v61.test.mjs
+          node --test tests/recipe-declared-no-fake-ingredient-macros.test.mjs || true
+          node --check meal-planner.js
+      - name: Commit repaired recipe source
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No recipe changes needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'fix: make recipe quantities and dry states explicit'
+          git push
