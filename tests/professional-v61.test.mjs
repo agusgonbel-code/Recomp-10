@@ -6,3 +6,5 @@ const pro=await readFile(new URL('../professional-v61.css',import.meta.url),'utf
 test('Recomp loads its professional layer from the early bootstrap',()=>{assert.match(loader,/professional-v61\.css/);assert.match(loader,/data-r10-professional|r10Professional/);});
 test('Recomp professional identity cannot show FitCoach F mark',()=>{assert.match(pro,/content:'R'!important/);});
 test('Recomp polish preserves touch, focus and reduced motion',()=>{assert.match(pro,/min-height:44px/);assert.match(pro,/focus-visible/);assert.match(pro,/prefers-reduced-motion/);});
+test('the duplicate legacy expert form stays hidden behind the unified profile flow',()=>{assert.match(pro,/#expertCoaches\{display:none!important\}/);});
+
