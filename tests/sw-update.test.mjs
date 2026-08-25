@@ -11,7 +11,7 @@ test('los scripts usan red primero para no mezclar versiones en iPhone',()=>{
   assert.ok(block.indexOf('fetch(event.request)')<block.indexOf('caches.match(event.request)'));
 });
 
-test('el formulario usa objetivos editables persistentes y soporta planes de 1 a 30 días',()=>{
+test('el formulario usa objetivos editables persistentes, planes de 1 a 30 días y comunica la precisión nutricional real',()=>{
   const ui=readFileSync(new URL('../meal-planner-ui.js',import.meta.url),'utf8');
   assert.match(ui,/manualKey='recomp10\.manualTargets'/);
   assert.match(ui,/savedManualTargets/);
@@ -23,5 +23,8 @@ test('el formulario usa objetivos editables persistentes y soporta planes de 1 a
   assert.match(ui,/Calculando menú/);
   assert.match(ui,/savedManualTargets\(\)\|\|savedTargets\(\)/);
   assert.match(ui,/ingredientDetailsFor\(meal\)/);
-  assert.match(ui,/cantidades visibles son exactamente las usadas/);
+  assert.match(ui,/quantityEstimated===true/);
+  assert.match(ui,/Macros de receta, no verificados ingrediente a ingrediente/);
+  assert.match(ui,/no certifican todavía una suma nutricional reconstruida alimento por alimento/);
+  assert.doesNotMatch(ui,/cantidades visibles son exactamente las usadas/);
 });
