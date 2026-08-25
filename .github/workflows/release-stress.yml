@@ -118,4 +118,4 @@ jobs:
           git push origin HEAD:main
       - name: Enforce release stress gate
         shell: bash
-        run: grep -q '^RESULT: PASS$' qa/release-stress-latest.txt
+        run: "grep -q '^RESULT: PASS$' qa/release-stress-latest.txt"
