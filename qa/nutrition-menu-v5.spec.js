@@ -19,7 +19,7 @@ test('nutrition is a daily dashboard, not a calculator-first screen', async ({ p
   await expect(page.locator('#rnTodayMeals')).toContainText('Desayuno QA');
   await expect(page.locator('#rnNutritionHeader')).toContainText('500');
   await page.locator('#nutricion .rn-tabs button[data-panel="targets"]').click();
-  await expect(page.getByText('Calculadora de kcal y macros')).toBeVisible();
+  await expect(page.locator('#nutricion summary').filter({hasText:'Calculadora de kcal y macros'})).toBeVisible();
   await page.locator('#nutricion .rn-tabs button[data-panel="diary"]').click();
   await expect(page.locator('#mealEditor')).toBeVisible();
   expect(errors).toEqual([]);
