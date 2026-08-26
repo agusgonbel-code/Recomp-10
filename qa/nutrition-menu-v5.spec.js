@@ -25,21 +25,42 @@ test('nutrition is a daily dashboard, not a calculator-first screen', async ({ p
   expect(errors).toEqual([]);
 });
 
-test('menu is a single planning studio without duplicate quick generators', async ({ page }) => {
+test('calculator and multidday generator share one planning screen and persist all four targets', async ({ page }) => {
   const errors=[]; page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
   await page.locator('nav button').filter({hasText:'Menús'}).click();
   await expect(page.locator('#rnMenuHeader')).toBeVisible();
   await expect(page.getByText('Un plan. Una lista de compra. Cero generadores duplicados.')).toBeVisible();
   await expect(page.locator('#mealPlanner30')).toBeVisible();
+  await expect(page.locator('#mpMacroCalculator')).toBeVisible();
+  await expect(page.locator('#mpCalculateTargets')).toBeVisible();
   await expect(page.getByRole('heading',{name:'Generador rápido'})).toBeHidden();
   await expect(page.locator('#mpGenerate')).toBeVisible();
+  await page.locator('#mpCalcAge').fill('46');
+  await page.locator('#mpCalcWeight').fill('81');
+  await page.locator('#mpCalcHeight').fill('181');
+  await page.locator('#mpCalculateTargets').click();
+  const calculated=await page.locator('#mpKcal, #mpProtein, #mpCarbs, #mpFat').evaluateAll(inputs=>Object.fromEntries(inputs.map(input=>[input.id,input.value])));
+  expect(Number(calculated.mpKcal)).toBeGreaterThan(1000);
+  expect(Number(calculated.mpProtein)).toBeGreaterThan(0);
+  expect(Number(calculated.mpCarbs)).toBeGreaterThan(0);
+  expect(Number(calculated.mpFat)).toBeGreaterThan(0);
+  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('targets')))).toEqual({
+    kcal:Number(calculated.mpKcal),protein:Number(calculated.mpProtein),carbs:Number(calculated.mpCarbs),fat:Number(calculated.mpFat)
+  });
   await page.locator('#mpDays').fill('7');
   await page.locator('#mpGenerate').click();
   await expect(page.locator('.mp-day').first()).toBeVisible({timeout:15000});
   await expect(page.locator('#rnMenuHeader')).toContainText('7 días listos.');
   const plannerParent=await page.locator('#mealPlanner30').evaluate(el=>el.parentElement.id);
   expect(plannerParent).toBe('recetas');
+  await page.reload({waitUntil:'load'});
+  await page.locator('nav button').filter({hasText:'Menús'}).click();
+  await expect(page.locator('#mpKcal')).toHaveValue(calculated.mpKcal);
+  await expect(page.locator('#mpProtein')).toHaveValue(calculated.mpProtein);
+  await expect(page.locator('#mpCarbs')).toHaveValue(calculated.mpCarbs);
+  await expect(page.locator('#mpFat')).toHaveValue(calculated.mpFat);
+  await expect(page.locator('.mp-day').first()).toBeVisible({timeout:15000});
   expect(errors).toEqual([]);
 });
 
