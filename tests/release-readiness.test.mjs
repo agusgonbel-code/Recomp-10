@@ -51,3 +51,19 @@ test('release: no hay dependencias remotas evidentes en el runtime principal',()
     assert.doesNotMatch(text,/XMLHttpRequest\s*\(/,`${file} usa XMLHttpRequest remoto`);
   }
 });
+
+test('release: los módulos profesionales están conectados al runtime público',()=>{
+  const html=read('index.html');
+  const required=[
+    'recomp-profile-v2.js','recomp-intake-v2.js','nutrition-target-sync-v51.js',
+    'meal-planner-six-v52.js','quality-v53.js','quality-v54.js',
+    'meal-planner-profile-sync-v52.js','meal-intelligence-v60.js',
+    'recomp-review-v3.js','recomp-trend-v3.js','recomp-checkin-v4.js',
+    'checkin-local-v55.js','recomp-trend-ui-v3.js','nutrition-menu-experience-v51.js'
+  ];
+  for(const file of required){
+    assert.match(html,new RegExp(`<script[^>]+src=['"]${file.replaceAll('.','\\.')}['"]`),`${file} no está cargado por index.html`);
+  }
+  assert.ok(html.indexOf('recomp-profile-v2.js')<html.indexOf('recomp-intake-v2.js'),'El perfil debe cargarse antes del formulario unificado');
+  assert.ok(html.indexOf('recomp-checkin-v4.js')<html.indexOf('checkin-local-v55.js'),'El parche de fecha local debe cargarse después del motor de check-in');
+});
