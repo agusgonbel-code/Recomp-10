@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recomp-10-v63-waist-baseline';
+const CACHE_NAME = 'recomp-10-v64-baseline-photo-handoff';
 const APP_SHELL = [
   './','./index.html','./privacy.html','./support.html','./persistence.js','./date-engine.js','./training-engine.js','./nutrition-engine.js','./meal-planner.js','./meal-planner-ui.js','./meal-planner-six-v52.js','./quality-v53.js','./quality-v54.js','./meal-planner-profile-sync-v52.js','./meal-intelligence-v60.js','./coach-engine.js','./photo-engine.js','./recomp-profile-v2.js','./recomp-intake-v2.js','./nutrition-target-sync-v51.js','./recomp-review-v3.js','./recomp-trend-v3.js','./recomp-trend-ui-v3.js','./recomp-checkin-v4.js','./checkin-local-v55.js','./nutrition-menu-experience-v51.js','./expert-coaches-v1.js?v=1','./manifest.webmanifest','./icon-192.png','./icon-512.png'
 ];
