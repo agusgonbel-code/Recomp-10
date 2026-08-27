@@ -1,248 +1,248 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: b35ef6725fc09dc8bd661d81e44536552734af82
+SOURCE_COMMIT: dcf7948ca67b1a89d054f387e801c1e54b586743
 RESULT: PASS
 EXIT_CODE: 0
 UNIT_EXIT_CODE: 0
 BROWSER_EXIT_CODE: 0
-UTC: 2026-08-27T06:11:43Z
+UTC: 2026-08-27T10:12:12Z
 COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intelligence + accessibility + 26 user-behavior scenarios
 --- UNIT / RECIPE INTEGRITY OUTPUT (tail) ---
   ---
-  duration_ms: 0.742078
-  type: 'test'
-  ...
-# Subtest: kcal declaradas son coherentes con los macros declarados
-ok 70 - kcal declaradas son coherentes con los macros declarados
-  ---
-  duration_ms: 1.044032
-  type: 'test'
-  ...
-# Subtest: normalizes and keeps a bounded check-in history
-ok 71 - normalizes and keeps a bounded check-in history
-  ---
-  duration_ms: 11.119217
-  type: 'test'
-  ...
-# Subtest: 360 review combines dated trend, waist, adherence and performance
-ok 72 - 360 review combines dated trend, waist, adherence and performance
-  ---
-  duration_ms: 1.782094
-  type: 'test'
-  ...
-# Subtest: multiple check-ins on the same date do not create fake weeks of evidence
-ok 73 - multiple check-ins on the same date do not create fake weeks of evidence
-  ---
-  duration_ms: 0.367774
+  duration_ms: 0.399327
   type: 'test'
   ...
 # Subtest: decision history is auditable
 ok 74 - decision history is auditable
   ---
-  duration_ms: 0.319051
+  duration_ms: 0.290183
   type: 'test'
   ...
 # Subtest: meal shares sum to one for 3-6 meals
 ok 75 - meal shares sum to one for 3-6 meals
   ---
-  duration_ms: 0.895809
+  duration_ms: 3.351582
   type: 'test'
   ...
 # Subtest: balanced meal shares match the production planner policy
 ok 76 - balanced meal shares match the production planner policy
   ---
-  duration_ms: 1.325667
+  duration_ms: 1.17571
   type: 'test'
   ...
 # Subtest: priority patterns remain bounded and actually prioritize the selected meal
 ok 77 - priority patterns remain bounded and actually prioritize the selected meal
   ---
-  duration_ms: 0.224668
+  duration_ms: 0.343183
   type: 'test'
   ...
 # Subtest: meal targets reconcile exactly
 ok 78 - meal targets reconcile exactly
   ---
-  duration_ms: 0.233722
+  duration_ms: 0.458378
   type: 'test'
   ...
 # Subtest: macro energy reconciles after nutrition calculation
 ok 79 - macro energy reconciles after nutrition calculation
   ---
-  duration_ms: 0.372121
+  duration_ms: 0.741357
   type: 'test'
   ...
-# Subtest: training respects days
-ok 80 - training respects days
+# Subtest: training respects days, duration and equipment aliases
+ok 80 - training respects days, duration and equipment aliases
   ---
-  duration_ms: 0.462937
+  duration_ms: 1.893895
+  type: 'test'
+  ...
+# Subtest: training excludes equipment outside the selected set
+ok 81 - training excludes equipment outside the selected set
+  ---
+  duration_ms: 0.787033
+  type: 'test'
+  ...
+# Subtest: training applies conservative limitation rules and reports exclusions
+ok 82 - training applies conservative limitation rules and reports exclusions
+  ---
+  duration_ms: 0.786672
+  type: 'test'
+  ...
+# Subtest: unrelated clinical context does not remove exercises
+ok 83 - unrelated clinical context does not remove exercises
+  ---
+  duration_ms: 0.616183
   type: 'test'
   ...
 # Subtest: profile preserves bounded waist, clinical context, meal schedule and supplements
-ok 81 - profile preserves bounded waist, clinical context, meal schedule and supplements
+ok 84 - profile preserves bounded waist, clinical context, meal schedule and supplements
   ---
-  duration_ms: 0.127963
+  duration_ms: 0.67363
   type: 'test'
   ...
 # Subtest: recognizes positive recomp with stable weight and falling waist
-ok 82 - recognizes positive recomp with stable weight and falling waist
+ok 85 - recognizes positive recomp with stable weight and falling waist
   ---
-  duration_ms: 1.459969
+  duration_ms: 1.520876
   type: 'test'
   ...
 # Subtest: does not adjust plan when adherence is poor
-ok 83 - does not adjust plan when adherence is poor
+ok 86 - does not adjust plan when adherence is poor
   ---
-  duration_ms: 1.395792
+  duration_ms: 1.167294
   type: 'test'
   ...
 # Subtest: raises calories when dated weekly loss is too aggressive and performance falls
-ok 84 - raises calories when dated weekly loss is too aggressive and performance falls
+ok 87 - raises calories when dated weekly loss is too aggressive and performance falls
   ---
-  duration_ms: 0.274484
+  duration_ms: 0.299841
   type: 'test'
   ...
 # Subtest: four observations on one day are not treated as a usable trend
-ok 85 - four observations on one day are not treated as a usable trend
+ok 88 - four observations on one day are not treated as a usable trend
   ---
-  duration_ms: 0.156085
+  duration_ms: 0.178204
   type: 'test'
   ...
 # Subtest: undated observations default to weekly spacing rather than one-day spacing
-ok 86 - undated observations default to weekly spacing rather than one-day spacing
+ok 89 - undated observations default to weekly spacing rather than one-day spacing
   ---
-  duration_ms: 0.362326
+  duration_ms: 0.403175
   type: 'test'
   ...
 # Subtest: applied targets reconcile macro energy closely
-ok 87 - applied targets reconcile macro energy closely
+ok 90 - applied targets reconcile macro energy closely
   ---
-  duration_ms: 0.191569
+  duration_ms: 0.195646
   type: 'test'
   ...
 # Subtest: favorable recomp keeps calories stable
-ok 88 - favorable recomp keeps calories stable
+ok 91 - favorable recomp keeps calories stable
   ---
-  duration_ms: 0.829529
+  duration_ms: 1.648505
   type: 'test'
   ...
 # Subtest: low adherence blocks calorie changes
-ok 89 - low adherence blocks calorie changes
+ok 92 - low adherence blocks calorie changes
   ---
-  duration_ms: 0.133732
+  duration_ms: 0.263132
   type: 'test'
   ...
 # Subtest: weight and waist rising together reduce energy modestly
-ok 90 - weight and waist rising together reduce energy modestly
+ok 93 - weight and waist rising together reduce energy modestly
   ---
-  duration_ms: 0.247973
+  duration_ms: 0.343894
   type: 'test'
   ...
 # Subtest: release: privacidad y soporte existen y no contienen marcadores provisionales
-ok 91 - release: privacidad y soporte existen y no contienen marcadores provisionales
+ok 94 - release: privacidad y soporte existen y no contienen marcadores provisionales
   ---
-  duration_ms: 1.598738
+  duration_ms: 2.238319
   type: 'test'
   ...
 # Subtest: release: privacidad y soporte son accesibles desde la app y offline
-ok 92 - release: privacidad y soporte son accesibles desde la app y offline
+ok 95 - release: privacidad y soporte son accesibles desde la app y offline
   ---
-  duration_ms: 1.19497
+  duration_ms: 1.643255
   type: 'test'
   ...
 # Subtest: release: manifiesto e iconos mínimos son válidos
-ok 93 - release: manifiesto e iconos mínimos son válidos
+ok 96 - release: manifiesto e iconos mínimos son válidos
   ---
-  duration_ms: 0.37857
+  duration_ms: 0.508231
   type: 'test'
   ...
 # Subtest: release: no hay dependencias remotas evidentes en el runtime principal
-ok 94 - release: no hay dependencias remotas evidentes en el runtime principal
+ok 97 - release: no hay dependencias remotas evidentes en el runtime principal
   ---
-  duration_ms: 0.819194
+  duration_ms: 1.289643
+  type: 'test'
+  ...
+# Subtest: release: los módulos profesionales están conectados al runtime público
+ok 98 - release: los módulos profesionales están conectados al runtime público
+  ---
+  duration_ms: 1.244058
   type: 'test'
   ...
 # Subtest: la compra semanal no puede perder cantidades cuando se repite un ingrediente
-ok 95 - la compra semanal no puede perder cantidades cuando se repite un ingrediente
+ok 99 - la compra semanal no puede perder cantidades cuando se repite un ingrediente
   ---
-  duration_ms: 2.260535
+  duration_ms: 3.615395
   type: 'test'
   ...
 # Subtest: la lista de compra muestra la cantidad total agregada cuando está disponible
-ok 96 - la lista de compra muestra la cantidad total agregada cuando está disponible
+ok 100 - la lista de compra muestra la cantidad total agregada cuando está disponible
   ---
-  duration_ms: 1.00277
+  duration_ms: 1.273453
   type: 'test'
   ...
 # Subtest: la lista de compra conserva un fallback explícito para ingredientes no cuantificables
-ok 97 - la lista de compra conserva un fallback explícito para ingredientes no cuantificables
+ok 101 - la lista de compra conserva un fallback explícito para ingredientes no cuantificables
   ---
-  duration_ms: 0.15923
+  duration_ms: 0.253956
   type: 'test'
   ...
 # Subtest: los scripts usan red primero para no mezclar versiones en iPhone
-ok 98 - los scripts usan red primero para no mezclar versiones en iPhone
+ok 102 - los scripts usan red primero para no mezclar versiones en iPhone
   ---
-  duration_ms: 1.118775
+  duration_ms: 1.193794
   type: 'test'
   ...
 # Subtest: el formulario usa objetivos editables persistentes, planes de 1 a 30 días y comunica la precisión nutricional real
-ok 99 - el formulario usa objetivos editables persistentes, planes de 1 a 30 días y comunica la precisión nutricional real
+ok 103 - el formulario usa objetivos editables persistentes, planes de 1 a 30 días y comunica la precisión nutricional real
   ---
-  duration_ms: 0.514515
+  duration_ms: 0.539961
   type: 'test'
   ...
 # Training engine tests passed
 # Subtest: tests/training-engine.test.mjs
 ok 36 - tests/training-engine.test.mjs
   ---
-  duration_ms: 32.067223
+  duration_ms: 50.041662
   type: 'test'
   ...
-1..100
-# tests 100
+1..104
+# tests 104
 # suites 0
-# pass 100
+# pass 104
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 4227.295545
+# duration_ms 5856.986008
 --- BROWSER OUTPUT (tail) ---
 
 Running 52 tests using 2 workers
 
-[1/52] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
-[2/52] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
+[1/52] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
+[2/52] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
 [3/52] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
 [4/52] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
 [5/52] qa/browser-smoke.spec.js:5:1 › 360 check-in records progress and produces an explainable decision
 [6/52] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
 [7/52] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
 [8/52] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[9/52] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 320px without horizontal overflow
-[10/52] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
+[9/52] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
+[10/52] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 320px without horizontal overflow
 [11/52] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
-[12/52] qa/nutrition-menu-v5.spec.js:28:1 › calculator and multidday generator share one planning screen and persist all four targets
-[13/52] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 375px without horizontal overflow
+[12/52] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 375px without horizontal overflow
+[13/52] qa/nutrition-menu-v5.spec.js:28:1 › calculator and multidday generator share one planning screen and persist all four targets
 [14/52] qa/nutrition-menu-v5.spec.js:67:1 › planned meal opens recipe and swap keeps the day usable
 [15/52] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 390px without horizontal overflow
 [16/52] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 430px without horizontal overflow
 [17/52] qa/nutrition-menu-v5.spec.js:88:1 › six meals selected in the unified profile are available in the advanced menu planner
 [18/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Inicio
-[19/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Entreno
-[20/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Nutrición
-[21/52] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
+[19/52] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
+[20/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Entreno
+[21/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Nutrición
 [22/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Menús
 [23/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Progreso
-[24/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Ajustes
-[25/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 320px sin desbordamiento
-[26/52] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
+[24/52] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
+[25/52] qa/user-100-sim.spec.js:27:30 › usuario navega a Ajustes
+[26/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 320px sin desbordamiento
 [27/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 375px sin desbordamiento
 [28/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 390px sin desbordamiento
 [29/52] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 430px sin desbordamiento
-[30/52] qa/user-100-sim.spec.js:29:1 › usuario puede cerrar el perfil inicial y explorar
-[31/52] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
-[32/52] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
+[30/52] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
+[31/52] qa/user-100-sim.spec.js:29:1 › usuario puede cerrar el perfil inicial y explorar
+[32/52] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
 [33/52] qa/user-100-sim.spec.js:31:1 › usuario fresco ve perfil neutro
 [34/52] qa/user-100-sim.spec.js:32:1 › usuario introduce antropometría sin crash
 [35/52] qa/mobile-layout.spec.js:8:1 › Recomp identity never displays FitCoach F branding
@@ -250,8 +250,8 @@ Running 52 tests using 2 workers
 [37/52] qa/user-100-sim.spec.js:33:1 › usuario cambia actividad y objetivo
 [38/52] qa/mobile-layout.spec.js:12:1 › Recomp menu cards keep readable meal column on iPhone width
 [39/52] qa/user-100-sim.spec.js:34:1 › usuario cierra el onboarding y Nutrición sigue siendo interactiva
-[40/52] qa/user-100-sim.spec.js:35:1 › usuario navega por día anterior y vuelve a hoy
-[41/52] qa/mobile-layout.spec.js:14:1 › Recomp 10 v53 rejects pathological calorie concentration
+[40/52] qa/mobile-layout.spec.js:14:1 › Recomp 10 v53 rejects pathological calorie concentration
+[41/52] qa/user-100-sim.spec.js:35:1 › usuario navega por día anterior y vuelve a hoy
 [42/52] qa/user-100-sim.spec.js:36:1 › usuario no puede introducir kcal negativas por control
 [43/52] qa/user-100-sim.spec.js:37:1 › usuario abre biblioteca de recetas sin perder menú
 [44/52] qa/user-100-sim.spec.js:38:1 › usuario busca una receta
@@ -263,4 +263,4 @@ Running 52 tests using 2 workers
 [50/52] qa/user-100-sim.spec.js:44:1 › usuario en iPhone landscape no desborda
 [51/52] qa/user-100-sim.spec.js:45:1 › usuario en iPad portrait conserva navegación
 [52/52] qa/user-100-sim.spec.js:46:1 › usuario puede enfocar controles con teclado
-  52 passed (45.6s)
+  52 passed (52.8s)
