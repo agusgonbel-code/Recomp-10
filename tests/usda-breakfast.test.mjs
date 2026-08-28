@@ -48,3 +48,21 @@ test('breakfast specifies edible raw/dry weights and complete preparation',()=>{
  assert.equal(snapshot.foods.length,5);
  assert.match(snapshot.sha256,/^[a-f0-9]{64}$/);
 });
+
+test('seven production days with USDA breakfast pass distribution guards without changing the cake',()=>{
+ const runtime=vm.createContext({});
+ vm.runInContext(code,runtime);
+ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+ const raw=JSON.parse(html.match(/const recipes=(\[[\s\S]*?\]);\s*const S=/)[1]);
+ const catalog=runtime.RecompMealPlanner.normalizeRecipeCatalog(raw);
+ for(const file of ['quality-v53.js','quality-v54.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),runtime);
+ const prefs={kcal:2200,protein:160,carbs:250,fat:70,days:7,meals:4,trainingDays:4,includeBreakfastCake:true,includePostWorkoutShake:true};
+ const plan=runtime.RecompMealPlanner.generateDays(catalog,prefs);
+ assert.equal(plan.days.length,7);
+ for(const day of plan.days){
+  assert.ok(runtime.RecompMealPlanner.withinTargets(day.totals,prefs,{k:.03,p:.05,c:.06,f:.08}));
+  const actual=day.items.find(item=>item.recipe.id==='fixed-breakfast-cake');
+  assert.deepEqual(JSON.parse(JSON.stringify(actual.ingredientAmounts)),cake.ingredientAmounts);
+  assert.equal(actual.k,cake.k);
+ }
+});
