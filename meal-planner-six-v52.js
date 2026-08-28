@@ -21,7 +21,52 @@ function generateSix(recipes,input){const p=prefs({...input,meals:6}),catalog=ba
 function validatePreferences(input={}){if(Math.trunc(finite(input.meals,4))!==6)return base.validatePreferences(input);return prefs(input);}
 function generateDays(recipes,input={}){return Math.trunc(finite(input.meals,4))===6?generateSix(recipes,input):base.generateDays(recipes,input);}
 function generate30Days(recipes,input={}){return generateDays(recipes,{...input,days:30});}
-function swapSix(plan,recipes,dayIndex,itemIndex){if(!plan?.days?.[dayIndex])throw new Error('Día no válido.');const p=prefs({...plan.preferences,meals:6,days:plan.days.length}),catalog=base.normalizeRecipeCatalog(recipes),pool=base.allowedRecipes(catalog,p),day=plan.days[dayIndex],old=day.items[itemIndex];if(!old)throw new Error('Comida no válida.');let candidates=candidatePool(pool,old.slot).filter(r=>r.n!==old.recipe.n);if(!candidates.length)candidates=pool.filter(r=>r.n!==old.recipe.n);if(!candidates.length)throw new Error('No hay una alternativa equivalente disponible.');let best=null;for(const r of candidates.slice(0,30)){const chosen=day.items.map((x,i)=>targetFor(i===itemIndex?r:x.recipe,SIX[i][1],p)),fit=optimize(chosen,p);if(preferFit(fit,best,p))best=fit;}if(!best||!acceptable(best,p))throw new Error('No se encontró una alternativa que conserve los cuatro macros y el reparto energético.');plan.days[dayIndex]={day:day.day,...best};return plan;}
+function swapSix(plan,recipes,dayIndex,itemIndex){if(!plan?.days?.[dayIndex])throw new Error('Día no válido.');const p=prefs({...plan.preferences,meals:6,days:plan.days.length}),catalog=base.normalizeRecipeCatalog(recipes),pool=base.allowedRecipes(catalog,p),day=plan.days[dayIndex],old=day.items[itemIndex];if(!old)throw new Error('Comida no válida.');let candidates=candidatePool(pool,old.slot).filter(r=>r.n!==old.recipe.n);if(!candidates.length)candidates=pool.filter(r=>r.n!==old.recipe.n);if(!candidates.length)throw new Error('No hay una alternativa equivalente disponible.');let best=null;for(const r of candidates.slice(0,30)){const retained=day.items.map((x,i)=>i===itemIndex?{recipe:r,scale:clamp(x.k/Math.max(1,r.k),.18,5)}:{recipe:x.recipe,scale:x.scale}),reset=day.items.map((x,i)=>targetFor(i===itemIndex?r:x.recipe,SIX[i][1],p));for(const chosen of [retained,reset]){const fit=optimize(chosen,p);if(preferFit(fit,best,p))best=fit;}}if(!best||!acceptable(best,p)){for(const r of candidates.slice(0,30)){const chosen=day.items.map((x,i)=>i===itemIndex?{recipe:r,scale:clamp(x.k/Math.max(1,r.k),.18,5)}:{recipe:x.recipe,scale:x.scale}),fit=refineEquivalent(chosen,p);if(preferFit(fit,best,p))best=fit;if(acceptable(best,p))break;}}if(!best||!acceptable(best,p))throw new Error('No se encontró una alternativa que conserve los cuatro macros y el reparto energético.');plan.days[dayIndex]={day:day.day,...best};return plan;}
+// Feasibility fallback for swaps: project real recipe coefficients onto the
+// four target intervals and meal-share limits. The proxy only proposes scales;
+// acceptance always uses rounded, displayed ingredient quantities.
+function refineEquivalent(chosen,p){
+ const keys=[['k','kcal',.028],['p','protein',.045],['c','carbs',.05],['f','fat',.05]];
+ const columns=chosen.map(({recipe:r})=>keys.map(([k])=>r.composition?r.composition.reduce((sum,a)=>sum+a.per100[k]*a.qty/100,0):r[k]));
+ const rows=keys.map((_,j)=>columns.map(c=>c[j])),constraints=[];
+ for(let j=0;j<keys.length;j++){const [,target,tolerance]=keys[j],row=rows[j];constraints.push([row,p[target]*(1+tolerance)],[row.map(x=>-x),-p[target]*(1-tolerance)]);}
+ for(let i=0;i<chosen.length;i++)constraints.push([rows[0].map((k,j)=>k*((i===j?1:0)-.34)),0]);
+ let scales=chosen.map(x=>clamp(x.scale,.18,5)),best=null;
+ for(let pass=0;pass<800;pass++){
+  for(const [row,limit] of constraints){
+   const excess=row.reduce((s,a,i)=>s+a*scales[i],0)-limit,norm=row.reduce((s,a)=>s+a*a,0);
+   if(excess>0&&norm>0)scales=scales.map((x,i)=>clamp(x-excess*row[i]/norm,.18,5));
+  }
+  if(pass%20===0||pass===799){
+   const items=rendered(chosen.map((x,i)=>({...x,scale:scales[i]})),p),t=totals(items);
+   const fit={items,totals:t,error:error(items,p),withinTarget:base.withinTargets(t,p,{k:.035,p:.05,c:.055,f:.065})};
+   if(preferFit(fit,best,p))best=fit;
+   if(acceptable(best,p))break;
+  }
+ }
+ if(!acceptable(best,p))best=refineRounded(chosen,p,best);
+ return best;
+}
+function refineRounded(chosen,p,initial){
+ const score=fit=>{
+  let penalty=0;
+  for(const [k,t,d] of [['k','kcal',.03],['p','protein',.05],['c','carbs',.055],['f','fat',.065]])penalty+=Math.pow(Math.max(0,Math.abs(fit.totals[k]/p[t]-1)-d),2);
+  for(const item of fit.items)penalty+=Math.pow(Math.max(0,item.k/Math.max(1,fit.totals.k)-.345),2);
+  return penalty+fit.error*.00001;
+ };
+ let best=initial,scales=initial.items.map(x=>x.scale),bestScore=score(best);
+ for(let pass=0;pass<5;pass++){
+  let improved=false;
+  for(const step of [.06,.03,.015,.008])for(let i=0;i<scales.length;i++)for(let j=-1;j<i;j++)for(const a of [-1,1])for(const b of j<0?[0]:[-1,1]){
+   const next=scales.slice();next[i]=clamp(next[i]+a*step,.18,5);if(j>=0)next[j]=clamp(next[j]+b*step,.18,5);
+   const items=rendered(chosen.map((x,n)=>({...x,scale:next[n]})),p),t=totals(items),fit={items,totals:t,error:error(items,p),withinTarget:base.withinTargets(t,p,{k:.035,p:.05,c:.055,f:.065})};
+   if(acceptable(fit,p))return fit;
+   const value=score(fit);if(value<bestScore){best=fit;scales=next;bestScore=value;improved=true;}
+  }
+  if(!improved)break;
+ }
+ return preferFit(best,initial,p)?best:initial;
+}
 function swapMeal(plan,recipes,dayIndex,itemIndex){return Number(plan?.preferences?.meals)===6?swapSix(plan,recipes,dayIndex,itemIndex):base.swapMeal(plan,recipes,dayIndex,itemIndex);}
 globalThis.RecompMealPlanner={...base,validatePreferences,generateDays,generate30Days,swapMeal,__sixV52:true};
 })();

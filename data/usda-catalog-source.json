@@ -1238,6 +1238,448 @@
           "type": "FoodNutrient"
         }
       ]
+    },
+    {
+      "description": "Pasta, dry, unenriched",
+      "fdcId": 168927,
+      "foodNutrients": [
+        {
+          "amount": 13,
+          "dataPoints": 6,
+          "foodNutrientDerivation": {
+            "code": "A",
+            "description": "Analytical",
+            "foodNutrientSource": {
+              "code": "1",
+              "description": "Analytical or derived from analytical",
+              "id": 1
+            }
+          },
+          "id": 1399608,
+          "max": 13.4,
+          "min": 12.4,
+          "nutrient": {
+            "id": 1003,
+            "name": "Protein",
+            "number": "203",
+            "rank": 600,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 1.51,
+          "dataPoints": 8,
+          "foodNutrientDerivation": {
+            "code": "A",
+            "description": "Analytical",
+            "foodNutrientSource": {
+              "code": "1",
+              "description": "Analytical or derived from analytical",
+              "id": 1
+            }
+          },
+          "id": 1399625,
+          "max": 2.09,
+          "min": 1,
+          "nutrient": {
+            "id": 1004,
+            "name": "Total lipid (fat)",
+            "number": "204",
+            "rank": 800,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 74.7,
+          "dataPoints": 0,
+          "foodNutrientDerivation": {
+            "code": "NC",
+            "description": "Calculated",
+            "foodNutrientSource": {
+              "code": "4",
+              "description": "Calculated or imputed",
+              "id": 2
+            }
+          },
+          "id": 1399676,
+          "nutrient": {
+            "id": 1005,
+            "name": "Carbohydrate, by difference",
+            "number": "205",
+            "rank": 1110,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 371,
+          "dataPoints": 0,
+          "foodNutrientDerivation": {
+            "code": "NC",
+            "description": "Calculated",
+            "foodNutrientSource": {
+              "code": "4",
+              "description": "Calculated or imputed",
+              "id": 2
+            }
+          },
+          "id": 1399677,
+          "nutrient": {
+            "id": 1008,
+            "name": "Energy",
+            "number": "208",
+            "rank": 300,
+            "unitName": "kcal"
+          },
+          "type": "FoodNutrient"
+        }
+      ]
+    },
+    {
+      "description": "Couscous, dry",
+      "fdcId": 169699,
+      "foodNutrients": [
+        {
+          "amount": 12.8,
+          "dataPoints": 6,
+          "foodNutrientDerivation": {
+            "foodNutrientSource": {}
+          },
+          "id": 1462407,
+          "nutrient": {
+            "id": 1003,
+            "name": "Protein",
+            "number": "203",
+            "rank": 600,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 0.64,
+          "dataPoints": 6,
+          "foodNutrientDerivation": {
+            "foodNutrientSource": {}
+          },
+          "id": 1462408,
+          "nutrient": {
+            "id": 1004,
+            "name": "Total lipid (fat)",
+            "number": "204",
+            "rank": 800,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 77.4,
+          "dataPoints": 0,
+          "foodNutrientDerivation": {
+            "code": "NC",
+            "description": "Calculated",
+            "foodNutrientSource": {
+              "code": "4",
+              "description": "Calculated or imputed",
+              "id": 2
+            }
+          },
+          "id": 1462409,
+          "nutrient": {
+            "id": 1005,
+            "name": "Carbohydrate, by difference",
+            "number": "205",
+            "rank": 1110,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 376,
+          "dataPoints": 0,
+          "foodNutrientDerivation": {
+            "code": "NC",
+            "description": "Calculated",
+            "foodNutrientSource": {
+              "code": "4",
+              "description": "Calculated or imputed",
+              "id": 2
+            }
+          },
+          "id": 1462410,
+          "nutrient": {
+            "id": 1008,
+            "name": "Energy",
+            "number": "208",
+            "rank": 300,
+            "unitName": "kcal"
+          },
+          "type": "FoodNutrient"
+        }
+      ]
+    },
+    {
+      "description": "Lentils, mature seeds, cooked, boiled, without salt",
+      "fdcId": 172421,
+      "foodNutrients": [
+        {
+          "amount": 20.1,
+          "dataPoints": 0,
+          "foodNutrientDerivation": {
+            "code": "NC",
+            "description": "Calculated",
+            "foodNutrientSource": {
+              "code": "4",
+              "description": "Calculated or imputed",
+              "id": 2
+            }
+          },
+          "id": 1693799,
+          "nutrient": {
+            "id": 1005,
+            "name": "Carbohydrate, by difference",
+            "number": "205",
+            "rank": 1110,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 116,
+          "dataPoints": 0,
+          "foodNutrientDerivation": {
+            "code": "NC",
+            "description": "Calculated",
+            "foodNutrientSource": {
+              "code": "4",
+              "description": "Calculated or imputed",
+              "id": 2
+            }
+          },
+          "id": 1693800,
+          "nutrient": {
+            "id": 1008,
+            "name": "Energy",
+            "number": "208",
+            "rank": 300,
+            "unitName": "kcal"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 9.02,
+          "dataPoints": 23,
+          "foodNutrientDerivation": {
+            "foodNutrientSource": {}
+          },
+          "id": 1693807,
+          "nutrient": {
+            "id": 1003,
+            "name": "Protein",
+            "number": "203",
+            "rank": 600,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 0.38,
+          "dataPoints": 22,
+          "foodNutrientDerivation": {
+            "foodNutrientSource": {}
+          },
+          "id": 1693834,
+          "nutrient": {
+            "id": 1004,
+            "name": "Total lipid (fat)",
+            "number": "204",
+            "rank": 800,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        }
+      ]
+    },
+    {
+      "description": "Fish, tuna, light, canned in water, drained solids (Includes foods for USDA's Food Distribution Program)",
+      "fdcId": 173709,
+      "foodNutrients": [
+        {
+          "amount": 0.96,
+          "dataPoints": 24,
+          "foodNutrientDerivation": {
+            "code": "A",
+            "description": "Analytical",
+            "foodNutrientSource": {
+              "code": "1",
+              "description": "Analytical or derived from analytical",
+              "id": 1
+            }
+          },
+          "id": 1800248,
+          "max": 1.27,
+          "min": 0.82,
+          "nutrient": {
+            "id": 1004,
+            "name": "Total lipid (fat)",
+            "number": "204",
+            "rank": 800,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 86,
+          "dataPoints": 0,
+          "foodNutrientDerivation": {
+            "code": "NC",
+            "description": "Calculated",
+            "foodNutrientSource": {
+              "code": "4",
+              "description": "Calculated or imputed",
+              "id": 2
+            }
+          },
+          "id": 1800249,
+          "nutrient": {
+            "id": 1008,
+            "name": "Energy",
+            "number": "208",
+            "rank": 300,
+            "unitName": "kcal"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 19.4,
+          "dataPoints": 24,
+          "foodNutrientDerivation": {
+            "code": "A",
+            "description": "Analytical",
+            "foodNutrientSource": {
+              "code": "1",
+              "description": "Analytical or derived from analytical",
+              "id": 1
+            }
+          },
+          "id": 1800306,
+          "max": 21,
+          "min": 16,
+          "nutrient": {
+            "id": 1003,
+            "name": "Protein",
+            "number": "203",
+            "rank": 600,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 0,
+          "dataPoints": 0,
+          "foodNutrientDerivation": {
+            "code": "Z",
+            "description": "Assumed zero (Insignificant amount or not naturally occurring in a food, such as fiber in meat)",
+            "foodNutrientSource": {
+              "code": "7",
+              "description": "Assumed zero",
+              "id": 5
+            }
+          },
+          "id": 1800319,
+          "nutrient": {
+            "id": 1005,
+            "name": "Carbohydrate, by difference",
+            "number": "205",
+            "rank": 1110,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        }
+      ]
+    },
+    {
+      "description": "Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt",
+      "fdcId": 173757,
+      "foodNutrients": [
+        {
+          "amount": 27.4,
+          "dataPoints": 0,
+          "foodNutrientDerivation": {
+            "code": "NC",
+            "description": "Calculated",
+            "foodNutrientSource": {
+              "code": "4",
+              "description": "Calculated or imputed",
+              "id": 2
+            }
+          },
+          "id": 1804149,
+          "nutrient": {
+            "id": 1005,
+            "name": "Carbohydrate, by difference",
+            "number": "205",
+            "rank": 1110,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 164,
+          "dataPoints": 0,
+          "foodNutrientDerivation": {
+            "code": "NC",
+            "description": "Calculated",
+            "foodNutrientSource": {
+              "code": "4",
+              "description": "Calculated or imputed",
+              "id": 2
+            }
+          },
+          "id": 1804150,
+          "nutrient": {
+            "id": 1008,
+            "name": "Energy",
+            "number": "208",
+            "rank": 300,
+            "unitName": "kcal"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 2.59,
+          "dataPoints": 24,
+          "foodNutrientDerivation": {
+            "foodNutrientSource": {}
+          },
+          "id": 1804172,
+          "nutrient": {
+            "id": 1004,
+            "name": "Total lipid (fat)",
+            "number": "204",
+            "rank": 800,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        },
+        {
+          "amount": 8.86,
+          "dataPoints": 23,
+          "foodNutrientDerivation": {
+            "foodNutrientSource": {}
+          },
+          "id": 1804186,
+          "nutrient": {
+            "id": 1003,
+            "name": "Protein",
+            "number": "203",
+            "rank": 600,
+            "unitName": "g"
+          },
+          "type": "FoodNutrient"
+        }
+      ]
     }
   ]
 }

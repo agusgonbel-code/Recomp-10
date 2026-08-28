@@ -1,4 +1,37 @@
 const { test, expect } = require('@playwright/test');
+test('tuna and legume recipes retain dry, cooked and drained quantities after reload',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+ const plan=await page.evaluate(()=>{
+  const api=globalThis.RecompMealPlanner;
+  const ids=['recipe-012','recipe-023','recipe-025','recipe-027','recipe-031','recipe-047'];
+  const catalog=api.normalizeRecipeCatalog(recipes);
+  // A persisted ingredient-ledger fixture exercises all six new recipes, not a
+  // claim that this arbitrary combination satisfies a personal nutrition goal.
+  const items=ids.map((id,i)=>api.portionFromComposition(catalog.find(r=>r.id===id),['Desayuno','Media mañana','Comida','Merienda','Cena','Snack nocturno'][i],.73));
+  const result={createdAt:new Date().toISOString(),preferences:{kcal:2200,protein:160,carbs:250,fat:62,meals:6,days:1},days:[{day:1,items,totals:api.totals(items)}]};
+  localStorage.setItem('recomp10.mealPlan30',JSON.stringify(result));return result;
+ });
+ await page.reload({waitUntil:'load'});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await expect(page.locator('.mp-day')).toHaveCount(1);
+ for(const [i,meal] of plan.days[0].items.entries()){
+  await page.locator('[data-recipe="0,'+i+'"]').click();
+  const detail=page.locator('#mpRecipeDetail');
+  await expect(detail.locator('h2')).toHaveText(meal.recipe.n);
+  await expect(detail.locator('ol li')).toHaveCount(6);
+  await expect(detail).toContainText('Macros calculados por ingredientes');
+  for(const row of meal.ingredientAmounts){
+   await expect(detail).toContainText(row.text);
+   expect(Number(row.text.match(/^\d+(?:\.\d+)?/)[0])).toBe(row.qty);
+   expect(row.text).toContain(row.state);
+   for(const k of ['k','p','c','f']){const z=k==='k'?1:10;expect(row.nutrients[k]).toBe(Math.round(row.per100[k]*row.qty/100*z+1e-9)/z)}
+  }
+ }
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp10.mealPlan30')))).toEqual(plan);
+ expect(errors).toEqual([]);
+});
+
 
 test('seven sourced days keep all four targets before and after swap and reload',async({page})=>{
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
@@ -89,10 +122,12 @@ test('real USDA recipes keep quantities and equivalent daily macros after swap a
  await page.locator('#mpGenerate').click();
  await expect(page.locator('.mp-day')).toHaveCount(2);
  await page.locator('[data-recipe="0,0"]').click();
- await expect(page.locator('#mpRecipeDetail')).toContainText('Huevos revueltos con patata');
- await expect(page.locator('#mpRecipeDetail')).toContainText('cocida, hervida sin sal');
+ const original=await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp10.mealPlan30')).days[0].items[0]);
+ await expect(page.locator('#mpRecipeDetail h2')).toHaveText(original.recipe.n);
+ expect(original.nutritionBasis).toBe('ingredient-composition');
+ for(const row of original.ingredientAmounts)await expect(page.locator('#mpRecipeDetail')).toContainText(row.text);
  await page.locator('[data-swap="0,0"]').click();
- await expect(page.locator('#mpRecipeDetail h2')).not.toHaveText('Huevos revueltos con patata');
+ await expect(page.locator('#mpRecipeDetail h2')).not.toHaveText(original.recipe.n);
  const saved=await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'));
  const plan=JSON.parse(saved),day=plan.days[0];
  expect(day.energyDistribution.policy).toBe('macro-fit-preserved');

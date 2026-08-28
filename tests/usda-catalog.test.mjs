@@ -23,7 +23,7 @@ function ledger(meal){
   assert.equal(meal[key],Math.round(meal.ingredientAmounts.reduce((sum,row)=>sum+Math.round(row.nutrients[key]*precision),0)/precision));
  }
 }
-for(const id of ['recipe-002','recipe-006','recipe-007','recipe-008','recipe-011','recipe-021','recipe-036','recipe-040','recipe-053'])test(`${id}: production quantities and four nutrients match pinned USDA foods`,()=>{
+for(const id of raw.filter(recipe=>recipe.composition).map(recipe=>recipe.id))test(`${id}: production quantities and four nutrients match pinned USDA foods`,()=>{
  const recipe=catalog.find(r=>r.id===id);
  assert.ok(recipe.composition.length>=2);
  assert.ok(recipe.s.length>=6);
@@ -41,10 +41,11 @@ for(const id of ['recipe-002','recipe-006','recipe-007','recipe-008','recipe-011
 test('real six-meal substitution preserves the four-target fit and survives JSON restore',()=>{
  const prefs={kcal:1950,protein:155,carbs:205,fat:58,meals:6,days:2};
  let plan=api.generateDays(catalog,prefs);
- assert.equal(plan.days[0].items[0].recipe.id,'recipe-006');
+ const originalId=plan.days[0].items[0].recipe.id;
+ assert.equal(plan.days[0].items[0].nutritionBasis,'ingredient-composition');
  ledger(plan.days[0].items[0]);
  plan=api.swapMeal(copy(plan),catalog,0,0);
- assert.notEqual(plan.days[0].items[0].recipe.id,'recipe-006');
+ assert.notEqual(plan.days[0].items[0].recipe.id,originalId);
  assert.equal(plan.days[0].energyDistribution.policy,'macro-fit-preserved');
  assert.ok(api.withinTargets(plan.days[0].totals,prefs,{k:.03,p:.05,c:.06,f:.08}));
  for(const meal of copy(plan).days[0].items)if(meal.nutritionBasis==='ingredient-composition')ledger(meal);
@@ -67,7 +68,7 @@ test('loading the six-meal extension twice cannot replace installed quality guar
 
 test('an entirely migrated catalogue keeps real ledgers through generation, swap and restore',()=>{
  const migrated=catalog.filter(recipe=>recipe.composition);
- assert.equal(migrated.length,9);
+ assert.equal(migrated.length,15);
  const prefs={kcal:2000,protein:175,carbs:255,fat:30,meals:6,days:2};
  let plan=api.generateDays(migrated,prefs);
  for(const day of plan.days){
