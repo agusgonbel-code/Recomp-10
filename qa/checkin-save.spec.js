@@ -55,8 +55,8 @@ test('a displayed recommendation cannot override goals changed by another view',
 
 async function openCheckinSaveFixture(page) {
   await page.route('**/__checkin-save-test', route=>route.fulfill({
-    contentType:'text/html',
-    body:'<!doctype html><html lang="es"><body><div id="coachBox"></div><script src="/recomp-review-v3.js"></script><script src="/recomp-checkin-v4.js"></script><script src="/checkin-local-v55.js"></script></body></html>'
+    contentType:'text/html; charset=utf-8',
+    body:'<!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><div id="coachBox"></div><script src="/recomp-review-v3.js"></script><script src="/recomp-checkin-v4.js"></script><script src="/checkin-local-v55.js"></script></body></html>'
   }));
   await page.goto('http://127.0.0.1:4173/__checkin-save-test');
   const host=page.locator('#recompCheckin360');
