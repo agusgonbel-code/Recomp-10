@@ -65,6 +65,39 @@ test('nutrition is a daily dashboard, not a calculator-first screen', async ({ p
   expect(errors).toEqual([]);
 });
 
+test('USDA breakfast displays its real ingredient ledger and survives reload',async({page})=>{
+ await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await page.locator('#mpCake').check();
+ await page.locator('#mpDays').fill('2');
+ await page.locator('#mpGenerate').click();
+ await expect(page.locator('.mp-day')).toHaveCount(2);
+ const raw=await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'));
+ const plan=JSON.parse(raw);
+ const index=plan.days[0].items.findIndex(meal=>meal.recipe.id==='fixed-breakfast-cake');
+ expect(index).toBeGreaterThanOrEqual(0);
+ const cake=plan.days[0].items[index];
+ expect(cake.nutritionBasis).toBe('ingredient-composition');
+ expect(cake.ingredientAmounts).toHaveLength(5);
+ for(const key of ['k','p','c','f']){
+  const precision=key==='k'?1:10;
+  const sum=cake.ingredientAmounts.reduce((total,row)=>total+Math.round(row.nutrients[key]*precision),0);
+  expect(cake[key]).toBe(Math.round(sum/precision));
+ }
+ await page.locator(`[data-recipe="0,${index}"]`).click();
+ await expect(page.locator('#mpRecipeDetail')).toContainText('Macros calculados por ingredientes');
+ for(const row of cake.ingredientAmounts){
+  expect(row.source.name).toContain('USDA');
+  await expect(page.locator('#mpRecipeDetail')).toContainText(row.text);
+ }
+ await expect(page.locator('#mpRecipeDetail')).toContainText('71');
+ await page.reload({waitUntil:'load'});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await page.locator(`[data-recipe="0,${index}"]`).click();
+ await expect(page.locator('#mpRecipeDetail')).toContainText('Macros calculados por ingredientes');
+ expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(raw);
+});
+
 test('calculator and multidday generator share one planning screen and persist all four targets', async ({ page }) => {
   const errors=[]; page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
