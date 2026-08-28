@@ -102,6 +102,22 @@ test('missing menu and explicitly saved null are normal empty states',()=>{
   }
 });
 
+test('fixed breakfast ingredients with text-only quantities survive restoration',()=>{
+  const f=fixture(),saved=validSavedMenu();
+  saved.days[0].items[0].ingredientAmounts=[
+    {text:'60 g de avena',adjustable:false,estimated:false,quantityEstimated:false},
+    {text:'1 huevo (60 g)',adjustable:false,estimated:false,quantityEstimated:false}
+  ];
+  f.store.set(KEY,JSON.stringify(saved));
+  f.api.restorePlan();
+  assert.deepEqual(snapshot(f.api.getPlan()),saved);
+  assert.equal(f.node('mpStatus').innerHTML,'');
+  assert.equal(f.store.get(KEY),JSON.stringify(saved));
+  saved.days[0].items[0].ingredientAmounts[0].qty=-1;
+  f.store.set(KEY,JSON.stringify(saved));
+  assert.throws(()=>f.api.readSavedPlan(),/incompleto/);
+});
+
 for(const raw of ['{broken','','{}','[]','{"days":[null],"preferences":{}}']){
   test(`damaged saved menu is reported without deleting its raw value: ${raw||'empty string'}`,()=>{
     const f=fixture();f.store.set(KEY,raw);
