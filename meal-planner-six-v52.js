@@ -1,5 +1,5 @@
 (function(){'use strict';
-const base=globalThis.RecompMealPlanner;if(!base)return;
+const base=globalThis.RecompMealPlanner;if(!base||base.__sixV52)return;
 const finite=(v,f=0)=>{const n=Number(v);return Number.isFinite(n)?n:f};
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,finite(v)));
 const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -20,5 +20,5 @@ function generateDays(recipes,input={}){return Math.trunc(finite(input.meals,4))
 function generate30Days(recipes,input={}){return generateDays(recipes,{...input,days:30});}
 function swapSix(plan,recipes,dayIndex,itemIndex){if(!plan?.days?.[dayIndex])throw new Error('Día no válido.');const p=prefs({...plan.preferences,meals:6,days:plan.days.length}),catalog=base.normalizeRecipeCatalog(recipes),pool=base.allowedRecipes(catalog,p),day=plan.days[dayIndex],old=day.items[itemIndex];if(!old)throw new Error('Comida no válida.');const candidates=candidatePool(pool,old.slot).filter(r=>r.n!==old.recipe.n);if(!candidates.length)throw new Error('No hay una alternativa equivalente disponible.');let best=null;for(const r of candidates.slice(0,30)){const chosen=day.items.map((x,i)=>targetFor(i===itemIndex?r:x.recipe,SIX[i][1],p)),fit=optimize(chosen,p);if(!best||fit.error<best.error)best=fit;}if(!best)throw new Error('No se pudo calcular una alternativa equivalente.');plan.days[dayIndex]={day:day.day,...best};return plan;}
 function swapMeal(plan,recipes,dayIndex,itemIndex){return Number(plan?.preferences?.meals)===6?swapSix(plan,recipes,dayIndex,itemIndex):base.swapMeal(plan,recipes,dayIndex,itemIndex);}
-globalThis.RecompMealPlanner={...base,validatePreferences,generateDays,generate30Days,swapMeal};
+globalThis.RecompMealPlanner={...base,validatePreferences,generateDays,generate30Days,swapMeal,__sixV52:true};
 })();
