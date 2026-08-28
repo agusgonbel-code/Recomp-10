@@ -92,7 +92,8 @@
         &&day.items.every(item=>macros(item)&&object(item.recipe)&&typeof item.recipe.n==='string'&&item.recipe.n.trim()
           &&strings(item.recipe.i)&&strings(item.recipe.s)
           &&(item.ingredientAmounts===undefined||(Array.isArray(item.ingredientAmounts)&&item.ingredientAmounts.every(ingredient=>
-            object(ingredient)&&typeof ingredient.text==='string'&&nonnegative(ingredient.qty)
+            object(ingredient)&&typeof ingredient.text==='string'
+            &&(nonnegative(ingredient.qty)||(ingredient.qty===undefined&&ingredient.adjustable===false))
             &&(ingredient.nutrients==null||macros(ingredient.nutrients)))))));
     if(!valid)throw new Error('El menú guardado está incompleto o tiene un formato no válido.');
     return candidate;
