@@ -115,7 +115,7 @@
     }catch(e){$('mpStatus').innerHTML='<div class="notice"><b>No se pudo crear el menú.</b><br>'+esc(e.message)+'</div>'}
     finally{if(button){button.disabled=false;button.textContent='Generar menú'}}
   }
-  function swap(day,item){try{RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render();showRecipe(day,item)}catch(e){alert(e.message)}}
+  function swap(day,item){try{plan=RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render();showRecipe(day,item)}catch(e){alert(e.message)}}
   function showRecipe(day,item){
     const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;
     const ingredients=RecompMealPlanner.ingredientDetailsFor(meal).map(ingredient=>{
@@ -166,4 +166,3 @@
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
-
