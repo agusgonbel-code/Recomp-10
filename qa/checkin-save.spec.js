@@ -65,7 +65,7 @@ async function openCheckinSaveFixture(page) {
   return host;
 }
 
-test('accepted review reaches all four generator fields without rewriting the saved menu',async({page})=>{
+test('accepted targets survive a failed menu regeneration, retry and reload',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await seedReview(page);
  await page.addInitScript(()=>{
@@ -86,10 +86,35 @@ test('accepted review reaches all four generator fields without rewriting the sa
  await page.locator('nav button').filter({hasText:'Menús'}).click();
  for(const [id,key] of [['mpKcal','kcal'],['mpProtein','protein'],['mpCarbs','carbs'],['mpFat','fat']])await expect(page.locator('#'+id)).toHaveValue(String(targets[key]));
  expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(menu);
+ // The accepted goals describe the next menu, not the already committed menu.
+ // Exercise both PRs together: a failed generation must not publish a candidate.
+ await page.locator('[data-recipe="0,0"]').click();
+ const previousRecipe=await page.locator('#mpRecipeDetail').innerText();
+ await page.locator('#mpDays').fill('3');
+ await page.evaluate(()=>window.failDecisionKey='recomp10.mealPlan30');
+ await page.locator('#mpGenerate').click();
+ await expect(page.locator('#mpStatus')).toContainText('Quota exceeded');
+ await expect(page.locator('.mp-day')).toHaveCount(2);
+ await expect(page.locator('#mpRecipeDetail')).toHaveText(previousRecipe);
+ expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(menu);
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('targets')))).toEqual(targets);
+ await page.evaluate(()=>window.failDecisionKey=null);
+ await page.locator('#mpGenerate').click();
+ await expect(page.locator('.mp-day')).toHaveCount(3);
+ const regenerated=await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'));
+ const next=JSON.parse(regenerated);
+ for(const key of ['kcal','protein','carbs','fat'])expect(next.preferences[key]).toBe(targets[key]);
+ for(const day of next.days){
+  for(const [macro,key,tolerance] of [['k','kcal',.03],['p','protein',.05],['c','carbs',.06],['f','fat',.08]]){
+   expect(Math.abs(day.totals[macro]-targets[key])/targets[key]).toBeLessThanOrEqual(tolerance);
+  }
+ }
  await page.reload({waitUntil:'load'});
  await page.locator('nav button').filter({hasText:'Menús'}).click();
  for(const [id,key] of [['mpKcal','kcal'],['mpProtein','protein'],['mpCarbs','carbs'],['mpFat','fat']])await expect(page.locator('#'+id)).toHaveValue(String(targets[key]));
- expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(menu);
+ await expect(page.locator('.mp-day')).toHaveCount(3);
+ expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(regenerated);
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp_decisions_v4')))).toHaveLength(1);
  expect(errors).toEqual([]);
 });
 test('check-in write failure preserves fields and retry persists once across reload',async({page})=>{
