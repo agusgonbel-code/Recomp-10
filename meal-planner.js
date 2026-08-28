@@ -114,7 +114,21 @@ function optimizeIngredients(chosen,prefs,slots){
   }
   return best;
 }
-function buildDay(pool,prefs,usage,day,forced={},limits={primary:50,secondary:50}){const slots=Array.isArray(prefs._slots)?prefs._slots:slotsFor(prefs.meals);let best=null;const attemptBuild=(activeUsage,attempts,offset=0)=>{for(let attempt=0;attempt<attempts;attempt++){const chosen=slots.map(([slot,share],i)=>forced[i]||pickRecipe(pool,slot,share,prefs,activeUsage,day*137+(attempt+offset)*29+i*13,forced.avoid)),items=optimizeIngredients(chosen,prefs,slots),t=totals(items),err=macroError(t,prefs);if(!best||err<best.err)best={items,t,err};if(withinTargets(t,prefs))break;}};attemptBuild(usage,limits.primary);if(!best||!withinTargets(best.t,prefs))attemptBuild(new Map(),limits.secondary,limits.primary);best.items.forEach(x=>usage.set(x.recipe.n,(usage.get(x.recipe.n)||0)+1));return {day:day+1,items:best.items,totals:best.t,error:best.err,withinTarget:withinTargets(best.t,prefs)};}
+function buildDay(pool,prefs,usage,day,forced={},limits={primary:50,secondary:50}){
+ const slots=Array.isArray(prefs._slots)?prefs._slots:slotsFor(prefs.meals);let best=null;
+ const attemptBuild=(activeUsage,attempts,offset=0)=>{
+  for(let attempt=0;attempt<attempts;attempt++){
+   const chosen=slots.map(([slot,share],i)=>forced[i]||pickRecipe(pool,slot,share,prefs,activeUsage,day*137+(attempt+offset)*29+i*13,forced.avoid)),items=optimizeIngredients(chosen,prefs,slots),t=totals(items),err=macroError(t,prefs);
+   const accepted=typeof limits.accept==='function'?limits.accept(items):true;
+   if(!best||(accepted&&!best.accepted)||(accepted===best.accepted&&err<best.err))best={items,t,err,accepted};
+   if(accepted&&withinTargets(t,prefs))break;
+  }
+ };
+ attemptBuild(usage,limits.primary);
+ if(!best||!best.accepted||!withinTargets(best.t,prefs))attemptBuild(new Map(),limits.secondary,limits.primary);
+ best.items.forEach(x=>usage.set(x.recipe.n,(usage.get(x.recipe.n)||0)+1));
+ return {day:day+1,items:best.items,totals:best.t,error:best.err,withinTarget:withinTargets(best.t,prefs)};
+}
 function sameMacroBand(t,reference){const limits={k:.015,p:.02,c:.025,f:.03};return ['k','p','c','f'].every(key=>Math.abs(t[key]-reference[key])/Math.max(1,reference[key])<=limits[key]);}
 function reconcileRemainingItems(items,target){
   // Never detach ingredient quantities from their nutrient contributions by
@@ -171,7 +185,12 @@ function generateDays(recipes,input){
     // A small change in a fixed meal can invalidate a formerly good recipe
     // combination. Search other combinations without rewriting their nutrients.
     for(let attempt=0;attempt<8;attempt++){
-      const built=buildDay(pool,buildTargets,attempt?new Map(usage):usage,day+attempt*31,{}, {primary:96,secondary:96});
+      const accept=variable=>{
+        const proposed=[...fixed,...reconcileRemainingItems(variable,remaining)],t=totals(proposed);
+        const cap=({3:.45,4:.40,5:.36,6:.34,7:.32})[proposed.length]||.40;
+        return withinTargets(t,prefs,{k:.03,p:.05,c:.06,f:.08})&&proposed.every(item=>item.k/Math.max(1,t.k)<=cap+.005);
+      };
+      const built=buildDay(pool,buildTargets,attempt?new Map(usage):usage,day+attempt*31,{}, {primary:96,secondary:96,accept});
       items=[...fixed,...reconcileRemainingItems(built.items,remaining)];
       dayTotals=totals(items);
       withinTarget=withinTargets(dayTotals,prefs,{k:.03,p:.05,c:.06,f:.08});

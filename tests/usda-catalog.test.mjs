@@ -38,6 +38,26 @@ for(const id of raw.filter(recipe=>recipe.composition).map(recipe=>recipe.id))te
  for(const key of ['k','p','c','f'])assert.equal(raw.find(r=>r.id===id)[key],base[key]);
 });
 
+for(const days of [1,7])test('default intake with fixed breakfast generates '+days+' bounded days',()=>{
+ const ctx=vm.createContext({});
+ for(const file of ['recomp-profile-v2.js','meal-planner.js','meal-planner-six-v52.js','quality-v53.js','quality-v54.js'])vm.runInContext(read(file),ctx);
+ const planner=ctx.RecompMealPlanner;
+ const prefs={...ctx.RecompProfile.nutrition({}).targets,meals:4,days,trainingDays:4,includeBreakfastCake:true,includePostWorkoutShake:true,maxTime:30};
+ assert.deepEqual(copy(prefs).kcal,2194);
+ const plan=planner.generateDays(catalog,prefs);
+ assert.equal(plan.days.length,days);
+ const cake=plan.days[0].items.find(x=>x.recipe.id==='fixed-breakfast-cake');
+ for(const [index,day] of plan.days.entries()){
+  assert.equal(day.items.length,index<4?5:4);
+  assert.equal(day.withinTarget,true);
+  assert.ok(planner.withinTargets(day.totals,prefs,{k:.03,p:.05,c:.06,f:.08}));
+  assert.ok(Math.max(...day.items.map(x=>x.k/day.totals.k))<=(index<4?.365:.405));
+  assert.deepEqual(copy(day.items.find(x=>x.recipe.id==='fixed-breakfast-cake')),copy(cake));
+  ledger(day.items.find(x=>x.recipe.id==='fixed-breakfast-cake'));
+  if(index<4)assert.equal(day.items.find(x=>x.recipe.id==='fixed-post-workout-shake').k,117);
+ }
+});
+
 test('real six-meal substitution preserves the four-target fit and survives JSON restore',()=>{
  const prefs={kcal:1950,protein:155,carbs:205,fat:58,meals:6,days:2};
  let plan=api.generateDays(catalog,prefs);
