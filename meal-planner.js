@@ -46,8 +46,13 @@ function compositionAmounts(composition,scale){
   });
 }
 function compositionTotals(amounts){
-  const sum=totals(amounts.map(entry=>entry.nutrients));
-  return Object.fromEntries(['k','p','c','f'].map(k=>[k,Math.round(sum[k])]));
+  // Sum displayed tenths as integers: 0.7 + 0.7 + 0.1 must round from
+  // exactly 1.5, not from a binary floating point value just below it.
+  return Object.fromEntries(['k','p','c','f'].map(k=>{
+    const precision=k==='k'?1:10;
+    const sum=amounts.reduce((total,entry)=>total+Math.round(entry.nutrients[k]*precision),0);
+    return [k,Math.round(sum/precision)];
+  }));
 }
 function withComposition(recipe){
   const composition=compositionFor(recipe);if(!composition)return recipe;
