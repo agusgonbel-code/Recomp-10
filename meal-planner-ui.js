@@ -69,7 +69,12 @@
     const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;const source=sourceKey(day,item);if(loggedToday(source))return;
     document.dispatchEvent(new CustomEvent('recomp:log-planned-meal',{detail:{item:meal,sourceKey:source}}));
   }
-  function save(){localStorage.setItem(key,JSON.stringify(plan));}
+  function save(candidate){
+    // Publish only after persistence succeeds. Storage failure must not leave
+    // the recipe buttons or diary actions pointing at an unsaved menu.
+    localStorage.setItem(key,JSON.stringify(candidate));
+    plan=candidate;
+  }
   function macroForm(){return {kcal:$('mpKcal')?.value,protein:$('mpProtein')?.value,carbs:$('mpCarbs')?.value,fat:$('mpFat')?.value}}
   function persistManualTargets(notify=false){const t=RecompMealPlanner.macroTargets(macroForm());localStorage.setItem(manualKey,JSON.stringify(t));if(notify&&$('mpStatus'))$('mpStatus').innerHTML='<div class="good"><b>Objetivos manuales guardados.</b> El próximo menú usará '+t.kcal+' kcal · P '+t.protein+' g · C '+t.carbs+' g · G '+t.fat+' g.</div>';return t}
   function formValues(){return {
@@ -111,11 +116,20 @@
       if(button){button.disabled=true;button.textContent='Calculando menú…'}
       persistManualTargets(false);
       const catalog=recipeSource();if(!catalog.length)throw new Error('La biblioteca de recetas todavía no está lista.');
-      plan=RecompMealPlanner.generateDays(catalog,formValues());visibleWeek=0;save();render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'});
+      const candidate=RecompMealPlanner.generateDays(catalog,formValues());
+      save(candidate);visibleWeek=0;$('mpRecipeDetail').innerHTML='';render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'});
     }catch(e){$('mpStatus').innerHTML='<div class="notice"><b>No se pudo crear el menú.</b><br>'+esc(e.message)+'</div>'}
     finally{if(button){button.disabled=false;button.textContent='Generar menú'}}
   }
-  function swap(day,item){try{RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render();showRecipe(day,item)}catch(e){alert(e.message)}}
+  function swap(day,item){
+    try{
+      if(!plan)return;
+      // The solver mutates its argument, including other meals when balancing.
+      const candidate=JSON.parse(JSON.stringify(plan));
+      RecompMealPlanner.swapMeal(candidate,recipeSource(),day,item);
+      save(candidate);render();showRecipe(day,item);
+    }catch(e){$('mpStatus').innerHTML='<div class="notice" role="alert"><b>No se pudo guardar la sustitución.</b><br>'+esc(e.message)+'<br>El menú anterior se conserva. Puedes reintentar.</div>'}
+  }
   function showRecipe(day,item){
     const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;
     const ingredients=RecompMealPlanner.ingredientDetailsFor(meal).map(ingredient=>{
