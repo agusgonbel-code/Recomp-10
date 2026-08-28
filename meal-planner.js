@@ -40,7 +40,11 @@ function compositionAmounts(composition,scale){
     const qty=practicalQty(entry.qty*scale,entry.unit);
     if(!Number.isFinite(qty)||qty>1000000)throw new Error('Cantidad de ingrediente fuera de rango.');
     // Contributions are rounded exactly as shown by the existing detail UI.
-    const nutrients=Object.fromEntries(['k','p','c','f'].map(k=>[k,Number((entry.per100[k]*qty/100).toFixed(k==='k'?0:1))]));
+    const nutrients=Object.fromEntries(['k','p','c','f'].map(k=>{
+      const precision=k==='k'?1:10,scaled=entry.per100[k]*qty/100*precision;
+      // Correct binary representation noise at decimal half-way boundaries.
+      return [k,Math.round(scaled+Number.EPSILON*Math.max(1,scaled)*4)/precision];
+    }));
     return {...entry,qty,text:formatIngredientAmount({unit:entry.unit,name:entry.name+' ('+entry.state+')'},qty),
       nutrients,adjustable:true,estimated:false,quantityEstimated:false};
   });
@@ -127,7 +131,21 @@ function reconcileRemainingItems(items,target){
   }
   return items;
 }
-function fixedMorningItem(kind){if(kind==='shake')return{recipe:{id:'fixed-post-workout-shake',n:'Batido de proteína postentreno con agua',m:'Postentreno',k:117,p:23.4,c:2.4,f:1.8,i:['30 g de proteína whey','Agua al gusto'],s:['Añade la proteína y el agua a un vaso mezclador.','Agita durante 20-30 segundos hasta que no queden grumos.','Tómalo después de entrenar y registra la toma en el diario.']},slot:'07:00 · Postentreno',scale:1,k:117,p:23,c:2,f:2,ingredientAmounts:[{text:'30 g de proteína whey',adjustable:false,qty:30,unit:'g',name:'proteína whey',estimated:false,quantityEstimated:false},{text:'Agua al gusto',adjustable:false,qty:0,unit:'ml',name:'agua',estimated:false,quantityEstimated:false}],nutritionBasis:'recipe-declared',ingredientNutritionVerified:false};return{recipe:{id:'fixed-breakfast-cake',n:'Bizcocho proteico de avena, huevo, claras y chía',m:'Desayuno',k:448,p:36,c:47,f:14,i:['60 g de avena','1 huevo (60 g)','150 g de claras','5 g de levadura química','10 g de semillas de chía'],s:['Mezcla la avena, el huevo, las claras, la levadura y la chía.','Vierte en un molde apto para microondas u horno.','Cocina hasta que el centro esté cuajado: comprueba en intervalos cortos para no resecarlo.']},slot:'07:30 · Desayuno',scale:1,k:448,p:36,c:47,f:14,ingredientAmounts:['60 g de avena','1 huevo (60 g)','150 g de claras','5 g de levadura química','10 g de semillas de chía'].map(text=>({text,adjustable:false,estimated:false,quantityEstimated:false})),nutritionBasis:'recipe-declared',ingredientNutritionVerified:false};}
+function fixedBreakfastCake(){
+  // Values copied from the pinned USDA extract in data/usda-breakfast-source.json.
+  const composition=[{"foodId":"173904","name":"avena","state":"seca","unit":"g","qty":60,"per100":{"f":6.52,"c":67.7,"k":379,"p":13.2},"source":{"id":"173904","name":"USDA FoodData Central / SR Legacy","url":"https://fdc.nal.usda.gov/food-details/173904/nutrients","accessedAt":"2026-08-28"}},{"foodId":"171287","name":"huevo sin cáscara","state":"crudo","unit":"g","qty":60,"per100":{"k":143,"p":12.6,"f":9.51,"c":0.72},"source":{"id":"171287","name":"USDA FoodData Central / SR Legacy","url":"https://fdc.nal.usda.gov/food-details/171287/nutrients","accessedAt":"2026-08-28"}},{"foodId":"172183","name":"claras de huevo","state":"crudas","unit":"g","qty":150,"per100":{"p":10.9,"f":0.17,"k":52,"c":0.73},"source":{"id":"172183","name":"USDA FoodData Central / SR Legacy","url":"https://fdc.nal.usda.gov/food-details/172183/nutrients","accessedAt":"2026-08-28"}},{"foodId":"172804","name":"impulsor químico de doble acción (fosfato)","state":"seco","unit":"g","qty":5,"per100":{"f":0,"c":24.1,"k":51,"p":0.1},"source":{"id":"172804","name":"USDA FoodData Central / SR Legacy","url":"https://fdc.nal.usda.gov/food-details/172804/nutrients","accessedAt":"2026-08-28"}},{"foodId":"170554","name":"semillas de chía","state":"secas","unit":"g","qty":10,"per100":{"p":16.5,"f":30.7,"c":42.1,"k":486},"source":{"id":"170554","name":"USDA FoodData Central / SR Legacy","url":"https://fdc.nal.usda.gov/food-details/170554/nutrients","accessedAt":"2026-08-28"}}];
+  const ingredientAmounts=compositionAmounts(composition,1).map(row=>({...row,adjustable:false}));
+  const macros=compositionTotals(ingredientAmounts);
+  const recipe={id:'fixed-breakfast-cake',n:'Bizcocho proteico de avena, huevo, claras y chía',m:'Desayuno',composition,...macros,i:ingredientAmounts.map(row=>row.text),s:[
+    'Pesa los ingredientes antes de cocinar según la lista; el peso del huevo es sin cáscara. Usa un molde pequeño con papel de horno, sin añadir aceite.',
+    'Precalienta el horno a 180 °C. Tritura la avena si prefieres una textura fina.',
+    'Bate el huevo y las claras en un bol. Incorpora la avena, la chía y el impulsor; mezcla hasta eliminar los grumos.',
+    'Vierte la masa en el molde. Hornea aproximadamente 20–25 minutos y comprueba el centro con un termómetro: debe alcanzar al menos 71 °C. Si no llega, continúa horneando y vuelve a comprobar.',
+    'Deja templar unos minutos, desmolda y sirve la ración completa. El tiempo depende del molde y del horno; el peso final cocinado no sustituye a los pesos iniciales del cálculo.'
+  ]};
+  return {recipe,slot:'07:30 · Desayuno',scale:1,...macros,ingredientAmounts,nutritionBasis:'ingredient-composition',ingredientNutritionVerified:false};
+}
+function fixedMorningItem(kind){if(kind==='shake')return{recipe:{id:'fixed-post-workout-shake',n:'Batido de proteína postentreno con agua',m:'Postentreno',k:117,p:23.4,c:2.4,f:1.8,i:['30 g de proteína whey','Agua al gusto'],s:['Añade la proteína y el agua a un vaso mezclador.','Agita durante 20-30 segundos hasta que no queden grumos.','Tómalo después de entrenar y registra la toma en el diario.']},slot:'07:00 · Postentreno',scale:1,k:117,p:23,c:2,f:2,ingredientAmounts:[{text:'30 g de proteína whey',adjustable:false,qty:30,unit:'g',name:'proteína whey',estimated:false,quantityEstimated:false},{text:'Agua al gusto',adjustable:false,qty:0,unit:'ml',name:'agua',estimated:false,quantityEstimated:false}],nutritionBasis:'recipe-declared',ingredientNutritionVerified:false};return fixedBreakfastCake();}
 function generateDays(recipes,input){
   const prefs=validatePreferences(input),pool=allowedRecipes(recipes.map(withComposition),prefs);
   if(pool.length<4)throw new Error('Las restricciones dejan muy pocas recetas. Revisa las exclusiones.');
