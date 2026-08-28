@@ -1,5 +1,45 @@
 const { test, expect } = require('@playwright/test');
 
+test('ingredient composition reaches recipe details, substitution and persistence',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+ await page.evaluate(()=>{
+  const source={id:'test',name:'Synthetic arithmetic only',url:'https://example.invalid/test',accessedAt:'2026-08-28'};
+  const composition=[
+   {foodId:'P',name:'Test P',qty:40,per100:{k:400,p:100,c:0,f:0}},
+   {foodId:'C',name:'Test C',qty:62.5,per100:{k:400,p:0,c:100,f:0}},
+   {foodId:'F',name:'Test F',qty:15.5,per100:{k:900,p:0,c:0,f:100}}
+  ].map(row=>({...row,unit:'g',state:'test state',source}));
+  const fixture=['Desayuno','Comida','Merienda','Cena'].flatMap((m,i)=>[0,1].map(j=>({id:`test-${i}-${j}`,n:`Fixture ${i}-${j}`,m,k:9999,p:1,c:1,f:1,i:[],s:['Test preparation only.'],composition})));
+  const catalog=typeof ALL_RECIPES!=='undefined'?ALL_RECIPES:recipes;
+  catalog.splice(0,catalog.length,...fixture);
+ });
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await page.locator('#mpCake').uncheck();await page.locator('#mpShake').uncheck();
+ for(const [id,value] of [['mpKcal','2200'],['mpProtein','160'],['mpCarbs','250'],['mpFat','62'],['mpDays','2']])await page.locator('#'+id).fill(value);
+ await page.locator('#mpGenerate').click();
+ await expect(page.locator('.mp-day')).toHaveCount(2);
+ await page.locator('[data-recipe="0,0"]').click();
+ await expect(page.locator('#mpRecipeDetail')).toContainText('Macros calculados por ingredientes');
+ await expect(page.locator('#mpRecipeDetail')).toContainText('Test preparation only.');
+ const old=await page.locator('#mpRecipeDetail h2').innerText();
+ await page.locator('[data-swap="0,0"]').click();
+ await expect(page.locator('#mpRecipeDetail h2')).not.toHaveText(old);
+ const raw=await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'));
+ const plan=JSON.parse(raw);
+ for(const meal of plan.days.flatMap(day=>day.items)){
+  expect(meal.nutritionBasis).toBe('ingredient-composition');
+  for(const k of ['k','p','c','f'])expect(meal[k]).toBe(Math.round(meal.ingredientAmounts.reduce((sum,row)=>sum+row.nutrients[k],0)));
+ }
+ await page.reload({waitUntil:'load'});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await page.locator('[data-recipe="0,0"]').click();
+ await expect(page.locator('#mpRecipeDetail')).toContainText('Macros calculados por ingredientes');
+ for(const row of plan.days[0].items[0].ingredientAmounts)await expect(page.locator('#mpRecipeDetail')).toContainText(row.text);
+ expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(raw);
+ expect(errors).toEqual([]);
+});
+
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('recomp_unified_profile_v2', JSON.stringify({name:'Usuario QA',sex:'m',age:40,height:178,weight:80,activity:1.45,goal:'recomp',experience:'intermediate',days:4,minutes:50,equipment:['Máquina','Mancuernas','Barra','Polea'],meals:4,mealPattern:'balanced',diet:'flexible',excluded:'',maxTime:30,budget:'medio'}));
@@ -101,4 +141,3 @@ test('six meals selected in the unified profile are available in the advanced me
   await expect(firstDayMeals.nth(5)).toContainText(/Snack nocturno|Merienda|Desayuno|Cena/);
   expect(errors).toEqual([]);
 });
-
