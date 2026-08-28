@@ -1,5 +1,45 @@
 const { test, expect } = require('@playwright/test');
 
+test('seven sourced days keep all four targets before and after swap and reload',async({page})=>{
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+ await page.evaluate(()=>{const migrated=recipes.filter(r=>r.composition);recipes.splice(0,recipes.length,...migrated)});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await page.locator('#mpCake').uncheck();await page.locator('#mpShake').uncheck();
+ await page.locator('#mpMeals').selectOption('6');
+ for(const [id,value] of [['mpKcal','2000'],['mpProtein','175'],['mpCarbs','255'],['mpFat','30'],['mpDays','7']])await page.locator('#'+id).fill(value);
+ await page.locator('#mpGenerate').click();
+ await expect(page.locator('.mp-day')).toHaveCount(7);
+ const verify=plan=>{
+  expect(plan.days).toHaveLength(7);
+  for(const day of plan.days){
+   expect(day.withinTarget).toBe(true);
+   expect(day.energyDistribution.policy).toBe('macro-fit-preserved');
+   for(const [k,target,tol] of [['k',2000,.03],['p',175,.05],['c',255,.06],['f',30,.08]]){
+    expect(Math.abs(day.totals[k]-target)/target).toBeLessThanOrEqual(tol);
+    expect(day.totals[k]).toBe(day.items.reduce((sum,m)=>sum+m[k],0));
+   }
+   expect(Math.max(...day.items.map(m=>m.k/day.totals.k))).toBeLessThanOrEqual(.345);
+  }
+ };
+ const before=await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp10.mealPlan30')));
+ verify(before);
+ let saved,after=before;
+ for(const index of [0,1,2,3,4,5]){
+  const old=after.days[0].items[index].recipe.id;
+  await page.locator(`[data-swap="0,${index}"]`).click();
+  saved=await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'));after=JSON.parse(saved);
+  verify(after);
+  expect(after.days[0].items[index].recipe.id).not.toBe(old);
+  expect(after.days.slice(1)).toEqual(before.days.slice(1));
+ }
+ await page.reload({waitUntil:'load'});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await expect(page.locator('.mp-day')).toHaveCount(7);
+ expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(saved);
+ expect(errors).toEqual([]);
+});
+
 test('migrated real catalogue exposes each ingredient ledger and complete steps after reload',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
