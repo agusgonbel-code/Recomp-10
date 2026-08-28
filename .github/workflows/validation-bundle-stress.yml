@@ -1,0 +1,58 @@
+name: Recomp Validation Bundle Stress 1000x
+
+on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'qa/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/validation-bundle-stress.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recomp-validation-stress-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stress:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1,2,3,4,5,6,7,8,9,10]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+      - name: Run unit suite 100 times per shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 100); do
+            echo "=== Validation shard ${{ matrix.shard }} unit pass $i/100 ==="
+            npm test >/tmp/recomp-validation-unit.log 2>&1 || { cat /tmp/recomp-validation-unit.log; exit 1; }
+          done
+      - name: Install Chromium
+        run: |
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Start app
+        run: python3 -m http.server 4173 >/tmp/recomp-validation-http.log 2>&1 &
+      - name: Run browser journeys 100 times per shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 100); do
+            echo "=== Validation shard ${{ matrix.shard }} browser pass $i/100 ==="
+            npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/nutrition-menu-v5.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js --reporter=line >/tmp/recomp-validation-browser.log 2>&1 || { cat /tmp/recomp-validation-browser.log; exit 1; }
+          done
