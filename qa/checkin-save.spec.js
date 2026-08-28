@@ -95,7 +95,7 @@ test('accepted targets survive a failed menu regeneration, retry and reload',asy
  await page.locator('#mpGenerate').click();
  await expect(page.locator('#mpStatus')).toContainText('Quota exceeded');
  await expect(page.locator('.mp-day')).toHaveCount(2);
- await expect(page.locator('#mpRecipeDetail')).toHaveText(previousRecipe);
+ expect(await page.locator('#mpRecipeDetail').innerText()).toBe(previousRecipe);
  expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(menu);
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('targets')))).toEqual(targets);
  await page.evaluate(()=>window.failDecisionKey=null);
