@@ -64,6 +64,34 @@ async function openCheckinSaveFixture(page) {
   await host.locator('summary').click();
   return host;
 }
+
+test('accepted review reaches all four generator fields without rewriting the saved menu',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await seedReview(page);
+ await page.addInitScript(()=>{
+  localStorage.setItem('recomp_unified_profile_v2',JSON.stringify({name:'Usuario QA',sex:'m',age:40,height:178,weight:80,activity:1.45,goal:'recomp',experience:'intermediate',days:4,minutes:50,equipment:['Máquina','Mancuernas','Barra','Polea'],meals:4,mealPattern:'balanced',diet:'flexible',excluded:'',maxTime:30,budget:'medio'}));
+ });
+ await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await page.locator('#mpDays').fill('2');
+ await page.locator('#mpGenerate').click();
+ await expect(page.locator('.mp-day').first()).toBeVisible({timeout:15000});
+ const menu=await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'));
+ expect(menu).not.toBeNull();
+ await page.locator('nav button').filter({hasText:'Inicio'}).click();
+ await page.locator('#recompCheckin360 [data-act="accept"]').click();
+ await expect(page.locator('#recompCheckin360 [data-checkin-status]')).toContainText('Recomendación aplicada');
+ const targets=await page.evaluate(()=>JSON.parse(localStorage.getItem('targets')));
+ expect(targets.kcal).toBe(2100);
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ for(const [id,key] of [['mpKcal','kcal'],['mpProtein','protein'],['mpCarbs','carbs'],['mpFat','fat']])await expect(page.locator('#'+id)).toHaveValue(String(targets[key]));
+ expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(menu);
+ await page.reload({waitUntil:'load'});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ for(const [id,key] of [['mpKcal','kcal'],['mpProtein','protein'],['mpCarbs','carbs'],['mpFat','fat']])await expect(page.locator('#'+id)).toHaveValue(String(targets[key]));
+ expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(menu);
+ expect(errors).toEqual([]);
+});
 test('check-in write failure preserves fields and retry persists once across reload',async({page})=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.addInitScript(()=>{
@@ -116,4 +144,3 @@ test('check-in cannot overwrite unreadable persisted history',async({page})=>{
   expect(await page.evaluate(()=>localStorage.getItem('recomp_checkins_v4'))).toBe('{broken');
   expect(errors).toEqual([]);
 });
-
