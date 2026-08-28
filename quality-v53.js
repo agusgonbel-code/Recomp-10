@@ -14,7 +14,17 @@ function sharesFor(count,pattern='balanced'){const n=Math.min(7,Math.max(3,Math.
 function activePattern(prefs={}){if(['balanced','breakfast','lunch','dinner'].includes(prefs.mealPattern))return prefs.mealPattern;if(typeof localStorage!=='undefined'){try{const p=JSON.parse(localStorage.getItem('recomp_unified_profile_v2')||'{}');if(['balanced','breakfast','lunch','dinner'].includes(p.mealPattern))return p.mealPattern}catch{}}return'balanced';}
 function totals(items=[]){return items.reduce((a,x)=>({k:a.k+finite(x.k),p:a.p+finite(x.p),c:a.c+finite(x.c),f:a.f+finite(x.f)}),{k:0,p:0,c:0,f:0});}
 function scaleIngredient(ingredient,factor){if(!ingredient||typeof ingredient!=='object')return ingredient;const next={...ingredient};if(Number.isFinite(Number(next.qty))){const step=/^ud|unidad/i.test(String(next.unit||'')) ? .5 : (Number(next.qty)*factor>=50?5:1);next.qty=Math.max(step,Math.round((Number(next.qty)*factor)/step)*step);if(next.name){const shown=Number.isInteger(next.qty)?next.qty:next.qty.toFixed(1);next.text=`${shown} ${next.unit||'g'} de ${next.name}`;}}if(next.nutrients){next.nutrients={k:finite(next.nutrients.k)*factor,p:finite(next.nutrients.p)*factor,c:finite(next.nutrients.c)*factor,f:finite(next.nutrients.f)*factor};}return next;}
-function rescaleItem(item,targetKcal){const current=Math.max(1,finite(item?.k));const factor=targetKcal/current;const next={...item};next.scale=Number((Math.max(.05,finite(item?.scale,1)*factor)).toFixed(6));next.k=round(targetKcal);next.p=round(finite(item?.p)*factor);next.c=round(finite(item?.c)*factor);next.f=round(finite(item?.f)*factor);if(Array.isArray(item?.ingredientAmounts))next.ingredientAmounts=item.ingredientAmounts.map(x=>scaleIngredient(x,factor));return next;}
+function rescaleItem(item,targetKcal){
+  const current=Math.max(1,finite(item?.k)),factor=targetKcal/current;
+  if(item?.nutritionBasis==='ingredient-composition'||item?.recipe?.composition!==undefined){
+    const calculate=root?.RecompMealPlanner?.portionFromComposition;
+    if(typeof calculate!=='function')throw new Error('No está disponible el cálculo de raciones por ingredientes.');
+    // Recompute from the new rounded quantities; do not scale rounded macros
+    // or force the requested calories independently of the ingredient ledger.
+    return {...item,...calculate(item.recipe,item.slot,finite(item.scale,1)*factor)};
+  }
+  const next={...item};next.scale=Number((Math.max(.05,finite(item?.scale,1)*factor)).toFixed(6));next.k=round(targetKcal);next.p=round(finite(item?.p)*factor);next.c=round(finite(item?.c)*factor);next.f=round(finite(item?.f)*factor);if(Array.isArray(item?.ingredientAmounts))next.ingredientAmounts=item.ingredientAmounts.map(x=>scaleIngredient(x,factor));return next;
+}
 function targetKcals(kcal,shares){const daily=round(kcal),out=shares.map(s=>round(daily*s));out[out.length-1]+=daily-out.reduce((a,b)=>a+b,0);return out;}
 function rebalanceDay(day,prefs={}){
   if(!day||!Array.isArray(day.items)||!day.items.length)return day;
