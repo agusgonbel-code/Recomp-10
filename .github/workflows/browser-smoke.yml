@@ -32,7 +32,7 @@ jobs:
           set +e
           npm test > /tmp/recomp-unit.log 2>&1
           unit_code=$?
-          npx playwright test qa/browser-smoke.spec.js qa/nutrition-menu-v5.spec.js qa/mobile-layout.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js qa/user-100-sim.spec.js --reporter=line > /tmp/recomp-browser.log 2>&1
+          npx playwright test qa/browser-smoke.spec.js qa/checkin-save.spec.js qa/nutrition-menu-v5.spec.js qa/mobile-layout.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js qa/user-100-sim.spec.js --reporter=line > /tmp/recomp-browser.log 2>&1
           browser_code=$?
           set -e
           code=0
