@@ -23,9 +23,9 @@ function ledger(meal){
   assert.equal(meal[key],Math.round(meal.ingredientAmounts.reduce((sum,row)=>sum+Math.round(row.nutrients[key]*precision),0)/precision));
  }
 }
-for(const id of ['recipe-006','recipe-007'])test(`${id}: production quantities and four nutrients match pinned USDA foods`,()=>{
+for(const id of ['recipe-002','recipe-006','recipe-007','recipe-008','recipe-011','recipe-021','recipe-036','recipe-040','recipe-053'])test(`${id}: production quantities and four nutrients match pinned USDA foods`,()=>{
  const recipe=catalog.find(r=>r.id===id);
- assert.equal(recipe.composition.length,3);
+ assert.ok(recipe.composition.length>=2);
  assert.ok(recipe.s.length>=6);
  for(const row of recipe.composition){
   const food=source.foods.find(f=>String(f.fdcId)===row.foodId);
@@ -44,10 +44,10 @@ test('real six-meal substitution preserves the four-target fit and survives JSON
  assert.equal(plan.days[0].items[0].recipe.id,'recipe-006');
  ledger(plan.days[0].items[0]);
  plan=api.swapMeal(copy(plan),catalog,0,0);
- assert.equal(plan.days[0].items[0].recipe.id,'recipe-007');
+ assert.notEqual(plan.days[0].items[0].recipe.id,'recipe-006');
  assert.equal(plan.days[0].energyDistribution.policy,'macro-fit-preserved');
  assert.ok(api.withinTargets(plan.days[0].totals,prefs,{k:.03,p:.05,c:.06,f:.08}));
- ledger(copy(plan).days[0].items[0]);
+ for(const meal of copy(plan).days[0].items)if(meal.nutritionBasis==='ingredient-composition')ledger(meal);
  assert.deepEqual(copy(api.totals(plan.days[0].items)),copy(plan.days[0].totals));
  assert.ok(Math.max(...plan.days[0].energyDistribution.shares)<=.345);
 });
@@ -63,4 +63,23 @@ test('loading the six-meal extension twice cannot replace installed quality guar
  const plan=planner.swapMeal(planner.generateDays(catalog,prefs),catalog,0,0);
  assert.equal(plan.days[0].energyDistribution.policy,'macro-fit-preserved');
  assert.ok(planner.withinTargets(plan.days[0].totals,prefs,{k:.03,p:.05,c:.06,f:.08}));
+});
+
+test('an entirely migrated catalogue keeps real ledgers through generation, swap and restore',()=>{
+ const migrated=catalog.filter(recipe=>recipe.composition);
+ assert.equal(migrated.length,9);
+ const prefs={kcal:2000,protein:175,carbs:255,fat:30,meals:6,days:2};
+ let plan=api.generateDays(migrated,prefs);
+ for(const day of plan.days){
+  for(const meal of day.items)ledger(meal);
+  assert.equal(day.withinTarget,api.withinTargets(day.totals,prefs,{k:.03,p:.05,c:.06,f:.08}));
+ }
+ const old=plan.days[0].items[0].recipe.id;
+ plan=api.swapMeal(plan,migrated,0,0);
+ assert.notEqual(plan.days[0].items[0].recipe.id,old);
+ assert.ok(api.withinTargets(plan.days[0].totals,prefs,{k:.03,p:.05,c:.06,f:.08}));
+ for(const day of copy(plan).days){
+  for(const meal of day.items)ledger(meal);
+  assert.deepEqual(copy(api.totals(day.items)),copy(day.totals));
+ }
 });

@@ -35,7 +35,6 @@ function rebalanceDay(day,prefs={},options={}){
   // A completed substitution may already satisfy all four targets. Do not
   // destroy that fit by imposing calorie shares a second time.
   const preserveFit=options.preserveNutrientFit===true
-    &&day.items.some(item=>item.nutritionBasis==='ingredient-composition')
     &&planner?.withinTargets?.(initial,prefs,{k:.03,p:.05,c:.06,f:.08})
     &&day.items.every(item=>finite(item.k)/Math.max(1,initial.k)<=limit+.005);
   const items=hasFixed||preserveFit?day.items.map(item=>({...item})):day.items.map((item,i)=>rescaleItem(item,targetKcals(daily,shares)[i]));
