@@ -184,3 +184,32 @@ test('failed meal replacement keeps recipe and quantities; retry saves the balan
   expect(errors).toEqual([]);
 });
 
+
+for(const [label,raw] of [['invalid JSON','{broken'],['incomplete structure','{}']]) {
+  test(`a saved menu with ${label} does not break startup or erase data`,async({page})=>{
+    const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    await page.addInitScript(value=>{
+      if(!sessionStorage.getItem('qa-corrupt-menu-seeded')){
+        localStorage.setItem('recomp10.mealPlan30',value);
+        sessionStorage.setItem('qa-corrupt-menu-seeded','1');
+      }
+    },raw);
+    await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+    await page.locator('nav button').filter({hasText:'Menús'}).click();
+    await expect(page.locator('#mpStatus')).toContainText('No se pudo recuperar el menú guardado');
+    await expect(page.locator('#mpGenerate')).toBeEnabled();
+    expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(raw);
+    await expect(page.locator('.mp-day')).toHaveCount(0);
+    await page.locator('#mpDays').fill('2');
+    await page.locator('#mpGenerate').click();
+    await expect(page.locator('.mp-day')).toHaveCount(2,{timeout:20000});
+    const saved=await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'));
+    expect(JSON.parse(saved).days).toHaveLength(2);
+    await page.reload({waitUntil:'load'});
+    await page.locator('nav button').filter({hasText:'Menús'}).click();
+    await expect(page.locator('.mp-day')).toHaveCount(2);
+    await expect(page.locator('#mpStatus')).not.toContainText('No se pudo recuperar');
+    expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(saved);
+    expect(errors).toEqual([]);
+  });
+}
