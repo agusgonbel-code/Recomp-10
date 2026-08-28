@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test('ingredient composition reaches recipe details, substitution and persistence',async({page})=>{
+for(const meals of [4,6])test(`${meals} meals: ingredient composition reaches details, substitution and persistence`,async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
  await page.evaluate(()=>{
@@ -16,6 +16,7 @@ test('ingredient composition reaches recipe details, substitution and persistenc
  });
  await page.locator('nav button').filter({hasText:'Menús'}).click();
  await page.locator('#mpCake').uncheck();await page.locator('#mpShake').uncheck();
+ await page.locator('#mpMeals').selectOption(String(meals));
  for(const [id,value] of [['mpKcal','2200'],['mpProtein','160'],['mpCarbs','250'],['mpFat','62'],['mpDays','2']])await page.locator('#'+id).fill(value);
  await page.locator('#mpGenerate').click();
  await expect(page.locator('.mp-day')).toHaveCount(2);
@@ -29,7 +30,14 @@ test('ingredient composition reaches recipe details, substitution and persistenc
  const plan=JSON.parse(raw);
  for(const meal of plan.days.flatMap(day=>day.items)){
   expect(meal.nutritionBasis).toBe('ingredient-composition');
-  for(const k of ['k','p','c','f'])expect(meal[k]).toBe(Math.round(meal.ingredientAmounts.reduce((sum,row)=>sum+row.nutrients[k],0)));
+  for(const k of ['k','p','c','f']){
+   const precision=k==='k'?1:10;
+   for(const row of meal.ingredientAmounts){
+    expect(row.nutrients[k]).toBe(Math.round(row.per100[k]*row.qty/100*precision)/precision);
+    expect(Number(row.text.match(/^\d+(?:\.\d+)?/)[0])).toBe(row.qty);
+   }
+   expect(meal[k]).toBe(Math.round(meal.ingredientAmounts.reduce((sum,row)=>sum+Math.round(row.nutrients[k]*precision),0)/precision));
+  }
  }
  await page.reload({waitUntil:'load'});
  await page.locator('nav button').filter({hasText:'Menús'}).click();
