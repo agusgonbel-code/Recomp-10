@@ -1,4 +1,69 @@
 const { test, expect } = require('@playwright/test');
+
+async function openCheckinSaveFixture(page) {
+  await page.route('**/__checkin-save-test', route=>route.fulfill({
+    contentType:'text/html',
+    body:'<!doctype html><html lang="es"><body><div id="coachBox"></div><script src="/recomp-review-v3.js"></script><script src="/recomp-checkin-v4.js"></script><script src="/checkin-local-v55.js"></script></body></html>'
+  }));
+  await page.goto('http://127.0.0.1:4173/__checkin-save-test');
+  const host=page.locator('#recompCheckin360');
+  await expect(host).toBeVisible();
+  await host.locator('summary').click();
+  return host;
+}
+test('check-in write failure preserves fields and retry persists once across reload',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.addInitScript(()=>{
+    const original=Storage.prototype.setItem;
+    window.failCheckinWrite=false;window.checkinEvents=0;
+    Storage.prototype.setItem=function(key,value){
+      if(key==='recomp_checkins_v4'&&window.failCheckinWrite)throw new DOMException('Quota exceeded','QuotaExceededError');
+      return original.call(this,key,value);
+    };
+    document.addEventListener('recomp:data-changed',()=>window.checkinEvents++);
+  });
+  const host=await openCheckinSaveFixture(page);
+  await host.locator('[data-k="weight"]').fill('80.5');
+  await host.locator('[data-k="notes"]').fill('Nota que debe conservarse');
+  await page.evaluate(()=>window.failCheckinWrite=true);
+  await host.locator('[data-act="save"]').click();
+  await expect(host.locator('[data-checkin-status]')).toContainText('No se pudo guardar');
+  await expect(host.locator('[data-k="notes"]')).toHaveValue('Nota que debe conservarse');
+  await expect(host.locator('[data-k="weight"]')).toHaveValue('80.5');
+  expect(await page.evaluate(()=>localStorage.getItem('recomp_checkins_v4'))).toBeNull();
+  expect(await page.evaluate(()=>window.checkinEvents)).toBe(0);
+  await page.evaluate(()=>window.failCheckinWrite=false);
+  await host.locator('[data-act="save"]').click();
+  await expect(host.locator('[data-checkin-status]')).toHaveText('Check-in guardado.');
+  expect(await page.evaluate(()=>window.checkinEvents)).toBe(1);
+  await page.reload();
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp_checkins_v4')));
+  expect(saved).toHaveLength(1);expect(saved[0].weight).toBe(80.5);expect(saved[0].notes).toBe('Nota que debe conservarse');
+  expect(errors).toEqual([]);
+});
+test('an open check-in form preserves newer history saved from another view',async({page})=>{
+  const host=await openCheckinSaveFixture(page);
+  await page.evaluate(()=>localStorage.setItem('recomp_checkins_v4',JSON.stringify([{id:'other-view',date:'2026-08-01',weight:81}])));
+  await host.locator('[data-k="weight"]').fill('80');
+  await host.locator('[data-act="save"]').click();
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp_checkins_v4')));
+  expect(saved).toHaveLength(2);expect(saved.some(row=>row.id==='other-view')).toBe(true);
+});
+test('check-in cannot overwrite unreadable persisted history',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const host=await openCheckinSaveFixture(page);
+  await page.evaluate(()=>localStorage.setItem('recomp_checkins_v4','{broken'));
+  await page.reload();
+  await expect(host.locator('[data-checkin-status]')).toContainText('No se pudo leer');
+  await host.locator('summary').click();
+  await host.locator('[data-k="notes"]').fill('Pendiente de guardar');
+  await host.locator('[data-act="save"]').click();
+  await expect(host.locator('[data-checkin-status]')).toContainText('No se pudo guardar');
+  await expect(host.locator('[data-k="notes"]')).toHaveValue('Pendiente de guardar');
+  expect(await page.evaluate(()=>localStorage.getItem('recomp_checkins_v4'))).toBe('{broken');
+  expect(errors).toEqual([]);
+});
+
 async function completeIntake(page){await expect(page.locator('#r10IntakeModal')).toBeVisible();await page.locator('#rWaist').fill('82');await page.locator('#rNext').click();await page.locator('#rNext').click();await page.locator('#rNext').click();await expect(page.locator('#rGenerate')).toBeVisible();await page.locator('#rGenerate').click();await page.waitForFunction(()=>localStorage.getItem('recomp_unified_profile_v2')!==null);await page.waitForFunction(()=>localStorage.getItem('targets')!==null);}
 test('fresh launch never exposes personal starter data', async ({ page }) => {await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await expect(page.locator('#hello')).toHaveText('Configura tu perfil');await expect(page.locator('#dWeight')).toHaveText('—');await expect(page.locator('#profileName')).toHaveValue('Usuario');await expect(page.locator('#age')).toHaveValue('');await expect(page.locator('#weight')).toHaveValue('');await expect(page.locator('#height')).toHaveValue('');const body=await page.locator('body').innerText();expect(body).not.toContain('Agustín');expect(body).not.toContain('81 kg');});
 test('unified intake opens, generates nutrition and training, and persists', async ({ page }) => {const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await expect(page.getByText('Perfil único usuario / cliente')).toBeVisible();await completeIntake(page);const profile=await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp_unified_profile_v2')));const nutrition=await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp_unified_nutrition_v2')));const plan=await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp_unified_plan_v2')));const targets=await page.evaluate(()=>JSON.parse(localStorage.getItem('targets')));expect(profile.meals).toBeGreaterThanOrEqual(3);expect(profile.waist).toBe(82);const baseline=await page.evaluate(()=>JSON.parse(localStorage.getItem('metrics')).filter(item=>item.source==='unified-profile'));expect(baseline).toHaveLength(1);expect(baseline[0].weight).toBe(profile.weight);expect(baseline[0].waist).toBe(82);expect(nutrition.targets.kcal).toBeGreaterThan(1000);expect(targets).toEqual(nutrition.targets);expect(Object.keys(plan.routine).length).toBe(profile.days);const storedRoutines=await page.evaluate(()=>JSON.parse(localStorage.getItem('routines')));expect(Object.keys(storedRoutines)).toEqual(Object.keys(plan.routine));for(const day of Object.keys(plan.routine)){expect(storedRoutines[day].map(item=>item[0])).toEqual(plan.routine[day].map(item=>item.name))}await page.waitForFunction(()=>{const profile=JSON.parse(localStorage.getItem('recomp_unified_profile_v2'));return document.querySelectorAll('#daySelect option').length===profile.days});await expect(page.locator('#r10TrainingPlanSummary')).toContainText('Plan personalizado');await expect(page.locator('#r10TrainingPlanSummary')).toContainText('Progresión:');await expect(page.locator('#r10TrainingPlanSummary')).toContainText('Descarga:');await page.locator('nav button').filter({hasText:'Menús'}).click();await expect(page.locator('#mpGenerate')).toBeVisible();await page.waitForTimeout(1300);await expect(page.locator('#mpGenerate')).toBeVisible();await page.getByRole('button',{name:'Perfil y plan'}).click();await page.locator('#rNext').click();await page.locator('#rNext').click();await page.locator('#rNext').click();await page.locator('#rGenerate').click();await page.waitForTimeout(1200);const baselinesAfterRegeneration=await page.evaluate(()=>JSON.parse(localStorage.getItem('metrics')).filter(item=>item.source==='unified-profile'));expect(baselinesAfterRegeneration).toHaveLength(1);expect(errors).toEqual([]);});
