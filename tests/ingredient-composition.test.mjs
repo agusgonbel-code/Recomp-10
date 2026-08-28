@@ -68,6 +68,8 @@ test('quantity boundary rounding and explicit millilitres use exactly the shown 
  const text=readFileSync(new URL('../meal-planner.js',import.meta.url),'utf8');
  const ctx=vm.createContext({});
  vm.runInContext(text.replace('globalThis.RecompMealPlanner={','globalThis.arithmetic={compositionAmounts,compositionTotals,reconcileRemainingItems};globalThis.RecompMealPlanner={'),ctx);
+ const halves=[.7,.7,.1].map(p=>({nutrients:{k:1,p,c:p,f:p}}));
+ assert.deepEqual(copy(ctx.arithmetic.compositionTotals(halves)),{k:3,p:2,c:2,f:2});
  for(const qty of [9.9,10,10.1,49.9,50,50.1,99.9]){
   const row={...ingredient('Synthetic liquid',qty,{k:37.7,p:1.3,c:5.7,f:1.1}),unit:'ml'};
   const amounts=ctx.arithmetic.compositionAmounts([row],1.17);
