@@ -44,17 +44,21 @@ function validateFullMonth(targets){
       assert.equal(exact.length,item.recipe.i.length);
       assert.ok(exact.every(x=>/^\d/.test(x)),`${item.recipe.n}: cantidad no exacta: ${exact.join(' | ')}`);
 
-      if(item.ingredientNutritionVerified===true){
-        assert.ok(item.ingredientAmounts.every(ingredient=>ingredient.nutrients),`${item.recipe.n}: receta marcada como verificada con nutrientes de ingrediente ausentes`);
-        const calculated=item.ingredientAmounts.reduce((sum,ingredient)=>({
-          k:sum.k+ingredient.nutrients.k,p:sum.p+ingredient.nutrients.p,
-          c:sum.c+ingredient.nutrients.c,f:sum.f+ingredient.nutrients.f
-        }),{k:0,p:0,c:0,f:0});
-        assert.deepEqual(
-          {k:item.k,p:item.p,c:item.c,f:item.f},
-          {k:Math.round(calculated.k),p:Math.round(calculated.p),c:Math.round(calculated.c),f:Math.round(calculated.f)},
-          `${item.recipe.n}: los macros verificados no proceden de las cantidades mostradas`
-        );
+      if(item.nutritionBasis==='ingredient-composition'){
+        for(const ingredient of item.ingredientAmounts){
+          assert.ok(ingredient.source?.id&&ingredient.state,'La composición necesita fuente y estado');
+          const shown=Number(ingredient.text.match(/^\d+(?:\.\d+)?/)?.[0]);
+          assert.equal(shown,ingredient.qty);
+          for(const key of ['k','p','c','f']){
+            const precision=key==='k'?1:10;
+            assert.equal(ingredient.nutrients[key],Math.round(ingredient.per100[key]*ingredient.qty/100*precision+1e-9)/precision);
+          }
+        }
+        for(const key of ['k','p','c','f']){
+          const precision=key==='k'?1:10;
+          const sum=item.ingredientAmounts.reduce((total,row)=>total+Math.round(row.nutrients[key]*precision),0);
+          assert.equal(item[key],Math.round(sum/precision),`${item.recipe.n}: total distinto de los aportes mostrados`);
+        }
       }else{
         assert.equal(item.nutritionBasis,'recipe-declared',`${item.recipe.n}: una receta no verificada debe identificar el origen de sus macros`);
         assert.ok(item.ingredientAmounts.every(ingredient=>ingredient.nutrients===null),`${item.recipe.n}: se atribuyeron macros a ingredientes sin verificación nutricional`);
