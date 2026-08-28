@@ -1,15 +1,22 @@
 (function(root,factory){'use strict';const api=factory();if(typeof module!=='undefined'&&module.exports)module.exports=api;if(root)root.RecompReview=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){'use strict';const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number(v)));const finite=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
 function parseDate(value){if(!value)return null;const d=new Date(String(value).length===10?String(value)+'T12:00:00':value);return Number.isNaN(d.getTime())?null:d.getTime();}
 function linearSlope(xs,ys){const mx=avg(xs),my=avg(ys);let num=0,den=0;for(let i=0;i<xs.length;i++){const dx=xs[i]-mx;num+=dx*(ys[i]-my);den+=dx*dx;}return den?num/den:0;}
-function dayKey(value){const match=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(value||''));if(!match)return null;const date=new Date(+match[1],+match[2]-1,+match[3]);return date.getFullYear()===+match[1]&&date.getMonth()===+match[2]-1&&date.getDate()===+match[3]?match[1]+'-'+match[2]+'-'+match[3]:null;}
+function measurement(value){
+ if(typeof value!=='number'&&(typeof value!=='string'||!value.trim()))return NaN;
+ const number=Number(value);return Number.isFinite(number)&&number>0?number:NaN;
+}
+function dayKey(value){const match=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(value||''));if(!match)return null;const date=new Date(Date.UTC(+match[1],+match[2]-1,+match[3]));return date.getUTCFullYear()===+match[1]&&date.getUTCMonth()===+match[2]-1&&date.getUTCDate()===+match[3]?match[1]+'-'+match[2]+'-'+match[3]:null;}
 function seriesTrend(values=[],dates=[]){
- const raw=Array.isArray(values)?values:[],sourceObservations=raw.filter(v=>Number.isFinite(Number(v))).length;
- const dated=Array.isArray(dates)&&dates.some(value=>value!==''&&value!=null);let rows=[];
+ const raw=(Array.isArray(values)?values:[]).map(measurement),sourceObservations=raw.filter(Number.isFinite).length;
+ // Supplied date slots must never fall back to invented weekly spacing.
+ const dated=Array.isArray(dates)&&dates.length>0;let rows=[];
  if(dated){
   const grouped=new Map();
-  for(let i=0;i<raw.length;i++){const value=Number(raw[i]),ms=parseDate(dates[i]),key=dayKey(dates[i]);if(!Number.isFinite(value)||!Number.isFinite(ms)||!key)continue;const group=grouped.get(key)||{values:[],ms:parseDate(key)};group.values.push(value);grouped.set(key,group);}
+  // UTC midnight is a civil-day ordinal here, not a conversion of the recorded timestamp.
+  // It keeps seven calendar days equal to seven days across daylight-saving changes.
+  for(let i=0;i<raw.length;i++){const value=raw[i],ms=parseDate(dates[i]),key=dayKey(dates[i]);if(!Number.isFinite(value)||!Number.isFinite(ms)||!key)continue;const group=grouped.get(key)||{values:[],ms:Date.parse(key+'T00:00:00Z')};group.values.push(value);grouped.set(key,group);}
   rows=[...grouped.values()].map(group=>({value:avg(group.values),ms:group.ms})).sort((a,b)=>a.ms-b.ms);
- }else rows=raw.map(Number).filter(Number.isFinite).map((value,index)=>({value,ms:index*7*864e5}));
+ }else rows=raw.filter(Number.isFinite).map((value,index)=>({value,ms:index*7*864e5}));
  const timing=dated?'dated':'weekly-assumed',observations=rows.length;
  if(observations<4)return{enough:false,delta:0,ratePct:0,spanDays:observations>1?Number(((rows.at(-1).ms-rows[0].ms)/864e5).toFixed(1)):0,observations,sourceObservations,timing};
  const x=rows.map(r=>r.ms/864e5),y=rows.map(r=>r.value),spanDays=Math.max(0,x.at(-1)-x[0]);
