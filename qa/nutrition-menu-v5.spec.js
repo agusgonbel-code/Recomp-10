@@ -1,4 +1,42 @@
 const { test, expect } = require('@playwright/test');
+test('ten additional USDA recipes preserve source states, quantities and steps on reload',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+ const plan=await page.evaluate(()=>{
+  const api=globalThis.RecompMealPlanner,ids=['recipe-001','recipe-010','recipe-020','recipe-028','recipe-030','recipe-033','recipe-035','recipe-037','recipe-044','recipe-048'];
+  const catalog=api.normalizeRecipeCatalog(recipes);
+  // Explicit persistence fixture: not a menu claiming to meet personal targets.
+  const days=[0,1].map(d=>{
+   const items=ids.slice(d*5,d*5+5).map((id,i)=>api.portionFromComposition(catalog.find(r=>r.id===id),['Desayuno','Media mañana','Comida','Merienda','Cena'][i],.73));
+   return {day:d+1,items,totals:api.totals(items)};
+  });
+  const result={createdAt:new Date().toISOString(),preferences:{kcal:2200,protein:160,carbs:250,fat:62,meals:5,days:2},days};
+  localStorage.setItem('recomp10.mealPlan30',JSON.stringify(result));return result;
+ });
+ await page.reload({waitUntil:'load'});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await expect(page.locator('.mp-day')).toHaveCount(2);
+ for(const [d,day] of plan.days.entries()){
+  const panel=page.locator('.mp-day').nth(d);
+  if(await panel.getAttribute('open')===null)await panel.locator('summary').click();
+  for(const [i,meal] of day.items.entries()){
+   await page.locator('[data-recipe="'+d+','+i+'"]').click();
+   const detail=page.locator('#mpRecipeDetail');
+   await expect(detail.locator('h2')).toHaveText(meal.recipe.n);
+   await expect(detail.locator('ol li')).toHaveCount(6);
+   await expect(detail).toContainText('Macros calculados por ingredientes');
+   for(const row of meal.ingredientAmounts){
+    await expect(detail).toContainText(row.text);
+    expect(row.text).toContain(row.state);
+    expect(Number(row.text.match(/^\d+(?:\.\d+)?/)[0])).toBe(row.qty);
+    expect(row.source.name).toContain('USDA');
+    for(const k of ['k','p','c','f']){const z=k==='k'?1:10;expect(row.nutrients[k]).toBe(Math.round(row.per100[k]*row.qty/100*z+1e-9)/z)}
+   }
+  }
+ }
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp10.mealPlan30')))).toEqual(plan);
+ expect(errors).toEqual([]);
+});
 test('tuna and legume recipes retain dry, cooked and drained quantities after reload',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});

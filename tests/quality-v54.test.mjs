@@ -4,6 +4,20 @@ import { createRequire } from 'node:module';
 const require=createRequire(import.meta.url);
 const quality=require('../quality-v54.js');
 
+test('whole-unit rounding does not reject a small valid ingredient portion',()=>{
+ // The source-ledger regression in usda-catalog.test.mjs reproduces this meal.
+ assert.equal(quality.validMeal({k:52,p:7,c:4,f:2}),true);
+ assert.equal(quality.macroCalories({p:7,c:4,f:2}),62);
+ assert.equal(quality.validMeal({k:52,p:10,c:10,f:2}),false);
+});
+test('rounding allowance is bounded and does not change the daily energy limit',()=>{
+ assert.equal(quality.validMeal({k:52,p:7,c:4,f:3}),false);
+ assert.equal(quality.validMeal({k:52,p:7.1,c:4,f:2}),false);
+ const items=Array.from({length:4},()=>({k:52,p:7,c:4,f:2}));
+ const plan={days:[{items,energyDistribution:{shares:[.25,.25,.25,.25]}}],preferences:{meals:4,kcal:180}};
+ assert.throws(()=>quality.validatePlan(plan),/objetivo energético/);
+});
+
 test('rejects days outside the supported 3-7 intake range',()=>{assert.throws(()=>quality.validatePlan({days:[{items:[{k:100},{k:100}]}],preferences:{}},{days:1}),/entre 3 y 7/);});
 test('rejects a day with fewer meals than requested',()=>{assert.throws(()=>quality.validatePlan({days:[{items:[{k:500},{k:500},{k:500}]}],preferences:{meals:4}},{days:1,meals:4}),/esperabas 4 tomas/);});
 test('accepts a complete four-meal day with matching distribution',()=>{const plan={days:[{items:[{k:528,p:35,c:60,f:16},{k:816,p:45,c:95,f:28},{k:336,p:25,c:35,f:10},{k:720,p:45,c:80,f:24}],energyDistribution:{shares:[.22,.34,.14,.30]}}],preferences:{meals:4,kcal:2400}};assert.equal(quality.validatePlan(plan,{days:1,meals:4,kcal:2400}),plan);});

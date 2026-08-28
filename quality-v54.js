@@ -5,7 +5,16 @@ const MAX_SHARE={3:.45,4:.40,5:.36,6:.34,7:.32};
 function expectedMeals(input={},plan={}){const raw=input.meals??plan.preferences?.meals;if(raw==null||raw==='')return null;return Math.min(6,Math.max(3,Math.round(finite(raw,4))));}
 function validShares(shares,count){if(!Array.isArray(shares)||shares.length!==count)return false;const nums=shares.map(Number);if(nums.some(x=>!Number.isFinite(x)||x<=0||x>=1))return false;return Math.abs(nums.reduce((a,b)=>a+b,0)-1)<=.005;}
 function macroCalories(item){return Number(item.p)*4+Number(item.c)*4+Number(item.f)*9;}
-function validMeal(item){if(!item||!['k','p','c','f'].every(key=>Number.isFinite(Number(item[key]))&&Number(item[key])>=0)||Number(item.k)<=0)return false;const fromMacros=macroCalories(item),k=Number(item.k);return Math.abs(fromMacros-k)/Math.max(1,k)<=.18;}
+function validMeal(item){
+ if(!item||!['k','p','c','f'].every(key=>Number.isFinite(Number(item[key]))&&Number(item[key])>=0)||Number(item.k)<=0)return false;
+ const fromMacros=macroCalories(item),k=Number(item.k);
+ // Whole-gram P/C/F and whole-kcal display rounding can contribute up to
+ // 0.5*4 + 0.5*4 + 0.5*9 + 0.5 = 9 kcal to a 4/4/9 comparison.
+ // Retain the existing 18% sanity bound on the non-rounding discrepancy.
+ // Fractional values do not receive a whole-unit rounding allowance.
+ const roundingAllowance=['k','p','c','f'].every(key=>Number.isInteger(Number(item[key])))?9:0;
+ return Math.max(0,Math.abs(fromMacros-k)-roundingAllowance)/Math.max(1,k)<=.18;
+}
 function actualShares(items=[]){if(!items.every(validMeal))return null;const kcals=items.map(item=>Number(item.k)),total=kcals.reduce((a,b)=>a+b,0);return total>0?kcals.map(k=>k/total):null;}
 function sharesMatch(declared,actual,tolerance=.015){if(!validShares(declared,actual?.length||0)||!Array.isArray(actual))return false;return declared.every((share,index)=>Math.abs(Number(share)-actual[index])<=tolerance);}
 function validatePlan(plan,input={}){

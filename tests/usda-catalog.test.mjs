@@ -53,6 +53,16 @@ test('real six-meal substitution preserves the four-target fit and survives JSON
  assert.ok(Math.max(...plan.days[0].energyDistribution.shares)<=.345);
 });
 
+test('small USDA edamame portion survives the calorie guard without changing its ledger',()=>{
+ const recipe=catalog.find(r=>r.id==='recipe-020');
+ const portion=copy(api.portionFromComposition(recipe,'Merienda',.195));
+ ledger(portion);
+ assert.deepEqual(Object.fromEntries(['k','p','c','f'].map(k=>[k,portion[k]])),{k:52,p:7,c:4,f:2});
+ const before=copy(portion);
+ assert.equal(runtime.RecompQualityV54.validMeal(portion),true);
+ assert.deepEqual(portion,before);
+});
+
 test('loading the six-meal extension twice cannot replace installed quality guards',()=>{
  const planner=runtime.RecompMealPlanner,generate=planner.generateDays,swap=planner.swapMeal;
  // The browser also has a legacy dynamic enhancement loader.
@@ -68,7 +78,7 @@ test('loading the six-meal extension twice cannot replace installed quality guar
 
 test('an entirely migrated catalogue keeps real ledgers through generation, swap and restore',()=>{
  const migrated=catalog.filter(recipe=>recipe.composition);
- assert.equal(migrated.length,15);
+ assert.equal(migrated.length,25);
  const prefs={kcal:2000,protein:175,carbs:255,fat:30,meals:6,days:2};
  let plan=api.generateDays(migrated,prefs);
  for(const day of plan.days){
