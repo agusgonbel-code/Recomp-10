@@ -3,6 +3,7 @@ name: Recomp Validation Bundle Stress 1000x
 on:
   pull_request:
     paths:
+      - '*.js'
       - 'app/**'
       - 'src/**'
       - 'qa/**'
@@ -38,9 +39,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p /tmp/recomp-validation-evidence
+          echo 0 > /tmp/recomp-validation-evidence/unit-completed.txt
           for i in $(seq 1 100); do
             echo "=== Validation shard ${{ matrix.shard }} unit pass $i/100 ==="
             npm test >/tmp/recomp-validation-unit.log 2>&1 || { cat /tmp/recomp-validation-unit.log; exit 1; }
+            echo "$i" > /tmp/recomp-validation-evidence/unit-completed.txt
           done
       - name: Install Chromium
         run: |
@@ -52,7 +56,49 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          echo 0 > /tmp/recomp-validation-evidence/browser-completed.txt
           for i in $(seq 1 100); do
             echo "=== Validation shard ${{ matrix.shard }} browser pass $i/100 ==="
-            npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/nutrition-menu-v5.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js --reporter=line >/tmp/recomp-validation-browser.log 2>&1 || { cat /tmp/recomp-validation-browser.log; exit 1; }
+            npx playwright test qa/browser-smoke.spec.js qa/checkin-save.spec.js qa/mobile-layout.spec.js qa/nutrition-menu-v5.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js --reporter=line >/tmp/recomp-validation-browser.log 2>&1 || { cat /tmp/recomp-validation-browser.log; exit 1; }
+            echo "$i" > /tmp/recomp-validation-evidence/browser-completed.txt
           done
+      - name: Write actual completed counts and source evidence
+        if: always()
+        shell: bash
+        env:
+          JOB_RESULT: ${{ job.status }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/recomp-validation-evidence
+          unit=$(cat /tmp/recomp-validation-evidence/unit-completed.txt 2>/dev/null || echo 0)
+          browser=$(cat /tmp/recomp-validation-evidence/browser-completed.txt 2>/dev/null || echo 0)
+          result=FAIL
+          if [ "$JOB_RESULT" = success ] && [ "$unit" = 100 ] && [ "$browser" = 100 ]; then result=PASS; fi
+          {
+            echo "RESULT: $result"
+            echo "HEAD_COMMIT: $HEAD_SHA"
+            echo "TESTED_COMMIT: $(git rev-parse HEAD)"
+            echo "SHARD: $SHARD/10"
+            echo "UNIT_COMPLETED: $unit/100"
+            echo "BROWSER_COMPLETED: $browser/100"
+            echo 'COVERAGE: browser-smoke, checkin-save, mobile-layout, nutrition-menu-v5, meal-intelligence-v60, accessibility'
+          } > /tmp/recomp-validation-evidence/shard.txt
+          cat /tmp/recomp-validation-evidence/shard.txt >> "$GITHUB_STEP_SUMMARY"
+          for log in /tmp/recomp-validation-unit.log /tmp/recomp-validation-browser.log /tmp/recomp-validation-http.log; do
+            if [ -f "$log" ]; then cp "$log" /tmp/recomp-validation-evidence/; fi
+          done
+      - name: Upload validation evidence even after failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recomp-validation-${{ matrix.shard }}
+          path: /tmp/recomp-validation-evidence/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Require all repetitions to have completed
+        if: always()
+        shell: bash
+        run: |
+          grep -q '^RESULT: PASS$' /tmp/recomp-validation-evidence/shard.txt
