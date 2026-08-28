@@ -51,3 +51,16 @@ test('real six-meal substitution preserves the four-target fit and survives JSON
  assert.deepEqual(copy(api.totals(plan.days[0].items)),copy(plan.days[0].totals));
  assert.ok(Math.max(...plan.days[0].energyDistribution.shares)<=.345);
 });
+
+test('loading the six-meal extension twice cannot replace installed quality guards',()=>{
+ const planner=runtime.RecompMealPlanner,generate=planner.generateDays,swap=planner.swapMeal;
+ // The browser also has a legacy dynamic enhancement loader.
+ vm.runInContext(read('meal-planner-six-v52.js'),runtime);
+ assert.equal(runtime.RecompMealPlanner,planner);
+ assert.equal(planner.generateDays,generate);
+ assert.equal(planner.swapMeal,swap);
+ const prefs={kcal:1950,protein:155,carbs:205,fat:58,meals:6,days:2};
+ const plan=planner.swapMeal(planner.generateDays(catalog,prefs),catalog,0,0);
+ assert.equal(plan.days[0].energyDistribution.policy,'macro-fit-preserved');
+ assert.ok(planner.withinTargets(plan.days[0].totals,prefs,{k:.03,p:.05,c:.06,f:.08}));
+});
