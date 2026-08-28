@@ -16,6 +16,7 @@
   let galleryUrls = [];
   let compareUrls = [];
   let selected = new Set();
+  let savingPhoto = false;
 
   const fail = message => { throw new Error(message); };
   const bytesFromBase64 = encoded => {
@@ -99,9 +100,13 @@
     const database = await openDatabase();
     try {
       await new Promise((resolve, reject) => {
-        const request = database.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(record);
-        request.onsuccess = resolve;
-        request.onerror = () => reject(request.error);
+        const transaction = database.transaction(STORE_NAME, 'readwrite');
+        // Request success is provisional: quota or disk errors can still abort
+        // the transaction. Do not announce success until the write commits.
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error || new Error('No se pudo guardar la foto.'));
+        transaction.onabort = () => reject(transaction.error || new Error('Guardado cancelado.'));
+        transaction.objectStore(STORE_NAME).put(record);
       });
     } finally {
       database.close();
@@ -225,28 +230,41 @@
   }
 
   async function savePhotoSecure() {
+    if (savingPhoto) return;
     const input = document.getElementById('photoInput');
     const file = input?.files?.[0];
     if (!file) return alert('Selecciona una foto');
-    status('Optimizando foto para guardarla…');
+    const noteInput = document.getElementById('photoNote');
+    const note = noteInput?.value || '';
+    const controls = [input, noteInput, ...Array.from(input.parentElement?.querySelectorAll('button') || [])]
+      .filter(Boolean).map(element => ({ element, disabled: element.disabled }));
+    savingPhoto = true;
     try {
+      controls.forEach(({ element }) => { element.disabled = true; });
+      status('Optimizando foto para guardarla…');
       const blob = await compressPhoto(file);
       const existing = await allPhotos();
       if (existing.length >= MAX_PHOTOS) fail('Has alcanzado el límite de 300 fotos.');
       await putPhoto({
         id: 'p' + Date.now() + Math.random().toString(36).slice(2, 7),
         date: new Date().toISOString(),
-        note: globalThis.RecompPersistence.clip(document.getElementById('photoNote')?.value, 300),
+        note: globalThis.RecompPersistence.clip(note, 300),
         blob,
         originalBytes: file.size,
         storedBytes: blob.size
       });
-      input.value = '';
-      document.getElementById('photoNote').value = '';
+      // Preserve newer selections made programmatically while this save ran.
+      if (input.files?.[0] === file) {
+        input.value = '';
+        if (noteInput?.value === note) noteInput.value = '';
+      }
       status('Foto guardada · ' + Math.max(1, Math.round(blob.size / 1024)) + ' KB');
       await renderPhotosSecure();
     } catch (error) {
       status(error?.message || 'No se pudo guardar la foto.', true);
+    } finally {
+      controls.forEach(({ element, disabled }) => { element.disabled = disabled; });
+      savingPhoto = false;
     }
   }
 
