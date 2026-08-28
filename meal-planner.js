@@ -161,8 +161,18 @@ function generateDays(recipes,input){
     if(prefs.includeBreakfastCake)fixed.push(fixedMorningItem('cake'));
     const fixedTotals=totals(fixed),remainingMeals=Math.max(1,prefs.meals-(prefs.includeBreakfastCake?1:0));
     const remaining={...prefs,days:1,meals:remainingMeals,_slots:prefs.includeBreakfastCake?remainingSlotsAfterBreakfast(remainingMeals):slotsFor(remainingMeals),kcal:Math.max(remainingMeals*120,prefs.kcal-fixedTotals.k),protein:Math.max(remainingMeals*10,prefs.protein-fixedTotals.p),carbs:Math.max(0,prefs.carbs-fixedTotals.c),fat:Math.max(0,prefs.fat-fixedTotals.f)};
-    const built=buildDay(pool,{...remaining,carbs:Math.max(50,remaining.carbs),fat:Math.max(30,remaining.fat)},usage,day,{}, {primary:96,secondary:96});
-    const reconciled=reconcileRemainingItems(built.items,remaining),items=[...fixed,...reconciled],dayTotals=totals(items),withinTarget=withinTargets(dayTotals,prefs,{k:.03,p:.05,c:.06,f:.08});
+    const buildTargets={...remaining,carbs:Math.max(50,remaining.carbs),fat:Math.max(30,remaining.fat)};
+    let items,dayTotals,withinTarget;
+    // A small change in a fixed meal can invalidate a formerly good recipe
+    // combination. Search other combinations without rewriting their nutrients.
+    for(let attempt=0;attempt<8;attempt++){
+      const built=buildDay(pool,buildTargets,attempt?new Map(usage):usage,day+attempt*31,{}, {primary:96,secondary:96});
+      items=[...fixed,...reconcileRemainingItems(built.items,remaining)];
+      dayTotals=totals(items);
+      withinTarget=withinTargets(dayTotals,prefs,{k:.03,p:.05,c:.06,f:.08});
+      const cap=({3:.45,4:.40,5:.36,6:.34,7:.32})[items.length]||.40;
+      if(withinTarget&&items.every(item=>item.k/Math.max(1,dayTotals.k)<=cap+.005))break;
+    }
     days.push({day:day+1,trainingDay,trainingTime:trainingDay?prefs.trainingTime:null,items,totals:dayTotals,error:macroError(dayTotals,prefs),withinTarget,macroAdjusted:false});
   }
   return {createdAt:new Date().toISOString(),preferences:prefs,days};
