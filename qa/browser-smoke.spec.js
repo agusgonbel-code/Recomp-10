@@ -1,5 +1,92 @@
 const { test, expect } = require('@playwright/test');
 
+async function photoFixture(page) {
+  const png = await page.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 40;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#336699';
+    ctx.fillRect(0, 0, 40, 40);
+    return canvas.toDataURL('image/png').split(',')[1];
+  });
+  return { name: 'baseline.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') };
+}
+
+async function storedPhotoCount(page) {
+  return page.evaluate(() => new Promise((resolve, reject) => {
+    const request = indexedDB.open('recomp-photos-v1', 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction('photos', 'readonly');
+      const count = transaction.objectStore('photos').count();
+      transaction.oncomplete = () => { db.close(); resolve(count.result); };
+      transaction.onabort = () => { db.close(); reject(transaction.error); };
+    };
+  }));
+}
+
+for (const failure of ['transaction abort', 'unreadable image']) {
+  test(`photo recovery after ${failure} preserves inputs and supports a successful retry`, async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded' });
+    await completeIntake(page);
+    await expect(page.locator('#r10IntakeModal')).toBeHidden();
+    await page.locator('nav button').filter({ hasText: 'Progreso' }).click();
+    const validPhoto = await photoFixture(page);
+    const selectedPhoto = failure === 'unreadable image'
+      ? { name: 'broken.png', mimeType: 'image/png', buffer: Buffer.from('not an image') }
+      : validPhoto;
+    await page.locator('#photoInput').setInputFiles(selectedPhoto);
+    await page.locator('#photoNote').fill('Nota conservada para reintentar');
+    if (failure === 'transaction abort') {
+      await page.evaluate(() => {
+        const originalPut = IDBObjectStore.prototype.put;
+        IDBObjectStore.prototype.put = function (...args) {
+          const request = originalPut.apply(this, args);
+          if (this.name === 'photos' && this.transaction.db.name === 'recomp-photos-v1') {
+            IDBObjectStore.prototype.put = originalPut;
+            const transaction = this.transaction;
+            // Exercise an actual browser transaction abort AFTER request success.
+            request.addEventListener('success', () => {
+              window.__photoWriteAborted = true;
+              transaction.abort();
+            }, { once: true });
+          }
+          return request;
+        };
+      });
+    }
+    await page.getByRole('button', { name: 'Guardar foto', exact: true }).click();
+    await expect(page.locator('#photoStatus')).toContainText(
+      failure === 'transaction abort' ? 'Guardado cancelado' : 'no pudo leer'
+    );
+    if (failure === 'transaction abort') {
+      expect(await page.evaluate(() => window.__photoWriteAborted)).toBe(true);
+    }
+    expect(await storedPhotoCount(page)).toBe(0);
+    await expect(page.locator('#photoGrid img')).toHaveCount(0);
+    await expect(page.locator('#photoInput')).toBeEnabled();
+    await expect(page.locator('#photoNote')).toBeEnabled();
+    await expect(page.locator('#photoNote')).toHaveValue('Nota conservada para reintentar');
+    expect(await page.locator('#photoInput').evaluate(input => input.files[0]?.name)).toBe(selectedPhoto.name);
+    // An aborted transaction can retry the same file; an unreadable file must be replaced.
+    if (failure === 'unreadable image') await page.locator('#photoInput').setInputFiles(validPhoto);
+    await page.getByRole('button', { name: 'Guardar foto', exact: true }).click();
+    await expect(page.locator('#photoStatus')).toContainText('Foto guardada');
+    expect(await storedPhotoCount(page)).toBe(1);
+    await expect(page.locator('#photoNote')).toHaveValue('');
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('nav button').filter({ hasText: 'Progreso' }).click();
+    await expect(page.locator('#photoGrid img')).toHaveCount(1);
+    await expect(page.locator('#photoGrid')).toContainText('Nota conservada para reintentar');
+    await expect.poll(() => page.locator('#photoGrid img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+    expect(await page.evaluate(() => localStorage.getItem('photos'))).toBeNull();
+    expect(errors).toEqual([]);
+  });
+}
+
 test('photo saving resists repeated taps and persists a single compressed photo', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -7,18 +94,7 @@ test('photo saving resists repeated taps and persists a single compressed photo'
   await completeIntake(page);
   await expect(page.locator('#r10IntakeModal')).toBeHidden();
   await page.locator('nav button').filter({ hasText: 'Progreso' }).click();
-  const png = await page.evaluate(() => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 40;
-    canvas.height = 40;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#336699';
-    ctx.fillRect(0, 0, 40, 40);
-    return canvas.toDataURL('image/png').split(',')[1];
-  });
-  await page.locator('#photoInput').setInputFiles({
-    name: 'baseline.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64')
-  });
+  await page.locator('#photoInput').setInputFiles(await photoFixture(page));
   await page.locator('#photoNote').fill('Línea base de prueba');
   const busy = await page.evaluate(async () => {
     const first = window.savePhoto();
