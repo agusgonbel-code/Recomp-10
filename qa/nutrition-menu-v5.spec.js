@@ -1,5 +1,41 @@
 const { test, expect } = require('@playwright/test');
 
+test('real USDA recipes keep quantities and equivalent daily macros after swap and reload',async({page})=>{
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await page.locator('#mpCake').uncheck();await page.locator('#mpShake').uncheck();
+ await page.locator('#mpMeals').selectOption('6');
+ for(const [id,value] of [['mpKcal','1950'],['mpProtein','155'],['mpCarbs','205'],['mpFat','58'],['mpDays','2']])await page.locator('#'+id).fill(value);
+ await page.locator('#mpGenerate').click();
+ await expect(page.locator('.mp-day')).toHaveCount(2);
+ await page.locator('[data-recipe="0,0"]').click();
+ await expect(page.locator('#mpRecipeDetail')).toContainText('Huevos revueltos con patata');
+ await expect(page.locator('#mpRecipeDetail')).toContainText('cocida, hervida sin sal');
+ await page.locator('[data-swap="0,0"]').click();
+ await expect(page.locator('#mpRecipeDetail')).toContainText('Pancakes de avena y claras');
+ await expect(page.locator('#mpRecipeDetail')).toContainText('Macros calculados por ingredientes');
+ const saved=await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'));
+ const plan=JSON.parse(saved),day=plan.days[0];
+ expect(day.energyDistribution.policy).toBe('macro-fit-preserved');
+ for(const [key,target,tolerance] of [['k',1950,.03],['p',155,.05],['c',205,.06],['f',58,.08]])expect(Math.abs(day.totals[key]-target)/target).toBeLessThanOrEqual(tolerance);
+ const meal=day.items[0];
+ for(const row of meal.ingredientAmounts){
+  expect(row.source.name).toContain('USDA');
+  await expect(page.locator('#mpRecipeDetail')).toContainText(row.text);
+  for(const key of ['k','p','c','f']){
+   const precision=key==='k'?1:10;
+   expect(row.nutrients[key]).toBe(Math.round(row.per100[key]*row.qty/100*precision+1e-9)/precision);
+  }
+ }
+ await page.reload({waitUntil:'load'});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await page.locator('[data-recipe="0,0"]').click();
+ await expect(page.locator('#mpRecipeDetail')).toContainText('Pancakes de avena y claras');
+ expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(saved);
+ expect(errors).toEqual([]);
+});
+
 for(const meals of [4,6])test(`${meals} meals: ingredient composition reaches details, substitution and persistence`,async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
