@@ -19,7 +19,50 @@ function announce(host,message,error=false){
  const status=host.querySelector('[data-checkin-status]');
  if(status){status.setAttribute('role',error?'alert':'status');status.textContent=message;}
 }
-function install(){const E=globalThis.RecompCheckin;if(!E)return;let host=document.getElementById('recompCheckin360');if(!host){host=document.createElement('div');host.id='recompCheckin360';host.className='card';host.style.marginTop='12px';(document.getElementById('recompTrendCard')||document.getElementById('coachBox'))?.after(host);}let history=[],historyError=false;try{history=readCheckins();}catch{historyError=true;}const targets=read('recomp_targets_v2',read('targets',{})),result=E.review(history,targets),n=E.narrative(result,history);host.innerHTML=`<h3>Check-in 360°</h3><p class="small">Peso, cintura, adherencia, rendimiento, recuperación y fotos estandarizadas en una sola revisión.</p><div class="good"><strong>${n.title}</strong><br>${n.action}<br><span class="small">Confianza ${n.confidence}${n.context.length?' · '+n.context.join(' · '):''}</span></div><details style="margin-top:10px"><summary>Registrar esta semana</summary><div class="row"><input data-k="weight" type="number" step="0.1" placeholder="Peso kg"><input data-k="waist" type="number" step="0.1" placeholder="Cintura cm"></div><label>Adherencia dieta %</label><input data-k="diet" type="number" value="85"><label>Adherencia entrenamiento %</label><input data-k="training" type="number" value="90"><label>Rendimiento -100 a 100</label><input data-k="performance" type="number" value="0"><div class="row"><div><label>Sueño 1–5</label><input data-k="sleep" type="number" value="3"></div><div><label>Hambre 1–5</label><input data-k="hunger" type="number" value="3"></div><div><label>Estrés 1–5</label><input data-k="stress" type="number" value="3"></div></div><label><input data-k="front" type="checkbox"> Foto frontal</label><label><input data-k="side" type="checkbox"> Foto lateral</label><label><input data-k="back" type="checkbox"> Foto posterior</label><label><input data-k="standardized" type="checkbox"> Misma luz, distancia y postura</label><textarea data-k="notes" placeholder="Notas de la semana"></textarea><button data-act="save">Guardar check-in y recalcular</button></details><p data-checkin-status role="status" aria-live="polite" class="small"></p><div style="margin-top:10px">${n.explanation.map(x=>`<p class="small">• ${x}</p>`).join('')}</div><div class="row"><button data-act="accept">Aceptar recomendación</button><button class="secondary" data-act="hold">Mantener por ahora</button><button class="secondary" data-act="reject">Rechazar</button></div><p class="small">Historial: ${history.length} check-ins · ${read(DKEY,[]).length} decisiones auditadas.</p>`;if(historyError)announce(host,'No se pudo leer el historial. No se sobrescribirán los datos guardados.',true);host.onclick=e=>{const a=e.target.dataset.act;if(!a)return;if(a==='save'){const q=k=>host.querySelector(`[data-k="${k}"]`);const item={weight:q('weight').value,waist:q('waist').value,dietAdherence:Number(q('diet').value)/100,trainingAdherence:Number(q('training').value)/100,performance:Number(q('performance').value)/100,sleep:q('sleep').value,hunger:q('hunger').value,stress:q('stress').value,notes:q('notes').value,photos:{front:q('front').checked,side:q('side').checked,back:q('back').checked,standardized:q('standardized').checked}};try{
+
+const TARGET_KEYS=['targets','macro','recomp_targets_v2'],ACCEPTED_KEY='recomp_last_accepted_review_v4';
+const validTargets=t=>t&&typeof t==='object'&&['kcal','protein','carbs','fat'].every(k=>typeof t[k]==='number'&&Number.isFinite(t[k])&&t[k]>=0)&&t.kcal>0;
+const targetSnapshot=()=>TARGET_KEYS.map(k=>localStorage.getItem(k));
+const reviewKey=history=>JSON.stringify(history.map(x=>[x.id,x.date,x.weight,x.waist,x.dietAdherence,x.trainingAdherence,x.performance,Boolean(x.photos?.front),Boolean(x.photos?.side),Boolean(x.photos?.back),Boolean(x.photos?.standardized)]));
+function strictRead(key,fallback){
+ const raw=localStorage.getItem(key);return raw===null?fallback:JSON.parse(raw);
+}
+function commitDecision(entries){
+ // Serialize and snapshot everything before writing. Only publish events after success.
+ const writes=entries.map(([key,value])=>[key,JSON.stringify(value),localStorage.getItem(key)]),completed=[];
+ try{for(const entry of writes){localStorage.setItem(entry[0],entry[1]);completed.push(entry);}}
+ catch(error){
+  let rollbackFailed=false;
+  for(const [key,,previous] of completed.reverse()){
+   try{if(previous===null)localStorage.removeItem(key);else localStorage.setItem(key,previous);}
+   catch{rollbackFailed=true;}
+  }
+  if(rollbackFailed)throw new Error('No se pudieron restaurar todos los datos. Revisa los objetivos antes de continuar.');
+  throw error;
+ }
+}
+function recordDecision(E,action,history,targets,result,snapshot){
+ if(JSON.stringify(readCheckins())!==JSON.stringify(history))throw new Error('Los datos han cambiado. Vuelve a abrir la revisión antes de decidir.');
+ const log=strictRead(DKEY,[]);
+ if(!Array.isArray(log)||log.some(x=>!x||typeof x!=='object'||Array.isArray(x)))throw new Error('El historial de decisiones no se puede leer.');
+ const nextLog=E.decisionLog(log,result,action),entries=[];
+ if(action==='accept'){
+  if(!result.reliable||!Number.isFinite(result.calorieDelta)||result.calorieDelta===0||!validTargets(result.nextTargets)||!validTargets(targets))throw new Error('No hay una recomendación válida que aplicar.');
+  const signature=reviewKey(history),accepted=strictRead(ACCEPTED_KEY,null);
+  if(accepted!==null&&typeof accepted!=='string')throw new Error('No se puede verificar la última recomendación aplicada.');
+  if(accepted===signature)throw new Error('Esta recomendación ya se aplicó. Registra nuevos datos antes de volver a ajustar.');
+  const current=targetSnapshot();
+  if(!snapshot||JSON.stringify(current)!==JSON.stringify(snapshot))throw new Error('Los objetivos han cambiado. Vuelve a abrir la revisión antes de decidir.');
+  for(const raw of current)if(raw!==null&&!validTargets(JSON.parse(raw)))throw new Error('Los objetivos guardados no son válidos.');
+  for(const key of TARGET_KEYS)entries.push([key,result.nextTargets]);
+  entries.push([ACCEPTED_KEY,signature]);
+  Object.assign(nextLog[nextLog.length-1],{previousTargets:targets,nextTargets:result.nextTargets});
+ }
+ entries.push([DKEY,nextLog]);
+ commitDecision(entries);
+}
+
+function install(){const E=globalThis.RecompCheckin;if(!E)return;let host=document.getElementById('recompCheckin360');if(!host){host=document.createElement('div');host.id='recompCheckin360';host.className='card';host.style.marginTop='12px';(document.getElementById('recompTrendCard')||document.getElementById('coachBox'))?.after(host);}let history=[],historyError=false;try{history=readCheckins();}catch{historyError=true;}const targets=read('recomp_targets_v2',read('targets',{})),result=E.review(history,targets),n=E.narrative(result,history);let snapshot=null;try{snapshot=targetSnapshot();}catch{}const alreadyAccepted=read(ACCEPTED_KEY,null)===reviewKey(history);const canAccept=!historyError&&snapshot&&result.reliable&&Number.isFinite(result.calorieDelta)&&result.calorieDelta!==0&&validTargets(targets)&&validTargets(result.nextTargets)&&!alreadyAccepted;host.innerHTML=`<h3>Check-in 360°</h3><p class="small">Peso, cintura, adherencia, rendimiento, recuperación y fotos estandarizadas en una sola revisión.</p><div class="good"><strong>${n.title}</strong><br>${alreadyAccepted?'Revisión ya aplicada. Registra nuevos datos para la siguiente revisión.':n.action}<br><span class="small">Confianza ${n.confidence}${n.context.length?' · '+n.context.join(' · '):''}</span></div><details style="margin-top:10px"><summary>Registrar esta semana</summary><div class="row"><input data-k="weight" type="number" step="0.1" placeholder="Peso kg"><input data-k="waist" type="number" step="0.1" placeholder="Cintura cm"></div><label>Adherencia dieta %</label><input data-k="diet" type="number" value="85"><label>Adherencia entrenamiento %</label><input data-k="training" type="number" value="90"><label>Rendimiento -100 a 100</label><input data-k="performance" type="number" value="0"><div class="row"><div><label>Sueño 1–5</label><input data-k="sleep" type="number" value="3"></div><div><label>Hambre 1–5</label><input data-k="hunger" type="number" value="3"></div><div><label>Estrés 1–5</label><input data-k="stress" type="number" value="3"></div></div><label><input data-k="front" type="checkbox"> Foto frontal</label><label><input data-k="side" type="checkbox"> Foto lateral</label><label><input data-k="back" type="checkbox"> Foto posterior</label><label><input data-k="standardized" type="checkbox"> Misma luz, distancia y postura</label><textarea data-k="notes" placeholder="Notas de la semana"></textarea><button data-act="save">Guardar check-in y recalcular</button></details><p data-checkin-status role="status" aria-live="polite" class="small"></p><div style="margin-top:10px">${n.explanation.map(x=>`<p class="small">• ${x}</p>`).join('')}</div><div class="row"><button data-act="accept" ${canAccept?'':'disabled'}>Aceptar recomendación</button><button class="secondary" data-act="hold">Mantener por ahora</button><button class="secondary" data-act="reject">Rechazar</button></div><p class="small">Historial: ${history.length} check-ins · ${read(DKEY,[]).length} decisiones auditadas.</p>`;if(historyError)announce(host,'No se pudo leer el historial. No se sobrescribirán los datos guardados.',true);host.onclick=e=>{const a=e.target.dataset.act;if(!a)return;if(a==='save'){const q=k=>host.querySelector(`[data-k="${k}"]`);const item={weight:q('weight').value,waist:q('waist').value,dietAdherence:Number(q('diet').value)/100,trainingAdherence:Number(q('training').value)/100,performance:Number(q('performance').value)/100,sleep:q('sleep').value,hunger:q('hunger').value,stress:q('stress').value,notes:q('notes').value,photos:{front:q('front').checked,side:q('side').checked,back:q('back').checked,standardized:q('standardized').checked}};try{
  // Read immediately before saving: another view may have appended since this form rendered.
  // Do not replace unreadable data with the display fallback or a stale snapshot.
  write(KEY,E.add(readCheckins(),item));
@@ -30,5 +73,12 @@ function install(){const E=globalThis.RecompCheckin;if(!E)return;let host=docume
 document.dispatchEvent(new CustomEvent('recomp:data-changed'));
 install();
 announce(host,'Check-in guardado.');
-return;}write(DKEY,E.decisionLog(read(DKEY,[]),result,a));if(a==='accept'&&result.nextTargets)write('recomp_targets_v2',result.nextTargets);install();};}
+return;}
+if(!['accept','hold','reject'].includes(a))return;
+try{recordDecision(E,a,history,targets,result,snapshot);}
+catch(error){announce(host,'No se pudo guardar la decisión. '+(error.message||'Revisa el almacenamiento y reintenta.'),true);return;}
+if(a==='accept')document.dispatchEvent(new CustomEvent('recomp:targets-updated',{detail:result.nextTargets}));
+document.dispatchEvent(new CustomEvent('recomp:data-changed'));
+install();
+announce(host,a==='accept'?'Recomendación aplicada. Los menús guardados no se han modificado.':'Decisión guardada.');};}
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',install,{once:true}):install();})();}
