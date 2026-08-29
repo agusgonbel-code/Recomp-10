@@ -169,8 +169,19 @@ function generateDays(recipes,input){
   const prefs=validatePreferences(input),pool=allowedRecipes(recipes.map(withComposition),prefs);
   if(pool.length<4)throw new Error('Las restricciones dejan muy pocas recetas. Revisa las exclusiones.');
   if(!prefs.includeBreakfastCake&&!prefs.includePostWorkoutShake){
-    const usage=new Map(),reference=buildDay(pool,prefs,new Map(),0,{}, {primary:120,secondary:160}),days=[reference],slots=slotsFor(prefs.meals);
-    for(let day=1;day<prefs.days;day++){let built=buildDay(pool,prefs,usage,day,{}, {primary:24,secondary:24});if(!withinTargets(built.totals,prefs)||!sameMacroBand(built.totals,reference.totals)){const items=optimizeIngredients(reference.items.map(x=>x.recipe),prefs,slots),t=totals(items);built={day:day+1,items,totals:t,error:macroError(t,prefs),withinTarget:withinTargets(t,prefs),fallback:true};}days.push(built);}
+    const usage=new Map(),slots=slotsFor(prefs.meals),cap=({3:.45,4:.40,5:.36,6:.34})[prefs.meals]||.40;
+    const accept=items=>{const t=totals(items);return withinTargets(t,prefs,{k:.03,p:.05,c:.06,f:.08})&&items.every(item=>item.k/Math.max(1,t.k)<=cap+.005)};
+    let reference=null,referenceAccepted=false;const referenceUsage=new Map();
+    // Search several deterministic seed families before choosing the template
+    // day. A single seed can repeatedly expose the same top-ranked recipes even
+    // when another fully sourced combination satisfies all four targets.
+    for(let seed=0;seed<8;seed++){
+      const candidate=buildDay(pool,prefs,referenceUsage,seed,{}, {primary:24,secondary:32,accept}),candidateAccepted=accept(candidate.items);
+      if(!reference||(candidateAccepted&&!referenceAccepted)||(candidateAccepted===referenceAccepted&&candidate.error<reference.error)){reference=candidate;referenceAccepted=candidateAccepted;}
+      if(candidateAccepted&&candidate.error<=.01)break;
+    }
+    reference={...reference,day:1};const days=[reference];
+    for(let day=1;day<prefs.days;day++){let built=buildDay(pool,prefs,usage,day,{}, {primary:24,secondary:24,accept});if(!accept(built.items)||!sameMacroBand(built.totals,reference.totals)){const items=optimizeIngredients(reference.items.map(x=>x.recipe),prefs,slots),t=totals(items);built={day:day+1,items,totals:t,error:macroError(t,prefs),withinTarget:withinTargets(t,prefs,{k:.03,p:.05,c:.06,f:.08}),fallback:true};}days.push(built);}
     return {createdAt:new Date().toISOString(),preferences:prefs,days};
   }
   const usage=new Map(),days=[];

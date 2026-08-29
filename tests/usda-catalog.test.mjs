@@ -114,3 +114,17 @@ test('an entirely migrated catalogue keeps real ledgers through generation, swap
   assert.deepEqual(copy(api.totals(day.items)),copy(day.totals));
  }
 });
+
+for(const meals of [3,4,5])test(`${meals} meals keep all 30 real-catalogue days inside the four targets`,()=>{
+ const migrated=catalog.filter(recipe=>recipe.composition);
+ const prefs={kcal:2200,protein:160,carbs:250,fat:62,meals,days:30,trainingDays:4,includeBreakfastCake:false,includePostWorkoutShake:false,maxTime:30};
+ const plan=api.generateDays(migrated,prefs);
+ assert.equal(plan.days.length,30);
+ const cap={3:.45,4:.40,5:.36}[meals];
+ for(const day of copy(plan).days){
+  assert.ok(api.withinTargets(day.totals,prefs,{k:.03,p:.05,c:.06,f:.08}));
+  assert.ok(day.items.every(item=>item.k/day.totals.k<=cap+.005));
+  for(const meal of day.items)ledger(meal);
+  assert.deepEqual(copy(api.totals(day.items)),copy(day.totals));
+ }
+});
