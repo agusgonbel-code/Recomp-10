@@ -70,7 +70,7 @@ function portionFromComposition(recipe,slot,scale){
   return calcItems([{recipe,slot,scale,model}])[0];
 }
 function baseScore(recipe,slot,share,prefs,usage,seed){const target={k:prefs.kcal*share,p:prefs.protein*share,c:prefs.carbs*share,f:prefs.fat*share},scale=clamp(target.k/Math.max(1,recipe.k),.45,3),txt=textOf(recipe),err=Math.abs(recipe.p*scale-target.p)/Math.max(15,target.p)+Math.abs(recipe.c*scale-target.c)/Math.max(20,target.c)+Math.abs(recipe.f*scale-target.f)/Math.max(8,target.f),used=Math.min(4,usage.get(recipe.n)||0),repeat=used*(prefs.variety==='alta'?.055:prefs.variety==='media'?.03:.012),pantry=prefs.pantry.some(x=>txt.includes(x))?-.12:0,budget=prefs.budget==='bajo'&&/(salmon|gamba|solomillo|atun fresco)/.test(txt)?.2:0,time=prefs.maxTime<=20&&recipe.time>20?.2:0,jitter=((seed*9301+49297)%233280)/233280*.02;return err+repeat+pantry+budget+time+jitter;}
-function pickRecipe(recipes,slot,share,prefs,usage,seed,avoid){let candidates=recipes.filter(r=>slotAliases(slot).includes(r.m)&&r.n!==avoid);if(!candidates.length)candidates=recipes.filter(r=>r.n!==avoid);if(!candidates.length)throw new Error('No quedan recetas compatibles con tus restricciones.');const ranked=candidates.map(r=>({r,score:baseScore(r,slot,share,prefs,usage,seed)})).sort((a,b)=>a.score-b.score||a.r.n.localeCompare(b.r.n,'es'));return ranked[seed%Math.min(4,ranked.length)].r;}
+function pickRecipe(recipes,slot,share,prefs,usage,seed,avoid){let candidates=recipes.filter(r=>slotAliases(slot).includes(r.m)&&r.n!==avoid);if(!candidates.length)candidates=recipes.filter(r=>r.n!==avoid);if(!candidates.length)throw new Error('No quedan recetas compatibles con tus restricciones.');const ranked=candidates.map(r=>({r,score:baseScore(r,slot,share,prefs,usage,seed)})).sort((a,b)=>a.score-b.score||a.r.n.localeCompare(b.r.n,'es'));return ranked[seed%Math.min(12,ranked.length)].r;}
 function solveLinear(matrix,b){const n=b.length,a=matrix.map((row,i)=>[...row,b[i]]);for(let col=0;col<n;col++){let pivot=col;for(let r=col+1;r<n;r++)if(Math.abs(a[r][col])>Math.abs(a[pivot][col]))pivot=r;if(Math.abs(a[pivot][col])<1e-10)return null;[a[col],a[pivot]]=[a[pivot],a[col]];const d=a[col][col];for(let j=col;j<=n;j++)a[col][j]/=d;for(let r=0;r<n;r++)if(r!==col){const f=a[r][col];for(let j=col;j<=n;j++)a[r][j]-=f*a[col][j];}}return a.map(row=>row[n]);}
 function practicalQty(qty,unit='g'){if(/^ud|unidad/.test(unit)){const step=.5;return Math.max(step,Math.round(qty/step)*step)}const step=qty>=50?5:qty>=10?1:.5;return Math.max(step,Math.round(qty/step)*step);}
 function formatIngredientAmount(parsed,qty){const shown=Number.isInteger(qty)?qty:qty.toFixed(1),unit=/^ud|unidad/.test(parsed.unit)?'ud':parsed.unit;return `${shown} ${unit}${parsed.name?' de '+parsed.name:''}`;}
@@ -118,7 +118,7 @@ function buildDay(pool,prefs,usage,day,forced={},limits={primary:50,secondary:50
  const slots=Array.isArray(prefs._slots)?prefs._slots:slotsFor(prefs.meals);let best=null;
  const attemptBuild=(activeUsage,attempts,offset=0)=>{
   for(let attempt=0;attempt<attempts;attempt++){
-   const chosen=slots.map(([slot,share],i)=>forced[i]||pickRecipe(pool,slot,share,prefs,activeUsage,day*137+(attempt+offset)*29+i*13,forced.avoid)),items=optimizeIngredients(chosen,prefs,slots),t=totals(items),err=macroError(t,prefs);
+   const chosen=slots.map(([slot,share],i)=>{const choiceSeed=Math.abs((((day+1)*73856093)^((attempt+offset+1)*19349663)^((i+1)*83492791))|0);return forced[i]||pickRecipe(pool,slot,share,prefs,activeUsage,choiceSeed,forced.avoid)}),items=optimizeIngredients(chosen,prefs,slots),t=totals(items),err=macroError(t,prefs);
    const accepted=typeof limits.accept==='function'?limits.accept(items):true;
    if(!best||(accepted&&!best.accepted)||(accepted===best.accepted&&err<best.err))best={items,t,err,accepted};
    if(accepted&&withinTargets(t,prefs))break;
@@ -164,7 +164,20 @@ function fixedBreakfastCake(){
   ]};
   return {recipe,slot:'07:30 · Desayuno',scale:1,...macros,ingredientAmounts,nutritionBasis:'ingredient-composition',ingredientNutritionVerified:false};
 }
-function fixedMorningItem(kind){if(kind==='shake')return{recipe:{id:'fixed-post-workout-shake',n:'Batido de proteína postentreno con agua',m:'Postentreno',k:117,p:23.4,c:2.4,f:1.8,i:['30 g de proteína whey','Agua al gusto'],s:['Añade la proteína y el agua a un vaso mezclador.','Agita durante 20-30 segundos hasta que no queden grumos.','Tómalo después de entrenar y registra la toma en el diario.']},slot:'07:00 · Postentreno',scale:1,k:117,p:23,c:2,f:2,ingredientAmounts:[{text:'30 g de proteína whey',adjustable:false,qty:30,unit:'g',name:'proteína whey',estimated:false,quantityEstimated:false},{text:'Agua al gusto',adjustable:false,qty:0,unit:'ml',name:'agua',estimated:false,quantityEstimated:false}],nutritionBasis:'recipe-declared',ingredientNutritionVerified:false};return fixedBreakfastCake();}
+function fixedPostWorkoutShake(){
+  // Practical quantities selected from the pinned USDA entries to provide the
+  // user's requested ~150 kcal and 25 g protein without declared recipe macros.
+  const composition=[{"foodId":"173180","name":"proteína whey en polvo","state":"seca","unit":"g","qty":28,"per100":{"p":78.1,"f":1.56,"c":6.25,"k":352},"source":{"id":"173180","name":"USDA FoodData Central / SR Legacy","url":"https://fdc.nal.usda.gov/food-details/173180/nutrients","accessedAt":"2026-08-29"}},{"foodId":"171267","name":"leche semidesnatada 2 %","state":"líquida","unit":"g","qty":105,"per100":{"p":3.3,"c":4.8,"k":50,"f":1.98},"source":{"id":"171267","name":"USDA FoodData Central / SR Legacy","url":"https://fdc.nal.usda.gov/food-details/171267/nutrients","accessedAt":"2026-08-29"}}];
+  const ingredientAmounts=compositionAmounts(composition,1).map(row=>({...row,adjustable:false})),macros=compositionTotals(ingredientAmounts);
+  const recipe={id:'fixed-post-workout-shake',n:'Batido de proteína postentreno con leche',m:'Postentreno',composition,...macros,i:ingredientAmounts.map(row=>row.text),s:[
+    'Pesa la proteína whey en seco y la leche por separado usando las cantidades indicadas.',
+    'Vierte toda la leche pesada en un vaso mezclador limpio.',
+    'Añade toda la proteína whey, cierra el vaso y agita durante 20–30 segundos.',
+    'Comprueba que no quedan grumos ni polvo adherido y consume la ración completa después de entrenar.'
+  ]};
+  return {recipe,slot:'07:00 · Postentreno',scale:1,...macros,ingredientAmounts,nutritionBasis:'ingredient-composition',ingredientNutritionVerified:false};
+}
+function fixedMorningItem(kind){return kind==='shake'?fixedPostWorkoutShake():fixedBreakfastCake();}
 function generateDays(recipes,input){
   const prefs=validatePreferences(input),pool=allowedRecipes(recipes.map(withComposition),prefs);
   if(pool.length<4)throw new Error('Las restricciones dejan muy pocas recetas. Revisa las exclusiones.');
@@ -175,7 +188,7 @@ function generateDays(recipes,input){
     // Search several deterministic seed families before choosing the template
     // day. A single seed can repeatedly expose the same top-ranked recipes even
     // when another fully sourced combination satisfies all four targets.
-    for(let seed=0;seed<8;seed++){
+    for(let seed=0;seed<12;seed++){
       const candidate=buildDay(pool,prefs,referenceUsage,seed,{}, {primary:24,secondary:32,accept}),candidateAccepted=accept(candidate.items);
       if(!reference||(candidateAccepted&&!referenceAccepted)||(candidateAccepted===referenceAccepted&&candidate.error<reference.error)){reference=candidate;referenceAccepted=candidateAccepted;}
       if(candidateAccepted&&candidate.error<=.01)break;
@@ -184,7 +197,7 @@ function generateDays(recipes,input){
     for(let day=1;day<prefs.days;day++){let built=buildDay(pool,prefs,usage,day,{}, {primary:24,secondary:24,accept});if(!accept(built.items)||!sameMacroBand(built.totals,reference.totals)){const items=optimizeIngredients(reference.items.map(x=>x.recipe),prefs,slots),t=totals(items);built={day:day+1,items,totals:t,error:macroError(t,prefs),withinTarget:withinTargets(t,prefs,{k:.03,p:.05,c:.06,f:.08}),fallback:true};}days.push(built);}
     return {createdAt:new Date().toISOString(),preferences:prefs,days};
   }
-  const usage=new Map(),days=[];
+  const usage=new Map(),days=[];let fallbackRecipes=null;
   for(let day=0;day<prefs.days;day++){
     const trainingDay=day%7<prefs.trainingDays,fixed=[];
     if(trainingDay&&prefs.includePostWorkoutShake)fixed.push(fixedMorningItem('shake'));
@@ -208,12 +221,24 @@ function generateDays(recipes,input){
       const cap=({3:.45,4:.40,5:.36,6:.34,7:.32})[items.length]||.40;
       if(withinTarget&&items.every(item=>item.k/Math.max(1,dayTotals.k)<=cap+.005))break;
     }
+    const cap=({3:.45,4:.40,5:.36,6:.34,7:.32})[items.length]||.40;
+    let distributed=items.every(item=>item.k/Math.max(1,dayTotals.k)<=cap+.005);
+    // Reuse the last fully accepted recipe combination when a different fixed
+    // morning signature (for example, a rest day without the shake) makes the
+    // deterministic search land on an infeasible high-calorie meal. Quantities
+    // are solved again from composition for the current remaining targets.
+    if((!withinTarget||!distributed)&&fallbackRecipes?.length===remainingMeals){
+      const variable=optimizeIngredients(fallbackRecipes,buildTargets,remaining._slots),proposed=[...fixed,...reconcileRemainingItems(variable,remaining)],proposedTotals=totals(proposed);
+      const proposedDistributed=proposed.every(item=>item.k/Math.max(1,proposedTotals.k)<=cap+.005),proposedWithin=withinTargets(proposedTotals,prefs,{k:.03,p:.05,c:.06,f:.08});
+      if(proposedWithin&&proposedDistributed){items=proposed;dayTotals=proposedTotals;withinTarget=true;distributed=true;}
+    }
+    if(withinTarget&&distributed)fallbackRecipes=items.filter(item=>!/^fixed-/.test(String(item?.recipe?.id||''))).map(item=>item.recipe);
     days.push({day:day+1,trainingDay,trainingTime:trainingDay?prefs.trainingTime:null,items,totals:dayTotals,error:macroError(dayTotals,prefs),withinTarget,macroAdjusted:false});
   }
   return {createdAt:new Date().toISOString(),preferences:prefs,days};
 }
 const generate30Days=(recipes,input)=>generateDays(recipes,{...input,days:30});
-function swapMeal(plan,recipes,dayIndex,itemIndex){if(!plan?.days?.[dayIndex])throw new Error('Día no válido.');const prefs=validatePreferences({...plan.preferences,days:plan.days.length}),pool=allowedRecipes(recipes.map(withComposition),prefs),day=plan.days[dayIndex],old=day.items[itemIndex];if(/^fixed-/.test(String(old?.recipe?.id||'')))throw new Error('Esta toma está fijada en tu perfil. Edita su configuración para cambiarla.');const fixed=day.items.filter(item=>/^fixed-/.test(String(item?.recipe?.id||''))),variable=day.items.filter(item=>!/^fixed-/.test(String(item?.recipe?.id||''))),variableIndex=variable.indexOf(old),remainingMeals=variable.length,remainingSlots=fixed.length?remainingSlotsAfterBreakfast(remainingMeals):slotsFor(remainingMeals),fixedTotals=totals(fixed),target=fixed.length?{...prefs,meals:remainingMeals,_slots:remainingSlots,kcal:prefs.kcal-fixedTotals.k,protein:prefs.protein-fixedTotals.p,carbs:prefs.carbs-fixedTotals.c,fat:prefs.fat-fixedTotals.f}:prefs;let candidates=pool.filter(r=>slotAliases(old.slot).includes(r.m)&&r.n!==old.recipe.n);if(!candidates.length)candidates=pool.filter(r=>r.n!==old.recipe.n);if(!candidates.length)throw new Error('No hay una alternativa equivalente disponible.');const ranked=candidates.map(r=>{const s=clamp(old.k/Math.max(1,r.k),.2,5),e=Math.abs(r.p*s-old.p)/Math.max(10,old.p)+Math.abs(r.c*s-old.c)/Math.max(15,old.c)+Math.abs(r.f*s-old.f)/Math.max(6,old.f);return {r,e};}).sort((a,b)=>a.e-b.e).slice(0,48);let best=null;ranked.forEach(({r})=>{const chosen=variable.map((x,i)=>i===variableIndex?r:x.recipe),optimized=optimizeIngredients(chosen,target,remainingSlots),variableItems=fixed.length?reconcileRemainingItems(optimized,target):optimized,items=[...fixed,...variableItems],t=totals(items),err=macroError(t,prefs),cap=items.length>=5?.38:.40,maxShare=Math.max(...items.map(item=>item.k/Math.max(1,t.k)));if(fixed.length&&(maxShare>cap+.005||!withinTargets(t,prefs,{k:.03,p:.05,c:.06,f:.08})))return;if(!best||err<best.err)best={items,t,err};});if(!best)throw new Error('No se encontró una alternativa que conserve tus macros y un reparto seguro. Prueba otra comida o ajusta el objetivo.');plan.days[dayIndex]={...day,items:best.items,totals:best.t,error:best.err,withinTarget:withinTargets(best.t,prefs,{k:.03,p:.05,c:.06,f:.08}),macroAdjusted:false};return plan;}
+function swapMeal(plan,recipes,dayIndex,itemIndex){if(!plan?.days?.[dayIndex])throw new Error('Día no válido.');const prefs=validatePreferences({...plan.preferences,days:plan.days.length}),pool=allowedRecipes(recipes.map(withComposition),prefs),day=plan.days[dayIndex],old=day.items[itemIndex];if(/^fixed-/.test(String(old?.recipe?.id||'')))throw new Error('Esta toma está fijada en tu perfil. Edita su configuración para cambiarla.');const fixed=day.items.filter(item=>/^fixed-/.test(String(item?.recipe?.id||''))),variable=day.items.filter(item=>!/^fixed-/.test(String(item?.recipe?.id||''))),variableIndex=variable.indexOf(old),remainingMeals=variable.length,remainingSlots=fixed.length?remainingSlotsAfterBreakfast(remainingMeals):slotsFor(remainingMeals),fixedTotals=totals(fixed),target=fixed.length?{...prefs,meals:remainingMeals,_slots:remainingSlots,kcal:prefs.kcal-fixedTotals.k,protein:prefs.protein-fixedTotals.p,carbs:prefs.carbs-fixedTotals.c,fat:prefs.fat-fixedTotals.f}:prefs;let candidates=pool.filter(r=>slotAliases(old.slot).includes(r.m)&&r.n!==old.recipe.n);if(!candidates.length)candidates=pool.filter(r=>r.n!==old.recipe.n);if(!candidates.length)throw new Error('No hay una alternativa equivalente disponible.');const ranked=candidates.map(r=>{const s=clamp(old.k/Math.max(1,r.k),.2,5),e=Math.abs(r.p*s-old.p)/Math.max(10,old.p)+Math.abs(r.c*s-old.c)/Math.max(15,old.c)+Math.abs(r.f*s-old.f)/Math.max(6,old.f);return {r,e};}).sort((a,b)=>a.e-b.e).slice(0,48),acceptSwap=items=>{const t=totals(items),cap=items.length>=5?.38:.40;return withinTargets(t,prefs,{k:.05,p:.06,c:.06,f:.07})&&items.every(item=>item.k/Math.max(1,t.k)<=cap+.005)};let best=null;ranked.forEach(({r})=>{const chosen=variable.map((x,i)=>i===variableIndex?r:x.recipe),optimized=optimizeIngredients(chosen,target,remainingSlots),variableItems=fixed.length?reconcileRemainingItems(optimized,target):optimized,items=[...fixed,...variableItems],t=totals(items),err=macroError(t,prefs),cap=items.length>=5?.38:.40,maxShare=Math.max(...items.map(item=>item.k/Math.max(1,t.k))),accepted=acceptSwap(items);if(fixed.length&&(maxShare>cap+.005||!withinTargets(t,prefs,{k:.03,p:.05,c:.06,f:.08})))return;if(!best||(accepted&&!best.accepted)||(accepted===best.accepted&&err<best.err))best={items,t,err,accepted};});if(!fixed.length&&!best?.accepted){for(const [candidateIndex,{r}] of ranked.slice(0,12).entries()){const forced={avoid:old.recipe.n};forced[variableIndex]=r;const built=buildDay(pool,prefs,new Map(),dayIndex+candidateIndex*17,forced,{primary:24,secondary:32,accept:acceptSwap}),accepted=acceptSwap(built.items);if(!accepted)continue;const t=totals(built.items),err=macroError(t,prefs);if(!best||!best.accepted||err<best.err)best={items:built.items,t,err,accepted:true};if(err<=.02)break;}}if(!best)throw new Error('No se encontró una alternativa que conserve tus macros y un reparto seguro. Prueba otra comida o ajusta el objetivo.');plan.days[dayIndex]={...day,items:best.items,totals:best.t,error:best.err,withinTarget:withinTargets(best.t,prefs,{k:.03,p:.05,c:.06,f:.08}),macroAdjusted:false};return plan;}
 function legacyScaleIngredient(raw,scale){return formatIngredient(parseIngredient(raw),scale);}
 function ingredientsFor(item){if(Array.isArray(item?.ingredientAmounts)&&item.ingredientAmounts.length)return item.ingredientAmounts.map(x=>x.text);return (item?.recipe?.i||[]).map(raw=>legacyScaleIngredient(raw,item?.scale||1));}
 function ingredientDetailsFor(item){if(Array.isArray(item?.ingredientAmounts)&&item.ingredientAmounts.length)return item.ingredientAmounts.map(ingredient=>({text:ingredient.text,nutrients:ingredient.nutrients||null,estimated:Boolean(ingredient.estimated),quantityEstimated:Boolean(ingredient.quantityEstimated)}));return ingredientsFor(item).map(text=>({text,nutrients:null,estimated:true,quantityEstimated:true}));}

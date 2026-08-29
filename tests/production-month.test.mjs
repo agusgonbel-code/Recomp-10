@@ -27,10 +27,16 @@ test('el catálogo real tiene recetas completas y cantidades escalables',()=>{
 
 function validateFullMonth(targets){
   const start=performance.now();
+  const cpuStart=process.cpuUsage();
   const plan=globalThis.RecompMealPlanner.generate30Days(recipes,{...targets,meals:4,diet:'flexible',variety:'alta'});
   const elapsed=performance.now()-start;
+  const cpu=process.cpuUsage(cpuStart),cpuMs=(cpu.user+cpu.system)/1000;
   assert.equal(plan.days.length,30);
-  assert.ok(elapsed<8000,`Generar 30 días tardó ${Math.round(elapsed)} ms`);
+  // Node runs test files concurrently, so wall time can include CPU stolen by
+  // other simulations. Bound the work performed by this generator separately
+  // and keep a generous wall-clock deadlock guard.
+  assert.ok(cpuMs<8000,`Generar 30 días consumió ${Math.round(cpuMs)} ms de CPU`);
+  assert.ok(elapsed<20000,`Generar 30 días quedó bloqueado durante ${Math.round(elapsed)} ms`);
   const reference=plan.days[0].totals;
   for(const day of plan.days){
     assert.ok(globalThis.RecompMealPlanner.withinTargets(day.totals,plan.preferences),`Día ${day.day} fuera de objetivo: ${JSON.stringify(day.totals)}`);
@@ -73,7 +79,7 @@ function validateFullMonth(targets){
     assert.notEqual(plan.days[dayIndex].items[1].recipe.n,before,`Día ${dayIndex+1}: la sustitución no cambió la comida`);
     assert.ok(globalThis.RecompMealPlanner.withinTargets(plan.days[dayIndex].totals,plan.preferences,{k:.05,p:.06,c:.065,f:.075}),`Día ${dayIndex+1}: sustitución rompe objetivos`);
   }
-  return {plan,elapsed};
+  return {plan,elapsed,cpuMs};
 }
 
 test('catálogo real: mes completo con objetivos estándar',()=>{

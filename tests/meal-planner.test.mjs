@@ -57,7 +57,7 @@ test('conecta el catálogo completo y conserva la receta paso a paso',()=>{
  });
 });
 
-test('bizcocho suma ingredientes, batido conserva macros declarados y el resto no fuerza cifras',()=>{
+test('bizcocho y batido suman ingredientes y el resto no fuerza cifras',()=>{
  const plan=RecompMealPlanner.generateDays(recipes,{kcal:2200,protein:160,carbs:250,fat:70,meals:4,days:7,trainingDays:4,trainingTime:'06:00',includeBreakfastCake:true,includePostWorkoutShake:true});
  assert.ok(plan.days.every(day=>day.withinTarget===RecompMealPlanner.withinTargets(day.totals,plan.preferences,{k:.03,p:.05,c:.06,f:.08})));
  assert.ok(plan.days.slice(0,4).every(day=>day.items.some(item=>item.recipe.id==='fixed-post-workout-shake')));
@@ -74,5 +74,5 @@ test('bizcocho suma ingredientes, batido conserva macros declarados y el resto n
    assert.equal(cake[key],Math.round(sum/precision));
   }
  }
- assert.deepEqual(plan.days[0].items.find(item=>item.recipe.id==='fixed-post-workout-shake').p,23);
+ assert.deepEqual(plan.days[0].items.find(item=>item.recipe.id==='fixed-post-workout-shake').p,25);
 });
