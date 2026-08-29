@@ -69,7 +69,41 @@
     const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;const source=sourceKey(day,item);if(loggedToday(source))return;
     document.dispatchEvent(new CustomEvent('recomp:log-planned-meal',{detail:{item:meal,sourceKey:source}}));
   }
-  function save(){localStorage.setItem(key,JSON.stringify(plan));}
+  function save(candidate){
+    // Publish only after persistence succeeds. Storage failure must not leave
+    // the recipe buttons or diary actions pointing at an unsaved menu.
+    localStorage.setItem(key,JSON.stringify(candidate));
+    plan=candidate;
+  }
+  function readSavedPlan(){
+    const stored=localStorage.getItem(key);
+    if(stored===null)return null;
+    const candidate=JSON.parse(stored);
+    if(candidate===null)return null;
+    const object=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
+    const nonnegative=value=>typeof value==='number'&&Number.isFinite(value)&&value>=0;
+    const macros=value=>object(value)&&['k','p','c','f'].every(field=>nonnegative(value[field]));
+    const strings=value=>value===undefined||(Array.isArray(value)&&value.every(item=>typeof item==='string'));
+    const valid=object(candidate)&&object(candidate.preferences)
+      &&['kcal','protein','carbs','fat'].every(field=>nonnegative(candidate.preferences[field])&&candidate.preferences[field]>0)
+      &&Array.isArray(candidate.days)&&candidate.days.length>0&&candidate.days.length<=30
+      &&candidate.days.every(day=>object(day)&&Number.isInteger(day.day)&&day.day>0&&macros(day.totals)
+        &&Array.isArray(day.items)&&day.items.length>0&&day.items.length<=6
+        &&day.items.every(item=>macros(item)&&object(item.recipe)&&typeof item.recipe.n==='string'&&item.recipe.n.trim()
+          &&strings(item.recipe.i)&&strings(item.recipe.s)
+          &&(item.ingredientAmounts===undefined||(Array.isArray(item.ingredientAmounts)&&item.ingredientAmounts.every(ingredient=>
+            object(ingredient)&&typeof ingredient.text==='string'
+            &&(nonnegative(ingredient.qty)||(ingredient.qty===undefined&&ingredient.adjustable===false))
+            &&(ingredient.nutrients==null||macros(ingredient.nutrients)))))));
+    if(!valid)throw new Error('El menú guardado está incompleto o tiene un formato no válido.');
+    return candidate;
+  }
+  function restorePlan(){
+    let error=null;
+    try{plan=readSavedPlan()}catch(cause){plan=null;error=cause}
+    render();
+    if(error)$('mpStatus').innerHTML='<div class="notice" role="alert"><b>No se pudo recuperar el menú guardado.</b><br>Los datos guardados no se han borrado. Puedes volver a abrir la app para reintentar. Si generas un menú nuevo y se guarda correctamente, reemplazará el anterior.</div>';
+  }
   function macroForm(){return {kcal:$('mpKcal')?.value,protein:$('mpProtein')?.value,carbs:$('mpCarbs')?.value,fat:$('mpFat')?.value}}
   function persistManualTargets(notify=false){const t=RecompMealPlanner.macroTargets(macroForm());localStorage.setItem(manualKey,JSON.stringify(t));if(notify&&$('mpStatus'))$('mpStatus').innerHTML='<div class="good"><b>Objetivos manuales guardados.</b> El próximo menú usará '+t.kcal+' kcal · P '+t.protein+' g · C '+t.carbs+' g · G '+t.fat+' g.</div>';return t}
   function formValues(){return {
@@ -111,11 +145,20 @@
       if(button){button.disabled=true;button.textContent='Calculando menú…'}
       persistManualTargets(false);
       const catalog=recipeSource();if(!catalog.length)throw new Error('La biblioteca de recetas todavía no está lista.');
-      plan=RecompMealPlanner.generateDays(catalog,formValues());visibleWeek=0;save();render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'});
+      const candidate=RecompMealPlanner.generateDays(catalog,formValues());
+      save(candidate);visibleWeek=0;$('mpRecipeDetail').innerHTML='';render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'});
     }catch(e){$('mpStatus').innerHTML='<div class="notice"><b>No se pudo crear el menú.</b><br>'+esc(e.message)+'</div>'}
     finally{if(button){button.disabled=false;button.textContent='Generar menú'}}
   }
-  function swap(day,item){try{plan=RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render();showRecipe(day,item)}catch(e){alert(e.message)}}
+  function swap(day,item){
+    try{
+      if(!plan)return;
+      // The solver mutates its argument, including other meals when balancing.
+      const candidate=JSON.parse(JSON.stringify(plan));
+      const replacement=RecompMealPlanner.swapMeal(candidate,recipeSource(),day,item);
+      save(replacement||candidate);render();showRecipe(day,item);
+    }catch(e){$('mpStatus').innerHTML='<div class="notice" role="alert"><b>No se pudo guardar la sustitución.</b><br>'+esc(e.message)+'<br>El menú anterior se conserva. Puedes reintentar.</div>'}
+  }
   function showRecipe(day,item){
     const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;
     const ingredients=RecompMealPlanner.ingredientDetailsFor(meal).map(ingredient=>{
@@ -162,7 +205,7 @@
     $('mpCalculateTargets').onclick=calculatePlannerTargets;$('mpGenerate').onclick=generate;$('mpSaveTargets').onclick=()=>persistManualTargets(true);$('mpCalculatorTargets').onclick=useCalculatorTargets;
     ['mpKcal','mpProtein','mpCarbs','mpFat'].forEach(id=>$(id).addEventListener('change',()=>persistManualTargets(false)));
     document.addEventListener('recomp:targets-updated',event=>{localStorage.removeItem(manualKey);applyMacroTargets(event.detail,true)});document.addEventListener('recomp:planned-meal-logged',()=>render());document.addEventListener('recomp:meal-log-changed',render);window.addEventListener('pageshow',()=>applyMacroTargets(savedManualTargets()||savedTargets()));
-    try{plan=JSON.parse(localStorage.getItem(key)||'null')}catch{plan=null}render();
+    restorePlan();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
