@@ -98,7 +98,7 @@ test('loading the six-meal extension twice cannot replace installed quality guar
 
 test('an entirely migrated catalogue keeps real ledgers through generation, swap and restore',()=>{
  const migrated=catalog.filter(recipe=>recipe.composition);
- assert.equal(migrated.length,25);
+ assert.equal(migrated.length,31);
  const prefs={kcal:2000,protein:175,carbs:255,fat:30,meals:6,days:2};
  let plan=api.generateDays(migrated,prefs);
  for(const day of plan.days){
