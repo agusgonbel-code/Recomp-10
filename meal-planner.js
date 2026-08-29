@@ -70,7 +70,7 @@ function portionFromComposition(recipe,slot,scale){
   return calcItems([{recipe,slot,scale,model}])[0];
 }
 function baseScore(recipe,slot,share,prefs,usage,seed){const target={k:prefs.kcal*share,p:prefs.protein*share,c:prefs.carbs*share,f:prefs.fat*share},scale=clamp(target.k/Math.max(1,recipe.k),.45,3),txt=textOf(recipe),err=Math.abs(recipe.p*scale-target.p)/Math.max(15,target.p)+Math.abs(recipe.c*scale-target.c)/Math.max(20,target.c)+Math.abs(recipe.f*scale-target.f)/Math.max(8,target.f),used=Math.min(4,usage.get(recipe.n)||0),repeat=used*(prefs.variety==='alta'?.055:prefs.variety==='media'?.03:.012),pantry=prefs.pantry.some(x=>txt.includes(x))?-.12:0,budget=prefs.budget==='bajo'&&/(salmon|gamba|solomillo|atun fresco)/.test(txt)?.2:0,time=prefs.maxTime<=20&&recipe.time>20?.2:0,jitter=((seed*9301+49297)%233280)/233280*.02;return err+repeat+pantry+budget+time+jitter;}
-function pickRecipe(recipes,slot,share,prefs,usage,seed,avoid){let candidates=recipes.filter(r=>slotAliases(slot).includes(r.m)&&r.n!==avoid);if(!candidates.length)candidates=recipes.filter(r=>r.n!==avoid);if(!candidates.length)throw new Error('No quedan recetas compatibles con tus restricciones.');const ranked=candidates.map(r=>({r,score:baseScore(r,slot,share,prefs,usage,seed)})).sort((a,b)=>a.score-b.score||a.r.n.localeCompare(b.r.n,'es'));return ranked[seed%Math.min(12,ranked.length)].r;}
+function pickRecipe(recipes,slot,share,prefs,usage,seed,avoid){let candidates=recipes.filter(r=>slotAliases(slot).includes(r.m)&&r.n!==avoid);if(!candidates.length)candidates=recipes.filter(r=>r.n!==avoid);if(!candidates.length)throw new Error('No quedan recetas compatibles con tus restricciones.');const ranked=candidates.map(r=>({r,score:baseScore(r,slot,share,prefs,usage,seed)})).sort((a,b)=>a.score-b.score||a.r.n.localeCompare(b.r.n,'es'));return ranked[seed%ranked.length].r;}
 function solveLinear(matrix,b){const n=b.length,a=matrix.map((row,i)=>[...row,b[i]]);for(let col=0;col<n;col++){let pivot=col;for(let r=col+1;r<n;r++)if(Math.abs(a[r][col])>Math.abs(a[pivot][col]))pivot=r;if(Math.abs(a[pivot][col])<1e-10)return null;[a[col],a[pivot]]=[a[pivot],a[col]];const d=a[col][col];for(let j=col;j<=n;j++)a[col][j]/=d;for(let r=0;r<n;r++)if(r!==col){const f=a[r][col];for(let j=col;j<=n;j++)a[r][j]-=f*a[col][j];}}return a.map(row=>row[n]);}
 function practicalQty(qty,unit='g'){if(/^ud|unidad/.test(unit)){const step=.5;return Math.max(step,Math.round(qty/step)*step)}const step=qty>=50?5:qty>=10?1:.5;return Math.max(step,Math.round(qty/step)*step);}
 function formatIngredientAmount(parsed,qty){const shown=Number.isInteger(qty)?qty:qty.toFixed(1),unit=/^ud|unidad/.test(parsed.unit)?'ud':parsed.unit;return `${shown} ${unit}${parsed.name?' de '+parsed.name:''}`;}
@@ -83,12 +83,18 @@ function macroError(t,prefs){const d=macroDeviation(t,prefs);return d.k+d.p+d.c+
 function withinTargets(t,prefs,tolerance={k:.03,p:.04,c:.045,f:.06}){const d=macroDeviation(t,prefs);return d.k<=tolerance.k&&d.p<=tolerance.p&&d.c<=tolerance.c&&d.f<=tolerance.f;}
 function optimizeIngredients(chosen,prefs,slots){
   const work=makeItems(chosen,prefs,slots),target=[prefs.kcal,prefs.protein,prefs.carbs,prefs.fat],weights=target.map(x=>Math.max(1,x));
+  // Fixed breakfasts and shakes reduce the variable-meal budget. Keep every
+  // variable recipe below the resulting whole-day energy cap while solving
+  // the four macros, rather than accepting an otherwise accurate day with one
+  // oversized lunch and compensating with implausibly tiny portions.
+  const boundedScale=(item,value)=>clamp(value,.18,Math.min(5,Number.isFinite(prefs._maxItemKcal)?prefs._maxItemKcal/Math.max(1,item.recipe.k):5));
+  work.forEach(item=>{item.scale=boundedScale(item,item.scale)});
   for(let pass=0;pass<28;pass++){
     const rendered=calcItems(work),t=totals(rendered),current=[t.k,t.p,t.c,t.f],residual=target.map((x,j)=>(x-current[j])/weights[j]);
     if(withinTargets(t,prefs,{k:.005,p:.008,c:.01,f:.012}))break;
     const derivatives=work.map(item=>[item.recipe.k/weights[0],item.recipe.p/weights[1],item.recipe.c/weights[2],item.recipe.f/weights[3]]),gram=Array.from({length:4},(_,r)=>Array.from({length:4},(_,c)=>derivatives.reduce((sum,d)=>sum+d[r]*d[c],0)+(r===c?2e-4:0))),y=solveLinear(gram,residual);
     if(!y)break;
-    work.forEach((item,i)=>{let delta=0;for(let j=0;j<4;j++)delta+=derivatives[i][j]*y[j];item.scale=clamp(item.scale+delta,.18,5)});
+    work.forEach((item,i)=>{let delta=0;for(let j=0;j<4;j++)delta+=derivatives[i][j]*y[j];item.scale=boundedScale(item,item.scale+delta)});
   }
   let best=calcItems(work),bestErr=macroError(totals(best),prefs);
   // Repeated projected coordinate descent. The old implementation visited each
@@ -102,7 +108,7 @@ function optimizeIngredients(chosen,prefs,slots){
         const original=item.scale;
         let localBest=original,localErr=bestErr,localRendered=best;
         for(const candidate of [original-step,original+step]){
-          item.scale=clamp(candidate,.18,5);
+          item.scale=boundedScale(item,candidate);
           const rendered=calcItems(work),err=macroError(totals(rendered),prefs);
           if(err+1e-12<localErr){localErr=err;localBest=item.scale;localRendered=rendered;}
         }
@@ -204,7 +210,8 @@ function generateDays(recipes,input){
     if(prefs.includeBreakfastCake)fixed.push(fixedMorningItem('cake'));
     const fixedTotals=totals(fixed),remainingMeals=Math.max(1,prefs.meals-(prefs.includeBreakfastCake?1:0));
     const remaining={...prefs,days:1,meals:remainingMeals,_slots:prefs.includeBreakfastCake?remainingSlotsAfterBreakfast(remainingMeals):slotsFor(remainingMeals),kcal:Math.max(remainingMeals*120,prefs.kcal-fixedTotals.k),protein:Math.max(remainingMeals*10,prefs.protein-fixedTotals.p),carbs:Math.max(0,prefs.carbs-fixedTotals.c),fat:Math.max(0,prefs.fat-fixedTotals.f)};
-    const buildTargets={...remaining,carbs:Math.max(50,remaining.carbs),fat:Math.max(30,remaining.fat)};
+    const totalMeals=fixed.length+remainingMeals,dayCap=({3:.45,4:.40,5:.36,6:.34,7:.32})[totalMeals]||.40;
+    const buildTargets={...remaining,carbs:Math.max(50,remaining.carbs),fat:Math.max(30,remaining.fat),_maxItemKcal:prefs.kcal*(dayCap+.004)};
     let items,dayTotals,withinTarget;
     // A small change in a fixed meal can invalidate a formerly good recipe
     // combination. Search other combinations without rewriting their nutrients.
