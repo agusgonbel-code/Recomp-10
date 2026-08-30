@@ -1,267 +1,283 @@
 RECOMP 10M FAST RELEASE GATE
-SOURCE_COMMIT: 905474243499e35f40fce8e5132abc1d9e0e726d
+SOURCE_COMMIT: 05da277aca422ef313dea20c6699016397d3161b
 RESULT: PASS
 EXIT_CODE: 0
 UNIT_EXIT_CODE: 0
 BROWSER_EXIT_CODE: 0
-UTC: 2026-08-27T22:13:44Z
+UTC: 2026-08-30T16:48:44Z
 COVERAGE: unit + recipe integrity + browser + nutrition + mobile + meal intelligence + accessibility + 26 user-behavior scenarios
 --- UNIT / RECIPE INTEGRITY OUTPUT (tail) ---
+ok 202 - recipe-033: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.40644
+  duration_ms: 0.388209
   type: 'test'
   ...
-# Subtest: meal shares sum to one for 3-6 meals
-ok 75 - meal shares sum to one for 3-6 meals
+# Subtest: recipe-034: production quantities and four nutrients match pinned USDA foods
+ok 203 - recipe-034: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 3.06238
+  duration_ms: 0.491557
   type: 'test'
   ...
-# Subtest: balanced meal shares match the production planner policy
-ok 76 - balanced meal shares match the production planner policy
+# Subtest: recipe-035: production quantities and four nutrients match pinned USDA foods
+ok 204 - recipe-035: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.806158
+  duration_ms: 0.410892
   type: 'test'
   ...
-# Subtest: priority patterns remain bounded and actually prioritize the selected meal
-ok 77 - priority patterns remain bounded and actually prioritize the selected meal
+# Subtest: recipe-036: production quantities and four nutrients match pinned USDA foods
+ok 205 - recipe-036: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.286566
+  duration_ms: 0.899266
   type: 'test'
   ...
-# Subtest: meal targets reconcile exactly
-ok 78 - meal targets reconcile exactly
+# Subtest: recipe-037: production quantities and four nutrients match pinned USDA foods
+ok 206 - recipe-037: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.362539
+  duration_ms: 0.987604
   type: 'test'
   ...
-# Subtest: macro energy reconciles after nutrition calculation
-ok 79 - macro energy reconciles after nutrition calculation
+# Subtest: recipe-038: production quantities and four nutrients match pinned USDA foods
+ok 207 - recipe-038: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.485068
+  duration_ms: 0.763122
   type: 'test'
   ...
-# Subtest: training respects days, duration and equipment aliases
-ok 80 - training respects days, duration and equipment aliases
+# Subtest: recipe-039: production quantities and four nutrients match pinned USDA foods
+ok 208 - recipe-039: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 1.364723
+  duration_ms: 1.911924
   type: 'test'
   ...
-# Subtest: training excludes equipment outside the selected set
-ok 81 - training excludes equipment outside the selected set
+# Subtest: recipe-040: production quantities and four nutrients match pinned USDA foods
+ok 209 - recipe-040: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.596396
+  duration_ms: 0.428938
   type: 'test'
   ...
-# Subtest: training applies conservative limitation rules and reports exclusions
-ok 82 - training applies conservative limitation rules and reports exclusions
+# Subtest: recipe-041: production quantities and four nutrients match pinned USDA foods
+ok 210 - recipe-041: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.531064
+  duration_ms: 0.497813
   type: 'test'
   ...
-# Subtest: unrelated clinical context does not remove exercises
-ok 83 - unrelated clinical context does not remove exercises
+# Subtest: recipe-042: production quantities and four nutrients match pinned USDA foods
+ok 211 - recipe-042: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.501058
+  duration_ms: 0.458035
   type: 'test'
   ...
-# Subtest: profile preserves bounded waist, clinical context, meal schedule and supplements
-ok 84 - profile preserves bounded waist, clinical context, meal schedule and supplements
+# Subtest: recipe-043: production quantities and four nutrients match pinned USDA foods
+ok 212 - recipe-043: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.56638
+  duration_ms: 0.856339
   type: 'test'
   ...
-# Subtest: training exposes a conservative and actionable deload protocol
-ok 85 - training exposes a conservative and actionable deload protocol
+# Subtest: recipe-044: production quantities and four nutrients match pinned USDA foods
+ok 213 - recipe-044: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 2.424516
+  duration_ms: 0.629709
   type: 'test'
   ...
-# Subtest: recognizes positive recomp with stable weight and falling waist
-ok 86 - recognizes positive recomp with stable weight and falling waist
+# Subtest: recipe-045: production quantities and four nutrients match pinned USDA foods
+ok 214 - recipe-045: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 2.254288
+  duration_ms: 0.474812
   type: 'test'
   ...
-# Subtest: does not adjust plan when adherence is poor
-ok 87 - does not adjust plan when adherence is poor
+# Subtest: recipe-046: production quantities and four nutrients match pinned USDA foods
+ok 215 - recipe-046: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 1.450223
+  duration_ms: 0.406034
   type: 'test'
   ...
-# Subtest: raises calories when dated weekly loss is too aggressive and performance falls
-ok 88 - raises calories when dated weekly loss is too aggressive and performance falls
+# Subtest: recipe-047: production quantities and four nutrients match pinned USDA foods
+ok 216 - recipe-047: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.389028
+  duration_ms: 0.3817
   type: 'test'
   ...
-# Subtest: four observations on one day are not treated as a usable trend
-ok 89 - four observations on one day are not treated as a usable trend
+# Subtest: recipe-048: production quantities and four nutrients match pinned USDA foods
+ok 217 - recipe-048: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.238406
+  duration_ms: 0.490226
   type: 'test'
   ...
-# Subtest: undated observations default to weekly spacing rather than one-day spacing
-ok 90 - undated observations default to weekly spacing rather than one-day spacing
+# Subtest: recipe-049: production quantities and four nutrients match pinned USDA foods
+ok 218 - recipe-049: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.491179
+  duration_ms: 0.840682
   type: 'test'
   ...
-# Subtest: applied targets reconcile macro energy closely
-ok 91 - applied targets reconcile macro energy closely
+# Subtest: recipe-050: production quantities and four nutrients match pinned USDA foods
+ok 219 - recipe-050: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.27771
+  duration_ms: 0.490247
   type: 'test'
   ...
-# Subtest: favorable recomp keeps calories stable
-ok 92 - favorable recomp keeps calories stable
+# Subtest: recipe-051: production quantities and four nutrients match pinned USDA foods
+ok 220 - recipe-051: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 1.147456
+  duration_ms: 0.432701
   type: 'test'
   ...
-# Subtest: low adherence blocks calorie changes
-ok 93 - low adherence blocks calorie changes
+# Subtest: recipe-052: production quantities and four nutrients match pinned USDA foods
+ok 221 - recipe-052: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.240991
+  duration_ms: 0.378893
   type: 'test'
   ...
-# Subtest: weight and waist rising together reduce energy modestly
-ok 94 - weight and waist rising together reduce energy modestly
+# Subtest: recipe-053: production quantities and four nutrients match pinned USDA foods
+ok 222 - recipe-053: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 0.233798
+  duration_ms: 0.291841
   type: 'test'
   ...
-# Subtest: release: privacidad y soporte existen y no contienen marcadores provisionales
-ok 95 - release: privacidad y soporte existen y no contienen marcadores provisionales
+# Subtest: recipe-054: production quantities and four nutrients match pinned USDA foods
+ok 223 - recipe-054: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 2.333917
+  duration_ms: 0.390269
   type: 'test'
   ...
-# Subtest: release: privacidad y soporte son accesibles desde la app y offline
-ok 96 - release: privacidad y soporte son accesibles desde la app y offline
+# Subtest: recipe-055: production quantities and four nutrients match pinned USDA foods
+ok 224 - recipe-055: production quantities and four nutrients match pinned USDA foods
   ---
-  duration_ms: 1.569527
+  duration_ms: 0.448476
   type: 'test'
   ...
-# Subtest: release: manifiesto e iconos mínimos son válidos
-ok 97 - release: manifiesto e iconos mínimos son válidos
+# Subtest: default intake with fixed breakfast generates 1 bounded days
+ok 225 - default intake with fixed breakfast generates 1 bounded days
   ---
-  duration_ms: 0.459319
+  duration_ms: 3809.444352
   type: 'test'
   ...
-# Subtest: release: no hay dependencias remotas evidentes en el runtime principal
-ok 98 - release: no hay dependencias remotas evidentes en el runtime principal
+# Subtest: default intake with fixed breakfast generates 7 bounded days
+ok 226 - default intake with fixed breakfast generates 7 bounded days
   ---
-  duration_ms: 1.474769
+  duration_ms: 11547.31268
   type: 'test'
   ...
-# Subtest: release: los módulos profesionales están conectados al runtime público
-ok 99 - release: los módulos profesionales están conectados al runtime público
+# Subtest: real six-meal substitution preserves the four-target fit and survives JSON restore
+ok 227 - real six-meal substitution preserves the four-target fit and survives JSON restore
   ---
-  duration_ms: 1.358582
+  duration_ms: 1125.443483
   type: 'test'
   ...
-# Subtest: la compra semanal no puede perder cantidades cuando se repite un ingrediente
-ok 100 - la compra semanal no puede perder cantidades cuando se repite un ingrediente
+# Subtest: small USDA edamame portion survives the calorie guard without changing its ledger
+ok 228 - small USDA edamame portion survives the calorie guard without changing its ledger
   ---
-  duration_ms: 3.873577
+  duration_ms: 0.367755
   type: 'test'
   ...
-# Subtest: la lista de compra muestra la cantidad total agregada cuando está disponible
-ok 101 - la lista de compra muestra la cantidad total agregada cuando está disponible
+# Subtest: loading the six-meal extension twice cannot replace installed quality guards
+ok 229 - loading the six-meal extension twice cannot replace installed quality guards
   ---
-  duration_ms: 1.208992
+  duration_ms: 1073.137814
   type: 'test'
   ...
-# Subtest: la lista de compra conserva un fallback explícito para ingredientes no cuantificables
-ok 102 - la lista de compra conserva un fallback explícito para ingredientes no cuantificables
+# Subtest: an entirely migrated catalogue keeps real ledgers through generation, swap and restore
+ok 230 - an entirely migrated catalogue keeps real ledgers through generation, swap and restore
   ---
-  duration_ms: 0.20289
+  duration_ms: 973.779942
   type: 'test'
   ...
-# Subtest: los scripts usan red primero para no mezclar versiones en iPhone
-ok 103 - los scripts usan red primero para no mezclar versiones en iPhone
+# Subtest: 3 meals keep all 30 real-catalogue days inside the four targets
+ok 231 - 3 meals keep all 30 real-catalogue days inside the four targets
   ---
-  duration_ms: 1.624028
+  duration_ms: 7131.03941
   type: 'test'
   ...
-# Subtest: el formulario usa objetivos editables persistentes, planes de 1 a 30 días y comunica la precisión nutricional real
-ok 104 - el formulario usa objetivos editables persistentes, planes de 1 a 30 días y comunica la precisión nutricional real
+# Subtest: 4 meals keep all 30 real-catalogue days inside the four targets
+ok 232 - 4 meals keep all 30 real-catalogue days inside the four targets
   ---
-  duration_ms: 0.719386
+  duration_ms: 11359.609597
   type: 'test'
   ...
-# Training engine tests passed
-# Subtest: tests/training-engine.test.mjs
-ok 36 - tests/training-engine.test.mjs
+# Subtest: 5 meals keep all 30 real-catalogue days inside the four targets
+ok 233 - 5 meals keep all 30 real-catalogue days inside the four targets
   ---
-  duration_ms: 45.945271
+  duration_ms: 12772.793704
   type: 'test'
   ...
-1..105
-# tests 105
+1..233
+# tests 233
 # suites 0
-# pass 105
+# pass 233
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 5684.651209
+# duration_ms 131311.302417
 --- BROWSER OUTPUT (tail) ---
 
-Running 53 tests using 2 workers
+Running 69 tests using 2 workers
 
-[1/53] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
-[2/53] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
-[3/53] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
-[4/53] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
-[5/53] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
-[6/53] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
-[7/53] qa/browser-smoke.spec.js:5:1 › unified intake offers a secure baseline photo handoff
-[8/53] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
-[9/53] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
-[10/53] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 320px without horizontal overflow
-[11/53] qa/browser-smoke.spec.js:6:1 › 360 check-in records progress and produces an explainable decision
-[12/53] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 375px without horizontal overflow
-[13/53] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 390px without horizontal overflow
-[14/53] qa/nutrition-menu-v5.spec.js:12:1 › nutrition is a daily dashboard, not a calculator-first screen
-[15/53] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 430px without horizontal overflow
-[16/53] qa/nutrition-menu-v5.spec.js:28:1 › calculator and multidday generator share one planning screen and persist all four targets
-[17/53] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
-[18/53] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
-[19/53] qa/nutrition-menu-v5.spec.js:67:1 › planned meal opens recipe and swap keeps the day usable
-[20/53] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
-[21/53] qa/nutrition-menu-v5.spec.js:88:1 › six meals selected in the unified profile are available in the advanced menu planner
-[22/53] qa/user-100-sim.spec.js:27:30 › usuario navega a Inicio
-[23/53] qa/user-100-sim.spec.js:27:30 › usuario navega a Entreno
-[24/53] qa/mobile-layout.spec.js:8:1 › Recomp identity never displays FitCoach F branding
-[25/53] qa/mobile-layout.spec.js:10:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
-[26/53] qa/user-100-sim.spec.js:27:30 › usuario navega a Nutrición
-[27/53] qa/user-100-sim.spec.js:27:30 › usuario navega a Menús
-[28/53] qa/user-100-sim.spec.js:27:30 › usuario navega a Progreso
-[29/53] qa/user-100-sim.spec.js:27:30 › usuario navega a Ajustes
-[30/53] qa/mobile-layout.spec.js:12:1 › Recomp menu cards keep readable meal column on iPhone width
-[31/53] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 320px sin desbordamiento
-[32/53] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 375px sin desbordamiento
-[33/53] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 390px sin desbordamiento
-[34/53] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 430px sin desbordamiento
-[35/53] qa/user-100-sim.spec.js:29:1 › usuario puede cerrar el perfil inicial y explorar
-[36/53] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
-[37/53] qa/user-100-sim.spec.js:31:1 › usuario fresco ve perfil neutro
-[38/53] qa/mobile-layout.spec.js:14:1 › Recomp 10 v53 rejects pathological calorie concentration
-[39/53] qa/user-100-sim.spec.js:32:1 › usuario introduce antropometría sin crash
-[40/53] qa/user-100-sim.spec.js:33:1 › usuario cambia actividad y objetivo
-[41/53] qa/user-100-sim.spec.js:34:1 › usuario cierra el onboarding y Nutrición sigue siendo interactiva
-[42/53] qa/user-100-sim.spec.js:35:1 › usuario navega por día anterior y vuelve a hoy
-[43/53] qa/user-100-sim.spec.js:36:1 › usuario no puede introducir kcal negativas por control
-[44/53] qa/user-100-sim.spec.js:37:1 › usuario abre biblioteca de recetas sin perder menú
-[45/53] qa/user-100-sim.spec.js:38:1 › usuario busca una receta
-[46/53] qa/user-100-sim.spec.js:39:1 › usuario filtra recetas por proteína
-[47/53] qa/user-100-sim.spec.js:40:1 › usuario ve botones táctiles de navegación >=44px
-[48/53] qa/user-100-sim.spec.js:41:1 › usuario con reducir movimiento mantiene navegación
-[49/53] qa/user-100-sim.spec.js:42:1 › usuario recarga sin perder datos locales básicos
-[50/53] qa/user-100-sim.spec.js:43:1 › usuario recorre toda la app sin pageerror
-[51/53] qa/user-100-sim.spec.js:44:1 › usuario en iPhone landscape no desborda
-[52/53] qa/user-100-sim.spec.js:45:1 › usuario en iPad portrait conserva navegación
-[53/53] qa/user-100-sim.spec.js:46:1 › usuario puede enfocar controles con teclado
-  53 passed (1.0m)
+[1/69] qa/accessibility.spec.js:5:1 › Recomp mobile controls remain labelled, unique and touchable
+[2/69] qa/browser-smoke.spec.js:3:1 › fresh launch never exposes personal starter data
+[3/69] qa/browser-smoke.spec.js:4:1 › unified intake opens, generates nutrition and training, and persists
+[4/69] qa/accessibility.spec.js:33:1 › Recomp generated menu remains readable with large text wrapping policy
+[5/69] qa/meal-intelligence-v60.spec.js:3:1 › meal intelligence runtime audits a generated-plan payload
+[6/69] qa/browser-smoke.spec.js:5:1 › unified intake offers a secure baseline photo handoff
+[7/69] qa/meal-intelligence-v60.spec.js:4:1 › meal intelligence never labels an incomplete target set as excellent
+[8/69] qa/meal-intelligence-v60.spec.js:5:1 › post-swap compensation fails closed without valid targets
+[9/69] qa/meal-intelligence-v60.spec.js:6:1 › post-swap compensation rejects an out-of-range meal index
+[10/69] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 320px without horizontal overflow
+[11/69] qa/browser-smoke.spec.js:6:1 › 360 check-in records progress and produces an explainable decision
+[12/69] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 375px without horizontal overflow
+[13/69] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 390px without horizontal overflow
+[14/69] qa/nutrition-menu-v5.spec.js:2:1 › six meals include fixed breakfast and training shake and restore all seven intakes
+[15/69] qa/mobile-layout.spec.js:5:39 › Recomp 10 fits 430px without horizontal overflow
+[16/69] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPhone landscape stays usable without horizontal overflow
+[17/69] qa/nutrition-menu-v5.spec.js:32:1 › fixed breakfast and shake can be replaced for one day with safe retry and exact persisted quantities
+[18/69] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPad portrait stays usable without horizontal overflow
+[19/69] qa/mobile-layout.spec.js:6:120 › Recomp 10 iPad landscape stays usable without horizontal overflow
+[20/69] qa/nutrition-menu-v5.spec.js:77:1 › turkey and lean beef recipes preserve exact raw and cooked states after reload
+[21/69] qa/mobile-layout.spec.js:8:1 › Recomp identity never displays FitCoach F branding
+[22/69] qa/mobile-layout.spec.js:10:1 › Recomp nutrition dashboard stays entirely inside a 390px iPhone viewport
+[23/69] qa/mobile-layout.spec.js:12:1 › Recomp menu cards keep readable meal column on iPhone width
+[24/69] qa/mobile-layout.spec.js:14:1 › Recomp 10 v53 rejects pathological calorie concentration
+[25/69] qa/user-100-sim.spec.js:27:30 › usuario navega a Inicio
+[26/69] qa/user-100-sim.spec.js:27:30 › usuario navega a Entreno
+[27/69] qa/nutrition-menu-v5.spec.js:107:1 › ten additional USDA recipes preserve source states, quantities and steps on reload
+[28/69] qa/user-100-sim.spec.js:27:30 › usuario navega a Nutrición
+[29/69] qa/user-100-sim.spec.js:27:30 › usuario navega a Menús
+[30/69] qa/user-100-sim.spec.js:27:30 › usuario navega a Progreso
+[31/69] qa/user-100-sim.spec.js:27:30 › usuario navega a Ajustes
+[32/69] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 320px sin desbordamiento
+[33/69] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 375px sin desbordamiento
+[34/69] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 390px sin desbordamiento
+[35/69] qa/user-100-sim.spec.js:28:38 › usuario usa Recomp a 430px sin desbordamiento
+[36/69] qa/user-100-sim.spec.js:29:1 › usuario puede cerrar el perfil inicial y explorar
+[37/69] qa/user-100-sim.spec.js:30:1 › usuario fresco no ve peso personal precargado
+[38/69] qa/user-100-sim.spec.js:31:1 › usuario fresco ve perfil neutro
+[39/69] qa/user-100-sim.spec.js:32:1 › usuario introduce antropometría sin crash
+[40/69] qa/user-100-sim.spec.js:33:1 › usuario cambia actividad y objetivo
+[41/69] qa/user-100-sim.spec.js:34:1 › usuario cierra el onboarding y Nutrición sigue siendo interactiva
+[42/69] qa/user-100-sim.spec.js:35:1 › usuario navega por día anterior y vuelve a hoy
+[43/69] qa/nutrition-menu-v5.spec.js:145:1 › final USDA catalogue recipes preserve exact ledgers and complete preparation after reload
+[44/69] qa/user-100-sim.spec.js:36:1 › usuario no puede introducir kcal negativas por control
+[45/69] qa/user-100-sim.spec.js:37:1 › usuario abre biblioteca de recetas sin perder menú
+[46/69] qa/user-100-sim.spec.js:38:1 › usuario busca una receta
+[47/69] qa/user-100-sim.spec.js:39:1 › usuario filtra recetas por proteína
+[48/69] qa/user-100-sim.spec.js:40:1 › usuario ve botones táctiles de navegación >=44px
+[49/69] qa/user-100-sim.spec.js:41:1 › usuario con reducir movimiento mantiene navegación
+[50/69] qa/user-100-sim.spec.js:42:1 › usuario recarga sin perder datos locales básicos
+[51/69] qa/user-100-sim.spec.js:43:1 › usuario recorre toda la app sin pageerror
+[52/69] qa/user-100-sim.spec.js:44:1 › usuario en iPhone landscape no desborda
+[53/69] qa/user-100-sim.spec.js:45:1 › usuario en iPad portrait conserva navegación
+[54/69] qa/user-100-sim.spec.js:46:1 › usuario puede enfocar controles con teclado
+[55/69] qa/nutrition-menu-v5.spec.js:173:1 › tuna and legume recipes retain dry, cooked and drained quantities after reload
+[56/69] qa/nutrition-menu-v5.spec.js:207:1 › seven sourced days keep all four targets before and after swap and reload
+[57/69] qa/nutrition-menu-v5.spec.js:247:1 › migrated real catalogue exposes each ingredient ledger and complete steps after reload
+[58/69] qa/nutrition-menu-v5.spec.js:286:1 › real USDA recipes keep quantities and equivalent daily macros after swap and reload
+[59/69] qa/nutrition-menu-v5.spec.js:324:26 › 4 meals: ingredient composition reaches details, substitution and persistence
+[60/69] qa/nutrition-menu-v5.spec.js:324:26 › 6 meals: ingredient composition reaches details, substitution and persistence
+[61/69] qa/nutrition-menu-v5.spec.js:381:1 › nutrition is a daily dashboard, not a calculator-first screen
+[62/69] qa/nutrition-menu-v5.spec.js:397:1 › USDA breakfast displays its real ingredient ledger and survives reload
+[63/69] qa/nutrition-menu-v5.spec.js:430:1 › calculator and multidday generator share one planning screen and persist all four targets
+[64/69] qa/nutrition-menu-v5.spec.js:469:1 › planned meal opens recipe and swap keeps the day usable
+[65/69] qa/nutrition-menu-v5.spec.js:490:1 › six meals selected in the unified profile are available in the advanced menu planner
+[66/69] qa/nutrition-menu-v5.spec.js:532:1 › failed menu generation retains the active plan and retry persists across reload
+[67/69] qa/nutrition-menu-v5.spec.js:561:1 › failed meal replacement keeps recipe and quantities; retry saves the balanced day
+[68/69] qa/nutrition-menu-v5.spec.js:598:3 › a saved menu with invalid JSON does not break startup or erase data
+[69/69] qa/nutrition-menu-v5.spec.js:598:3 › a saved menu with incomplete structure does not break startup or erase data
+  69 passed (2.9m)
