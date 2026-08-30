@@ -46,7 +46,7 @@ function assertMonth(targets){
     const before=plan.days[dayIndex].items[0].recipe.n;
     globalThis.RecompMealPlanner.swapMeal(plan,recipes,dayIndex,0);
     assert.notEqual(plan.days[dayIndex].items[0].recipe.n,before);
-    assert.ok(globalThis.RecompMealPlanner.withinTargets(plan.days[dayIndex].totals,plan.preferences,{k:.05,p:.06,c:.06,f:.07}));
+    assert.ok(globalThis.RecompMealPlanner.withinTargets(plan.days[dayIndex].totals,plan.preferences,{k:.05,p:.06,c:.06,f:.07}),`sustitución día ${dayIndex+1} fuera de objetivo: ${JSON.stringify(plan.days[dayIndex].totals)}; ${plan.days[dayIndex].items.map(item=>`${item.recipe.n}@${item.scale}`).join(' | ')}`);
   }
   return plan;
 }

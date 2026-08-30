@@ -69,7 +69,41 @@
     const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;const source=sourceKey(day,item);if(loggedToday(source))return;
     document.dispatchEvent(new CustomEvent('recomp:log-planned-meal',{detail:{item:meal,sourceKey:source}}));
   }
-  function save(){localStorage.setItem(key,JSON.stringify(plan));}
+  function save(candidate){
+    // Publish only after persistence succeeds. Storage failure must not leave
+    // the recipe buttons or diary actions pointing at an unsaved menu.
+    localStorage.setItem(key,JSON.stringify(candidate));
+    plan=candidate;
+  }
+  function readSavedPlan(){
+    const stored=localStorage.getItem(key);
+    if(stored===null)return null;
+    const candidate=JSON.parse(stored);
+    if(candidate===null)return null;
+    const object=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
+    const nonnegative=value=>typeof value==='number'&&Number.isFinite(value)&&value>=0;
+    const macros=value=>object(value)&&['k','p','c','f'].every(field=>nonnegative(value[field]));
+    const strings=value=>value===undefined||(Array.isArray(value)&&value.every(item=>typeof item==='string'));
+    const valid=object(candidate)&&object(candidate.preferences)
+      &&['kcal','protein','carbs','fat'].every(field=>nonnegative(candidate.preferences[field])&&candidate.preferences[field]>0)
+      &&Array.isArray(candidate.days)&&candidate.days.length>0&&candidate.days.length<=30
+      &&candidate.days.every(day=>object(day)&&Number.isInteger(day.day)&&day.day>0&&macros(day.totals)
+        &&Array.isArray(day.items)&&day.items.length>0&&day.items.length<=7
+        &&day.items.every(item=>macros(item)&&object(item.recipe)&&typeof item.recipe.n==='string'&&item.recipe.n.trim()
+          &&strings(item.recipe.i)&&strings(item.recipe.s)
+          &&(item.ingredientAmounts===undefined||(Array.isArray(item.ingredientAmounts)&&item.ingredientAmounts.every(ingredient=>
+            object(ingredient)&&typeof ingredient.text==='string'
+            &&(nonnegative(ingredient.qty)||(ingredient.qty===undefined&&ingredient.adjustable===false))
+            &&(ingredient.nutrients==null||macros(ingredient.nutrients)))))));
+    if(!valid)throw new Error('El menú guardado está incompleto o tiene un formato no válido.');
+    return candidate;
+  }
+  function restorePlan(){
+    let error=null;
+    try{plan=readSavedPlan()}catch(cause){plan=null;error=cause}
+    render();
+    if(error)$('mpStatus').innerHTML='<div class="notice" role="alert"><b>No se pudo recuperar el menú guardado.</b><br>Los datos guardados no se han borrado. Puedes volver a abrir la app para reintentar. Si generas un menú nuevo y se guarda correctamente, reemplazará el anterior.</div>';
+  }
   function macroForm(){return {kcal:$('mpKcal')?.value,protein:$('mpProtein')?.value,carbs:$('mpCarbs')?.value,fat:$('mpFat')?.value}}
   function persistManualTargets(notify=false){const t=RecompMealPlanner.macroTargets(macroForm());localStorage.setItem(manualKey,JSON.stringify(t));if(notify&&$('mpStatus'))$('mpStatus').innerHTML='<div class="good"><b>Objetivos manuales guardados.</b> El próximo menú usará '+t.kcal+' kcal · P '+t.protein+' g · C '+t.carbs+' g · G '+t.fat+' g.</div>';return t}
   function formValues(){return {
@@ -111,11 +145,20 @@
       if(button){button.disabled=true;button.textContent='Calculando menú…'}
       persistManualTargets(false);
       const catalog=recipeSource();if(!catalog.length)throw new Error('La biblioteca de recetas todavía no está lista.');
-      plan=RecompMealPlanner.generateDays(catalog,formValues());visibleWeek=0;save();render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'});
+      const candidate=RecompMealPlanner.generateDays(catalog,formValues());
+      save(candidate);visibleWeek=0;$('mpRecipeDetail').innerHTML='';render();$('mpResult').scrollIntoView({behavior:'smooth',block:'start'});
     }catch(e){$('mpStatus').innerHTML='<div class="notice"><b>No se pudo crear el menú.</b><br>'+esc(e.message)+'</div>'}
     finally{if(button){button.disabled=false;button.textContent='Generar menú'}}
   }
-  function swap(day,item){try{RecompMealPlanner.swapMeal(plan,recipeSource(),day,item);save();render();showRecipe(day,item)}catch(e){alert(e.message)}}
+  function swap(day,item){
+    try{
+      if(!plan)return;
+      // The solver mutates its argument, including other meals when balancing.
+      const candidate=JSON.parse(JSON.stringify(plan));
+      const replacement=RecompMealPlanner.swapMeal(candidate,recipeSource(),day,item);
+      save(replacement||candidate);render();showRecipe(day,item);
+    }catch(e){$('mpStatus').innerHTML='<div class="notice" role="alert"><b>No se pudo guardar la sustitución.</b><br>'+esc(e.message)+'<br>El menú anterior se conserva. Puedes reintentar.</div>'}
+  }
   function showRecipe(day,item){
     const meal=plan?.days?.[day]?.items?.[item];if(!meal)return;
     const ingredients=RecompMealPlanner.ingredientDetailsFor(meal).map(ingredient=>{
@@ -126,10 +169,11 @@
     const steps=(meal.recipe.s?.length?meal.recipe.s:(matched?.s||[])).map(value=>'<li>'+esc(value)+'</li>').join('');
     const preparation=steps?'<h3>Cómo prepararla</h3><ol>'+steps+'</ol>':'<div class="notice">Esta receta no tiene todavía pasos de elaboración en la biblioteca. Cámbiala por otra receta completa.</div>';
     const meta=[meal.recipe.time&&meal.recipe.time+' min',meal.recipe.difficulty].filter(Boolean).map(esc).join(' · '),logged=loggedToday(sourceKey(day,item));
+    const calculated=meal.nutritionBasis==='ingredient-composition';
     const verified=meal.ingredientNutritionVerified===true;
-    const nutritionNote=verified?'<div class="good">Macros verificados ingrediente a ingrediente para las cantidades mostradas.</div>':'<div class="notice"><b>Macros de receta, no verificados ingrediente a ingrediente.</b> Los totales se escalan desde la ficha nutricional declarada de la receta. Las cantidades sirven para preparar y ajustar la porción, pero no certifican todavía una suma nutricional reconstruida alimento por alimento.</div>';
-    const ingredientHeading=verified?'Ingredientes y aporte nutricional':'Ingredientes';
-    const ingredientNote=verified?'<p class="small">El aporte mostrado para cada ingrediente forma parte del cálculo verificado de esta ración.</p>':'<p class="small">No se muestra un reparto de macros por ingrediente porque la biblioteca aún no dispone de composición nutricional verificable para todos ellos. Las cantidades marcadas como estimadas/no verificadas han sido inferidas para poder escalar la receta y no proceden de una cantidad original certificada. Evitamos atribuir nutrientes estimados como si fueran exactos.</p>';
+    const nutritionNote=calculated?'<div class="good">Macros calculados por ingredientes con las cantidades mostradas. Datos de composición declarados por la fuente, no una medición de esta ración.</div>':verified?'<div class="good">Macros verificados ingrediente a ingrediente para las cantidades mostradas.</div>':'<div class="notice"><b>Macros de receta, no verificados ingrediente a ingrediente.</b> Los totales se escalan desde la ficha nutricional declarada de la receta. Las cantidades sirven para preparar y ajustar la porción, pero no certifican todavía una suma nutricional reconstruida alimento por alimento.</div>';
+    const ingredientHeading=calculated?'Ingredientes y aporte calculado':verified?'Ingredientes y aporte nutricional':'Ingredientes';
+    const ingredientNote=calculated?'<p class="small">Se suman los aportes mostrados; el total de la comida se redondea a enteros. No se convierten pesos crudos/cocinados ni gramos/mililitros.</p>':verified?'<p class="small">El aporte mostrado para cada ingrediente forma parte del cálculo verificado de esta ración.</p>':'<p class="small">No se muestra un reparto de macros por ingrediente porque la biblioteca aún no dispone de composición nutricional verificable para todos ellos. Las cantidades marcadas como estimadas/no verificadas han sido inferidas para poder escalar la receta y no proceden de una cantidad original certificada. Evitamos atribuir nutrientes estimados como si fueran exactos.</p>';
     $('mpRecipeDetail').innerHTML='<div class="card mp-recipe-detail"><button class="secondary mp-recipe-close">Cerrar</button><span class="pill">'+esc(meal.slot||meal.recipe.m)+'</span><h2>'+esc(meal.recipe.n)+'</h2><div class="kcal">'+meal.k+' kcal</div><p class="small">P '+meal.p+' g · C '+meal.c+' g · G '+meal.f+' g'+(meta?' · '+meta:'')+'</p>'+nutritionNote+'<button class="mp-log-detail '+(logged?'secondary':'')+'" '+(logged?'disabled':'')+'>'+(logged?'✓ Registrada hoy':'Añadir al diario de hoy')+'</button><h3>'+ingredientHeading+'</h3><ul>'+ingredients+'</ul>'+ingredientNote+preparation+'</div>';
     $('mpRecipeDetail').querySelector('.mp-recipe-close').onclick=()=>{$('mpRecipeDetail').innerHTML=''};
     const logButton=$('mpRecipeDetail').querySelector('.mp-log-detail');if(!logged)logButton.onclick=()=>logMeal(day,item);
@@ -141,7 +185,7 @@
     if(visibleWeek>=weeks)visibleWeek=Math.max(0,weeks-1);
     const tabs=Array.from({length:weeks},(_,i)=>'<button class="'+(i===visibleWeek?'active':'')+'" data-week="'+i+'">S'+(i+1)+'</button>').join('');
     const target=plan.preferences;
-    const days=plan.days.slice(start,end).map((d,di)=>'<details class="mp-day" '+(di===0?'open':'')+'><summary><span><b>Día '+d.day+' · '+(d.withinTarget?'✓ dentro de tolerancia':'⚠ revisar')+'</b><small>'+d.totals.k+' kcal · P '+d.totals.p+' · C '+d.totals.c+' · G '+d.totals.f+'</small></span><span>›</span></summary>'+d.items.map((x,ii)=>{const day=start+di,logged=loggedToday(sourceKey(day,ii)),fixed=/^fixed-/.test(String(x.recipe?.id||''));return '<div class="mp-meal"><button class="mp-recipe-link" data-recipe="'+day+','+ii+'"><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · C '+x.c+' · G '+x.f+' · Ver receta</span></button><button class="secondary mp-log" data-log="'+day+','+ii+'" '+(logged?'disabled':'')+' aria-label="'+(logged?'Comida registrada':'Registrar comida')+'">'+(logged?'✓':'+')+'</button>'+(fixed?'':'<button class="secondary" data-swap="'+day+','+ii+'" aria-label="Cambiar receta">↻</button>')+'</div>'}).join('')+(d.withinTarget?'':'<div class="notice"><b>Este día necesita ajuste.</b> No se han sustituido los macros calculados por cifras objetivo.</div>')+'</details>').join('');
+    const days=plan.days.slice(start,end).map((d,di)=>'<details class="mp-day" '+(di===0?'open':'')+'><summary><span><b>Día '+d.day+' · '+(d.withinTarget?'✓ dentro de tolerancia':'⚠ revisar')+'</b><small>'+d.totals.k+' kcal · P '+d.totals.p+' · C '+d.totals.c+' · G '+d.totals.f+'</small></span><span>›</span></summary>'+d.items.map((x,ii)=>{const day=start+di,logged=loggedToday(sourceKey(day,ii));return '<div class="mp-meal"><button class="mp-recipe-link" data-recipe="'+day+','+ii+'"><small>'+esc(x.slot)+'</small><b>'+esc(x.recipe.n)+'</b><span>'+x.k+' kcal · P '+x.p+' · C '+x.c+' · G '+x.f+' · Ver receta</span></button><button class="secondary mp-log" data-log="'+day+','+ii+'" '+(logged?'disabled':'')+' aria-label="'+(logged?'Comida registrada':'Registrar comida')+'">'+(logged?'✓':'+')+'</button>'+('<button class="secondary" data-swap="'+day+','+ii+'" title="Cambiar esta toma solo en este día" aria-label="Cambiar receta">↻</button>')+'</div>'}).join('')+(d.withinTarget?'':'<div class="notice"><b>Este día necesita ajuste.</b> No se han sustituido los macros calculados por cifras objetivo.</div>')+'</details>').join('');
     const shop=RecompMealPlanner.shoppingByWeek(plan,visibleWeek).map(x=>{const quantity=x.amount!=null&&x.unit?x.amount+' '+x.unit:'×'+x.count;return '<label class="mp-check"><input type="checkbox"> <span>'+esc(x.name)+'</span><small>'+esc(quantity)+'</small></label>'}).join('');
     const reviewCount=plan.days.filter(day=>!day.withinTarget).length;
     $('mpStatus').innerHTML='<div class="'+(reviewCount?'notice':'good')+'"><b>'+totalDays+' días · objetivos usados:</b> '+target.kcal+' kcal · P '+target.protein+' g · C '+target.carbs+' g · G '+target.fat+' g. Tolerancia visible: kcal ±3%, proteína ±5%, carbohidratos ±6% y grasa ±8%. '+(reviewCount?reviewCount+' día(s) necesitan revisión antes de utilizarse.':'Todos los días están dentro de tolerancia y conservan los macros calculados de sus recetas.')+'</div>';
@@ -157,13 +201,11 @@
     root.innerHTML='<div class="mp-intro"><span class="pill">NUTRICIÓN</span><h2>Calcula tus macros y genera el menú</h2><p>Un único flujo: calcula kcal, proteína, carbohidratos y grasas; revisa los cuatro objetivos y genera de 1 a 30 días sin cambiar de pantalla.</p></div><div class="card mp-form" id="mpMacroCalculator"><h3>1 · Calculadora de kcal y macros</h3><div class="row"><div><label>Sexo</label><select id="mpCalcSex"><option value="m">Hombre</option><option value="f">Mujer</option></select></div><div><label>Edad</label><input id="mpCalcAge" type="number" min="13" max="100" value="'+esc(profile.age||40)+'"></div></div><div class="row"><div><label>Peso (kg)</label><input id="mpCalcWeight" type="number" min="30" max="300" step="0.1" value="'+esc(profile.weight||75)+'"></div><div><label>Altura (cm)</label><input id="mpCalcHeight" type="number" min="120" max="230" value="'+esc(profile.height||175)+'"></div></div><label>Actividad</label><select id="mpCalcActivity"><option value="1.2">Sedentario</option><option value="1.375">Ligera</option><option value="1.55" selected>3-5 entrenos</option><option value="1.725">Alta</option></select><label>Objetivo</label><select id="mpCalcGoal"><option value="-0.15">Pérdida de grasa</option><option value="0">Mantenimiento</option><option value="0.08" selected>Ganancia muscular</option></select><button id="mpCalculateTargets" style="width:100%;margin-top:10px">Calcular kcal y macros</button></div><div class="card mp-form"><h3>2 · Objetivos diarios editables</h3><div class="good">Estas cuatro cifras son exactamente las que utilizará el generador. Puedes revisarlas o ajustarlas antes de crear el menú.</div><div class="row"><div><label>Calorías</label><input id="mpKcal" type="number" value="'+esc(t.kcal)+'"></div><div><label>Proteína (g)</label><input id="mpProtein" type="number" value="'+esc(t.protein)+'"></div></div><div class="row"><div><label>Carbohidratos (g)</label><input id="mpCarbs" type="number" value="'+esc(t.carbs)+'"></div><div><label>Grasas (g)</label><input id="mpFat" type="number" value="'+esc(t.fat)+'"></div></div><div class="row"><button id="mpSaveTargets" class="secondary">Usar y guardar estos objetivos</button><button id="mpCalculatorTargets" class="secondary">Recuperar calculadora</button></div><div class="row"><div><label>Días</label><input id="mpDays" type="number" min="1" max="30" value="7"></div><div><label>Comidas / día</label><select id="mpMeals"><option>3</option><option selected>4</option><option>5</option></select></div></div><h3>3 · Preferencias</h3><label>Estilo</label><select id="mpDiet"><option value="flexible">Flexible</option><option value="vegetariana">Vegetariano</option><option value="vegana">Vegano</option><option value="pescetariana">Pescetariano</option><option value="sin-lactosa">Sin lactosa</option><option value="sin-gluten">Sin gluten</option></select><label>Alergias o alimentos excluidos</label><input id="mpExcluded" placeholder="Ej. cacahuete, marisco, cebolla"><label>Ingredientes que ya tienes o prefieres</label><input id="mpPantry" placeholder="Ej. arroz, huevos, pollo"><div class="row"><div><label>Tiempo máximo</label><select id="mpTime"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">60 min</option></select></div><div><label>Presupuesto</label><select id="mpBudget"><option value="bajo">Ajustado</option><option value="medio" selected>Medio</option><option value="alto">Flexible</option></select></div></div><label>Variedad</label><select id="mpVariety"><option value="alta" selected>Alta</option><option value="media">Media</option><option value="baja">Baja</option></select><button id="mpGenerate" style="width:100%;margin-top:14px">Generar menú</button></div><div id="mpRecipeDetail"></div><div id="mpStatus"></div><div id="mpResult"></div>';
     if(profile.sex==='f')$('mpCalcSex').value='f';
     const preferencesCard=$('mpGenerate').closest('.card');
-    preferencesCard.querySelector('#mpGenerate').insertAdjacentHTML('beforebegin','<h3>3 · Entrenamiento y desayuno</h3><div class="row"><div><label>Días de entrenamiento / semana</label><input id="mpTrainingDays" type="number" min="0" max="7" value="4"></div><div><label>Hora habitual</label><input id="mpTrainingTime" type="time" value="06:00"></div></div><div class="mp-checks"><label class="mp-check"><input id="mpCake" type="checkbox" checked> <span>Bizcocho de avena, huevo, claras, levadura y chía</span></label><label class="mp-check"><input id="mpShake" type="checkbox" checked> <span>30 g de whey con agua después de entrenar</span></label></div>');
+    preferencesCard.querySelector('#mpGenerate').insertAdjacentHTML('beforebegin','<h3>3 · Entrenamiento y desayuno</h3><div class="row"><div><label>Días de entrenamiento / semana</label><input id="mpTrainingDays" type="number" min="0" max="7" value="4"></div><div><label>Hora habitual</label><input id="mpTrainingTime" type="time" value="06:00"></div></div><div class="mp-checks"><label class="mp-check"><input id="mpCake" type="checkbox" checked> <span>Bizcocho de avena, huevo, claras, levadura y chía</span></label><label class="mp-check"><input id="mpShake" type="checkbox" checked> <span>28 g de whey con 105 g de leche después de entrenar</span></label></div>');
     $('mpCalculateTargets').onclick=calculatePlannerTargets;$('mpGenerate').onclick=generate;$('mpSaveTargets').onclick=()=>persistManualTargets(true);$('mpCalculatorTargets').onclick=useCalculatorTargets;
     ['mpKcal','mpProtein','mpCarbs','mpFat'].forEach(id=>$(id).addEventListener('change',()=>persistManualTargets(false)));
     document.addEventListener('recomp:targets-updated',event=>{localStorage.removeItem(manualKey);applyMacroTargets(event.detail,true)});document.addEventListener('recomp:planned-meal-logged',()=>render());document.addEventListener('recomp:meal-log-changed',render);window.addEventListener('pageshow',()=>applyMacroTargets(savedManualTargets()||savedTargets()));
-    try{plan=JSON.parse(localStorage.getItem(key)||'null')}catch{plan=null}render();
+    restorePlan();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
-
-

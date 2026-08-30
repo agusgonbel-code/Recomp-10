@@ -47,7 +47,13 @@ test('release: no hay dependencias remotas evidentes en el runtime principal',()
   const files=['persistence.js','date-engine.js','training-engine.js','nutrition-engine.js','meal-planner.js','meal-planner-ui.js','coach-engine.js','photo-engine.js'];
   for(const file of files){
     const text=read(file);
-    assert.doesNotMatch(text,/https?:\/\//i,`${file} contiene una URL remota; revisar privacidad/offline`);
+    // Pinned food provenance is inert metadata, not a runtime dependency.
+    // Only this exact USDA source-field form is permitted in the planner.
+    const withoutProvenance=file==='meal-planner.js'
+      ?text.replace(/"url":"https:\/\/fdc\.nal\.usda\.gov\/food-details\/\d+\/nutrients"/g,'"url":"source-reference"')
+      :text;
+    assert.doesNotMatch(withoutProvenance,/https?:\/\//i,`${file} contiene una URL remota; revisar privacidad/offline`);
+    if(file==='meal-planner.js')assert.doesNotMatch(text,/\b(?:fetch|WebSocket|EventSource|sendBeacon|importScripts)\s*\(|\bimport\s*\(/,'El motor no debe consultar fuentes por red');
     assert.doesNotMatch(text,/XMLHttpRequest\s*\(/,`${file} usa XMLHttpRequest remoto`);
   }
 });

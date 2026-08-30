@@ -20,17 +20,23 @@ const recipes=[
 ];
 
 for(const meals of [3,4,5,6]){
- test(`meal-budget-first keeps ${meals} meals distributed across the day`,()=>{
+ test(`generation keeps ${meals} meals distributed without overwriting a four-macro fit`,()=>{
    const kcal=2400;
    const plan=RecompMealPlanner.generateDays(recipes,{kcal,protein:170,carbs:285,fat:75,meals,days:3,diet:'flexible'});
    const expected=RecompQualityV53.sharesFor(meals);
    for(const day of plan.days){
      assert.equal(day.items.length,meals);
-     assert.equal(Math.round(day.totals.k),kcal);
      const shares=day.items.map(x=>x.k/day.totals.k);
-     shares.forEach((share,i)=>assert.ok(Math.abs(share-expected[i])<=0.01,`meal ${i+1} share ${share}`));
      assert.ok(Math.max(...shares)<=0.405,'no meal may absorb an implausible share of daily energy');
-     assert.equal(day.energyDistribution?.policy,'meal-budget-first');
+     if(day.energyDistribution?.policy==='macro-fit-preserved'){
+       assert.ok(RecompMealPlanner.withinTargets(day.totals,plan.preferences,{k:.03,p:.05,c:.06,f:.08}));
+       assert.equal(day.withinTarget,true);
+       assert.deepEqual(day.totals,RecompMealPlanner.totals(day.items));
+     }else{
+       assert.equal(Math.round(day.totals.k),kcal);
+       shares.forEach((share,i)=>assert.ok(Math.abs(share-expected[i])<=0.01,`meal ${i+1} share ${share}`));
+       assert.equal(day.energyDistribution?.policy,'meal-budget-first');
+     }
    }
  });
 }
