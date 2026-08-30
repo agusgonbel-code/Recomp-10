@@ -1,4 +1,34 @@
 const { test, expect } = require('@playwright/test');
+test('six meals include fixed breakfast and training shake and restore all seven intakes',async({page})=>{
+ test.setTimeout(120000);
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
+ await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await page.locator('#mpMeals').selectOption('6');await page.locator('#mpDays').fill('2');await page.locator('#mpTrainingDays').fill('1');
+ await page.locator('#mpCake').check();await page.locator('#mpShake').check();
+ await page.locator('#mpGenerate').click();
+ await expect(page.locator('.mp-day')).toHaveCount(2,{timeout:60000});
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp10.mealPlan30')));
+ expect(saved.preferences.meals).toBe(6);expect(saved.preferences.trainingDays).toBe(1);
+ expect(saved.preferences.includeBreakfastCake).toBe(true);expect(saved.preferences.includePostWorkoutShake).toBe(true);
+ expect(saved.days.map(day=>day.items.length)).toEqual([7,6]);
+ for(const [d,day] of saved.days.entries()){
+  expect(day.items.filter(item=>item.recipe.id==='fixed-breakfast-cake')).toHaveLength(1);
+  expect(day.items.filter(item=>item.recipe.id==='fixed-post-workout-shake')).toHaveLength(d===0?1:0);
+  for(const [key,target,tolerance] of [['k','kcal',.03],['p','protein',.05],['c','carbs',.06],['f','fat',.08]])expect(Math.abs(day.totals[key]/saved.preferences[target]-1)).toBeLessThanOrEqual(tolerance);
+ }
+ await page.reload({waitUntil:'load'});await page.locator('nav button').filter({hasText:'Menús'}).click();
+ await expect(page.locator('.mp-day')).toHaveCount(2);
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp10.mealPlan30')))).toEqual(saved);
+ await page.locator('[data-recipe="0,6"]').click();
+ for(const row of saved.days[0].items[6].ingredientAmounts)await expect(page.locator('#mpRecipeDetail')).toContainText(row.text);
+ await page.locator('[data-swap="0,6"]').click();
+ const changed=await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp10.mealPlan30')));
+ expect(changed.days[0].items).toHaveLength(7);expect(changed.days[0].items[6].recipe.id).not.toBe(saved.days[0].items[6].recipe.id);
+ expect(changed.days[1]).toEqual(saved.days[1]);expect(changed.preferences).toEqual(saved.preferences);
+ for(const id of ['fixed-breakfast-cake','fixed-post-workout-shake'])expect(changed.days[0].items.find(item=>item.recipe.id===id)).toEqual(saved.days[0].items.find(item=>item.recipe.id===id));
+ expect(errors).toEqual([]);
+});
 test('fixed breakfast and shake can be replaced for one day with safe retry and exact persisted quantities',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  const previous=await enableMenuWriteFault(page),original=JSON.parse(previous);

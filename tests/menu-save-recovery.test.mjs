@@ -111,6 +111,18 @@ test('valid legacy menus without ingredient-level metadata remain readable',()=>
   assert.equal(f.store.get(KEY),JSON.stringify(saved));
 });
 
+test('seven-intake saved menus are restored completely while eight remain rejected',()=>{
+  const f=fixture(),saved=validSavedMenu();saved.preferences.meals=6;saved.preferences.includePostWorkoutShake=true;
+  saved.days[0].trainingDay=true;
+  saved.days[0].items=Array.from({length:7},()=>snapshot(saved.days[0].items[0]));
+  f.store.set(KEY,JSON.stringify(saved));f.api.restorePlan();
+  assert.deepEqual(snapshot(f.api.getPlan()),saved);
+  assert.equal(f.store.get(KEY),JSON.stringify(saved));
+  saved.days[0].items.push(snapshot(saved.days[0].items[0]));f.store.set(KEY,JSON.stringify(saved));
+  assert.throws(()=>f.api.readSavedPlan(),/formato no válido/);
+  assert.equal(f.store.get(KEY),JSON.stringify(saved));
+});
+
 test('missing menu and explicitly saved null are normal empty states',()=>{
   for(const stored of [undefined,'null']){
     const f=fixture();if(stored===undefined)f.store.delete(KEY);else f.store.set(KEY,stored);

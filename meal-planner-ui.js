@@ -88,7 +88,7 @@
       &&['kcal','protein','carbs','fat'].every(field=>nonnegative(candidate.preferences[field])&&candidate.preferences[field]>0)
       &&Array.isArray(candidate.days)&&candidate.days.length>0&&candidate.days.length<=30
       &&candidate.days.every(day=>object(day)&&Number.isInteger(day.day)&&day.day>0&&macros(day.totals)
-        &&Array.isArray(day.items)&&day.items.length>0&&day.items.length<=6
+        &&Array.isArray(day.items)&&day.items.length>0&&day.items.length<=7
         &&day.items.every(item=>macros(item)&&object(item.recipe)&&typeof item.recipe.n==='string'&&item.recipe.n.trim()
           &&strings(item.recipe.i)&&strings(item.recipe.s)
           &&(item.ingredientAmounts===undefined||(Array.isArray(item.ingredientAmounts)&&item.ingredientAmounts.every(ingredient=>
