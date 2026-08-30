@@ -499,8 +499,15 @@ test('six meals selected in the unified profile are available in the advanced me
   await page.locator('#mpGenerate').click();
   await expect(page.locator('.mp-day').first()).toBeVisible({timeout:20000});
   const firstDayMeals=page.locator('.mp-day').first().locator('.mp-meal');
-  await expect(firstDayMeals).toHaveCount(6);
-  await expect(firstDayMeals.nth(5)).toContainText(/Snack nocturno|Merienda|Desayuno|Cena/);
+  // Six regular meals plus the enabled training-day shake; the cake replaces
+  // breakfast rather than adding an eighth intake.
+  await expect(firstDayMeals).toHaveCount(7);
+  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp10.mealPlan30')));
+  expect(stored.preferences.meals).toBe(6);
+  expect(stored.preferences.includePostWorkoutShake).toBe(true);
+  expect(stored.days[0].items.filter(item=>item.recipe.id==='fixed-post-workout-shake')).toHaveLength(1);
+  expect(stored.days[0].items.filter(item=>item.recipe.id!=='fixed-post-workout-shake')).toHaveLength(6);
+  await expect(firstDayMeals.nth(6)).toContainText(/Snack nocturno|Merienda|Desayuno|Cena/);
   expect(errors).toEqual([]);
 });
 
