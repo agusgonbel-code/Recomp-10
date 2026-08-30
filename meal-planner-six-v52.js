@@ -67,6 +67,6 @@ function refineRounded(chosen,p,initial){
  }
  return preferFit(best,initial,p)?best:initial;
 }
-function swapMeal(plan,recipes,dayIndex,itemIndex){return Number(plan?.preferences?.meals)===6?swapSix(plan,recipes,dayIndex,itemIndex):base.swapMeal(plan,recipes,dayIndex,itemIndex);}
+function swapMeal(plan,recipes,dayIndex,itemIndex){if(plan?.days?.[dayIndex]?.fixedMealSubstitutions||plan?.days?.[dayIndex]?.items?.some(item=>/^fixed-/.test(String(item?.recipe?.id||''))))return base.swapMeal(plan,recipes,dayIndex,itemIndex);return Number(plan?.preferences?.meals)===6?swapSix(plan,recipes,dayIndex,itemIndex):base.swapMeal(plan,recipes,dayIndex,itemIndex);}
 globalThis.RecompMealPlanner={...base,validatePreferences,generateDays,generate30Days,swapMeal,__sixV52:true};
 })();

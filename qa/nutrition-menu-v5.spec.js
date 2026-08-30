@@ -1,4 +1,49 @@
 const { test, expect } = require('@playwright/test');
+test('fixed breakfast and shake can be replaced for one day with safe retry and exact persisted quantities',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const previous=await enableMenuWriteFault(page),original=JSON.parse(previous);
+ await expect(page.locator('.mp-checks')).toContainText('28 g de whey con 105 g de leche');
+ for(const [pass,id] of ['fixed-breakfast-cake','fixed-post-workout-shake'].entries()){
+  const index=original.days[0].items.findIndex(item=>item.recipe.id===id);
+  expect(index).toBeGreaterThanOrEqual(0);
+  const selector='[data-swap="0,'+index+'"]';
+  await expect(page.locator(selector)).toBeVisible();
+  if(pass===0){
+   await page.locator('[data-recipe="0,'+index+'"]').click();
+   const detail=await page.locator('#mpRecipeDetail').innerHTML();
+   await page.evaluate(()=>window.failMenuWrite=true);
+   await page.locator(selector).click();
+   await expect(page.locator('#mpStatus')).toContainText('El menú anterior se conserva');
+   expect(await page.evaluate(()=>localStorage.getItem('recomp10.mealPlan30'))).toBe(previous);
+   expect(await page.locator('#mpRecipeDetail').innerHTML()).toBe(detail);
+   await page.evaluate(()=>window.failMenuWrite=false);
+  }
+  await page.locator(selector).click();
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp10.mealPlan30')));
+  const day=saved.days[0],meal=day.items[index];
+  expect(meal.recipe.id).not.toBe(id);
+  expect(saved.preferences).toEqual(original.preferences);
+  expect(saved.days[1]).toEqual(original.days[1]);
+  expect(day.items.map(item=>item.slot)).toEqual(original.days[0].items.map(item=>item.slot));
+  for(const [key,target,tolerance] of [['k','kcal',.03],['p','protein',.05],['c','carbs',.06],['f','fat',.08]]){
+   expect(Math.abs(day.totals[key]/saved.preferences[target]-1)).toBeLessThanOrEqual(tolerance);
+   expect(day.totals[key]).toBe(day.items.reduce((sum,item)=>sum+item[key],0));
+  }
+  if(pass===0)expect(day.items.find(item=>item.recipe.id==='fixed-post-workout-shake')).toEqual(original.days[0].items.find(item=>item.recipe.id==='fixed-post-workout-shake'));
+  for(const item of day.items)for(const row of item.ingredientAmounts){
+   expect(Number(row.text.match(/^\d+(?:\.\d+)?/)[0])).toBe(row.qty);
+   for(const key of ['k','p','c','f']){const precision=key==='k'?1:10;expect(row.nutrients[key]).toBe(Math.round(row.per100[key]*row.qty/100*precision+1e-9)/precision)}
+  }
+  await expect(page.locator('#mpRecipeDetail h2')).toHaveText(meal.recipe.n);
+  await expect(page.locator('#mpRecipeDetail ol li')).toHaveCount(6);
+  for(const row of meal.ingredientAmounts)await expect(page.locator('#mpRecipeDetail')).toContainText(row.text);
+  await page.reload({waitUntil:'load'});
+  await page.locator('nav button').filter({hasText:'Menús'}).click();
+  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('recomp10.mealPlan30')))).toEqual(saved);
+  await expect(page.locator('#mpCake')).toBeChecked();await expect(page.locator('#mpShake')).toBeChecked();
+ }
+ expect(errors).toEqual([]);
+});
 test('turkey and lean beef recipes preserve exact raw and cooked states after reload',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'load'});
