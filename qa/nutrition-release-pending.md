@@ -44,6 +44,12 @@ browser-suite repetitions. Main/manual runs retain 1000 repetitions of each
 suite (10 shards x 100), with unit and browser phases in separate jobs and a
 360-minute job limit. Browser runs also include the user-behavior suite.
 
+For pre-merge validation, adding the `release-stress-1000` label to a PR whose
+head is in this repository triggers the complete run against its merge-check
+SHA. Other labels and fork PR label events are ignored. An ordinary new commit
+still triggers only the bounded smoke run, even if the label remains present.
+The explicit full run must be repeated if the candidate changes afterward.
+
 ## Still blocking release
 
 1. **Full intensive validation:** a passing PR harness check is NOT a completed

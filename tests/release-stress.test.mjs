@@ -10,6 +10,25 @@ const config=configuration(env);
 const records=(c=config)=>['unit','browser'].flatMap(phase=>Array.from({length:c.shards},(_,i)=>({version:1,...c,phase,shard:i+1,completed:c.passes,status:'success',failedIteration:null})));
 const temporary=fn=>{const dir=mkdtempSync(join(tmpdir(),'recomp-stress-test-'));try{return fn(dir)}finally{rmSync(dir,{recursive:true,force:true})}};
 
+test('full PR stress requires the explicit label event on a same-repository head',()=>{
+ const workflow=readFileSync(new URL('../.github/workflows/release-stress.yml',import.meta.url),'utf8');
+ // These deliberately JS-compatible workflow expressions are evaluated with
+ // synthetic GitHub contexts to protect the costly full-run opt-in boundary.
+ const evaluate=(text,github)=>Function('github','contains','fromJSON',`return (${text})`)(github,(value,part)=>value.includes(part),JSON.parse);
+ const expression=name=>workflow.split('\n').find(line=>line.trim().startsWith(name+':')).match(/\$\{\{ (.*) \}\}/)[1];
+ const guard=workflow.match(/  stress:\n    if: \$\{\{ (.*) \}\}/)[1];
+ const context=(event_name,action,label='release-stress-1000',head='owner/repo')=>({event_name,repository:'owner/repo',event:{action,label:{name:label},head_commit:{message:'change'},pull_request:{head:{repo:{full_name:head}},labels:[{name:'release-stress-1000'}]}}});
+ for(const action of ['opened','synchronize','reopened']){
+  const ctx=context('pull_request',action);assert.equal(evaluate(guard,ctx),true);assert.equal(evaluate(expression('STRESS_SCOPE'),ctx),'smoke');assert.equal(evaluate(expression('STRESS_SHARDS'),ctx),'2');assert.equal(evaluate(expression('STRESS_PASSES'),ctx),'1');assert.equal(evaluate(expression('shard'),ctx).length,2);
+ }
+ const full=context('pull_request','labeled');assert.equal(evaluate(guard,full),true);assert.equal(evaluate(expression('STRESS_SCOPE'),full),'release-1000');assert.equal(evaluate(expression('STRESS_SHARDS'),full),'10');assert.equal(evaluate(expression('STRESS_PASSES'),full),'100');assert.equal(evaluate(expression('shard'),full).length,10);
+ assert.equal(evaluate(guard,context('pull_request','labeled','unrelated')),false);
+ assert.equal(evaluate(guard,context('pull_request','labeled','release-stress-1000','fork/repo')),false);
+ for(const event of ['push','workflow_dispatch'])assert.equal(evaluate(expression('STRESS_SCOPE'),context(event)), 'release-1000');
+ const skip=context('push');skip.event.head_commit.message='evidence [skip ci]';assert.equal(evaluate(guard,skip),false);
+ assert.match(workflow,/types: \[opened, synchronize, reopened, labeled\]/);
+});
+
 test('smoke cannot be described as the complete 1000-repetition release',()=>{
  const result=summarize(records(),config);assert.equal(result.result,'PASS');assert.equal(result.releaseValidated,false);assert.deepEqual(result.completed,{unit:2,browser:2});
  assert.throws(()=>configuration({...env,STRESS_SCOPE:'release-1000'}),/1000/);

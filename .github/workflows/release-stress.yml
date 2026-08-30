@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
     paths:
       - '.github/workflows/release-stress.yml'
       - 'scripts/release-stress.mjs'
@@ -17,24 +18,26 @@ concurrency:
   group: recomp-release-stress-${{ github.ref }}
   cancel-in-progress: false
 
-# PRs validate the harness with two repetitions per suite, not 1000.
+# PR updates validate the harness with two repetitions per suite, not 1000.
+# Adding release-stress-1000 to a same-repository PR explicitly runs the full
+# validation without merging. Later commits do not implicitly repeat that run.
 # Separate phases so 100 unit + 100 browser runs do not share a job timeout.
 env:
-  STRESS_SCOPE: ${{ github.event_name == 'pull_request' && 'smoke' || 'release-1000' }}
-  STRESS_SHARDS: ${{ github.event_name == 'pull_request' && '2' || '10' }}
-  STRESS_PASSES: ${{ github.event_name == 'pull_request' && '1' || '100' }}
+  STRESS_SCOPE: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' && 'smoke' || 'release-1000' }}
+  STRESS_SHARDS: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' && '2' || '10' }}
+  STRESS_PASSES: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' && '1' || '100' }}
   STRESS_SOURCE: ${{ github.sha }}
   STRESS_RUN: ${{ github.run_id }}
   STRESS_ATTEMPT: ${{ github.run_attempt }}
 
 jobs:
   stress:
-    if: ${{ github.event_name != 'push' || contains(github.event.head_commit.message, '[skip ci]') == false }}
+    if: ${{ (github.event_name != 'push' || contains(github.event.head_commit.message, '[skip ci]') == false) && (github.event_name != 'pull_request' || github.event.action != 'labeled' || (github.event.label.name == 'release-stress-1000' && github.event.pull_request.head.repo.full_name == github.repository)) }}
     strategy:
       fail-fast: false
       max-parallel: 10
       matrix:
-        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[1,2]' || '[1,2,3,4,5,6,7,8,9,10]') }}
+        shard: ${{ fromJSON(github.event_name == 'pull_request' && github.event.action != 'labeled' && '[1,2]' || '[1,2,3,4,5,6,7,8,9,10]') }}
         phase: [unit, browser]
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -71,7 +74,7 @@ jobs:
           retention-days: 14
 
   evidence:
-    if: always()
+    if: ${{ always() && needs.stress.result != 'skipped' }}
     needs: stress
     runs-on: ubuntu-latest
     steps:
