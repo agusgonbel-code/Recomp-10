@@ -3,100 +3,71 @@ name: Recomp 10M Release Stress 1000x
 on:
   push:
     branches: [main]
+  pull_request:
+    paths:
+      - '.github/workflows/release-stress.yml'
+      - 'scripts/release-stress.mjs'
+      - 'tests/release-stress.test.mjs'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: recomp-release-stress-${{ github.ref }}
   cancel-in-progress: false
+
+# PRs validate the harness with two repetitions per suite, not 1000.
+# Separate phases so 100 unit + 100 browser runs do not share a job timeout.
+env:
+  STRESS_SCOPE: ${{ github.event_name == 'pull_request' && 'smoke' || 'release-1000' }}
+  STRESS_SHARDS: ${{ github.event_name == 'pull_request' && '2' || '10' }}
+  STRESS_PASSES: ${{ github.event_name == 'pull_request' && '1' || '100' }}
+  STRESS_SOURCE: ${{ github.sha }}
+  STRESS_RUN: ${{ github.run_id }}
+  STRESS_ATTEMPT: ${{ github.run_attempt }}
 
 jobs:
   stress:
     if: ${{ github.event_name != 'push' || contains(github.event.head_commit.message, '[skip ci]') == false }}
     strategy:
       fail-fast: false
+      max-parallel: 10
       matrix:
-        shard: [1,2,3,4,5,6,7,8,9,10]
+        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[1,2]' || '[1,2,3,4,5,6,7,8,9,10]') }}
+        phase: [unit, browser]
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Install dependencies
         run: npm install --ignore-scripts
-      - name: Run unit suite 100 times per shard
-        shell: bash
+      - name: Install Chromium
+        if: matrix.phase == 'browser'
         run: |
-          set -euo pipefail
-          rm -f /tmp/recomp-stress-failure.txt
-          for i in $(seq 1 100); do
-            echo "=== Recomp shard ${{ matrix.shard }} unit pass $i/100 ==="
-            if ! npm test >/tmp/recomp-unit.log 2>&1; then
-              {
-                echo 'FAILURE_PHASE: unit'
-                echo "FAILURE_ITERATION: $i"
-                echo '--- FAILURE_LOG_TAIL ---'
-                tail -n 120 /tmp/recomp-unit.log || true
-              } > /tmp/recomp-stress-failure.txt
-              cat /tmp/recomp-unit.log
-              exit 1
-            fi
-          done
-      - name: Install Chromium for repeated user journeys
-        run: |
-          npm install --no-save @playwright/test
+          npm install --no-save --ignore-scripts @playwright/test
           npx playwright install --with-deps chromium
       - name: Start app
-        run: python3 -m http.server 4173 >/tmp/recomp-http.log 2>&1 &
-      - name: Run browser journeys 100 times per shard
-        shell: bash
-        run: |
-          set -euo pipefail
-          for i in $(seq 1 100); do
-            echo "=== Recomp shard ${{ matrix.shard }} browser pass $i/100 ==="
-            if ! npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/nutrition-menu-v5.spec.js qa/meal-intelligence-v60.spec.js qa/accessibility.spec.js --reporter=line >/tmp/recomp-browser.log 2>&1; then
-              {
-                echo 'FAILURE_PHASE: browser'
-                echo "FAILURE_ITERATION: $i"
-                echo '--- FAILURE_LOG_TAIL ---'
-                tail -n 160 /tmp/recomp-browser.log || true
-                echo '--- HTTP_LOG_TAIL ---'
-                tail -n 80 /tmp/recomp-http.log || true
-              } > /tmp/recomp-stress-failure.txt
-              cat /tmp/recomp-browser.log
-              exit 1
-            fi
-          done
-      - name: Write shard evidence
-        if: always()
-        shell: bash
-        run: |
-          mkdir -p /tmp/recomp-stress
-          {
-            echo 'APP: Recomp 10M'
-            echo "SOURCE_COMMIT: $GITHUB_SHA"
-            echo 'SHARD: ${{ matrix.shard }}/10'
-            echo 'UNIT_PASSES_PLANNED: 100'
-            echo 'BROWSER_PASSES_PLANNED: 100'
-            echo 'RESULT: ${{ job.status }}'
-            if [ -f /tmp/recomp-stress-failure.txt ]; then
-              cat /tmp/recomp-stress-failure.txt
-            else
-              echo 'FAILURE_PHASE: none'
-              echo 'FAILURE_ITERATION: none'
-            fi
-            echo "UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          } > /tmp/recomp-stress/shard-${{ matrix.shard }}.txt
-      - name: Upload shard evidence
+        if: matrix.phase == 'browser'
+        run: python3 -m http.server 4173 > /tmp/recomp-http.log 2>&1 &
+      - name: Run counted repetitions
+        env:
+          STRESS_PHASE: ${{ matrix.phase }}
+          STRESS_SHARD: ${{ matrix.shard }}
+        run: node scripts/release-stress.mjs run /tmp/recomp-stress
+      - name: Upload completion counters and last log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: recomp-stress-${{ matrix.shard }}
-          path: /tmp/recomp-stress/shard-${{ matrix.shard }}.txt
+          name: recomp-stress-${{ github.run_attempt }}-${{ matrix.phase }}-${{ matrix.shard }}
+          path: /tmp/recomp-stress/
+          if-no-files-found: warn
           retention-days: 14
 
   evidence:
@@ -106,43 +77,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
-      - name: Download stress evidence
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Download current-run evidence
+        id: download
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
-          pattern: recomp-stress-*
+          pattern: recomp-stress-${{ github.run_attempt }}-*
           path: /tmp/recomp-evidence
-          merge-multiple: true
-      - name: Build release evidence
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p qa
-          count=$(find /tmp/recomp-evidence -name 'shard-*.txt' -type f | wc -l | tr -d ' ')
-          success=$(grep -l '^RESULT: success$' /tmp/recomp-evidence/shard-*.txt 2>/dev/null | wc -l | tr -d ' ')
-          result=FAIL
-          if [ "$count" = "10" ] && [ "$success" = "10" ] && [ "${{ needs.stress.result }}" = "success" ]; then result=PASS; fi
-          {
-            echo 'RECOMP 10M RELEASE STRESS 1000X'
-            echo "SOURCE_COMMIT: $GITHUB_SHA"
-            echo "RESULT: $result"
-            echo "SHARDS: $success/10 successful"
-            echo 'PLANNED_REPETITIONS: 1000 unit passes and 1000 browser/mobile/nutrition/intelligence/accessibility journeys'
-            echo "UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            echo '--- SHARDS ---'
-            cat /tmp/recomp-evidence/shard-*.txt || true
-          } > qa/release-stress-latest.txt
-      - name: Persist evidence
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name 'Recomp QA Bot'
-          git config user.email 'actions@users.noreply.github.com'
-          git add qa/release-stress-latest.txt
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'QA result: Recomp 1000x release stress [skip ci]'
-          git pull --rebase origin main
-          git push origin HEAD:main
-      - name: Enforce release stress gate
-        shell: bash
-        run: "grep -q '^RESULT: PASS$' qa/release-stress-latest.txt"
+      - name: Validate identity and actual completed repetitions
+        if: always()
+        env:
+          STRESS_JOB_RESULT: ${{ needs.stress.result }}
+          STRESS_DOWNLOAD_RESULT: ${{ steps.download.outcome }}
+        run: node scripts/release-stress.mjs aggregate /tmp/recomp-evidence /tmp/recomp-report
+      - name: Upload release report without changing any branch
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recomp-report-${{ github.run_attempt }}
+          path: /tmp/recomp-report/
+          if-no-files-found: error
+          retention-days: 14

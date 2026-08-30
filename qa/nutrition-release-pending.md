@@ -26,14 +26,29 @@ days, exact ledgers, training/rest counts and day-local replacement after JSON
 restoration. Browser coverage generates both a training and rest day, reloads
 all seven intakes, and replaces the seventh while retaining both fixed meals.
 
+## Intensive test harness
+
+The release-stress workflow now has read-only repository permission and never
+commits or pushes evidence. Both jobs check out the exact tested SHA without
+persisting credentials. Results are uploaded as artifacts scoped to the current
+run attempt. A full rerun is required after partial failures; evidence from a
+previous attempt cannot certify the current attempt.
+
+The runner durably records each completed suite only after its process succeeds.
+Aggregation rejects missing, duplicate, malformed, incomplete and mismatched
+source/run/attempt records, plus failed matrix jobs or artifact downloads.
+Reports explicitly distinguish smoke validation from a 1000-repetition release.
+
+Pull requests run a bounded harness check: two unit-suite repetitions and two
+browser-suite repetitions. Main/manual runs retain 1000 repetitions of each
+suite (10 shards x 100), with unit and browser phases in separate jobs and a
+360-minute job limit. Browser runs also include the user-behavior suite.
+
 ## Still blocking release
 
-1. **Intensive test safety:** the current `release-stress.yml` evidence job checks
-   out and pushes to `main`, including when manually run for another branch.
-   Do not dispatch that workflow from a candidate branch until evidence is
-   isolated to artifacts or the tested branch. The workflow records planned
-   repetitions, not actual completions; fix the counters before interpreting
-   a run as 1,000 completed repetitions.
+1. **Full intensive validation:** a passing PR harness check is NOT a completed
+   1000-repetition release. Require a release-1000 report with both counters at
+   1000 and the matching candidate SHA before describing that validation as done.
 2. **Approval and deployment:** no integration into `main` or production
    deployment has been authorized/completed for this candidate. Recheck the
    deployed commit and browser behavior after approved integration before
